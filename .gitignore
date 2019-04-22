@@ -1,0 +1,8 @@
+.DS_Store
+.ropeproject
+__pycache__
+env
+sqdssite/local_settings.py
+sqds/swgoh_local.py
+*.sqlite
+*.sqlite3
