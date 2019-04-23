@@ -1,13 +1,8 @@
 import requests
 import datetime
 
-try:
-    from swgoh_local import SWGOH_USERNAME, SWGOH_PASSWORD
-except ImportError:
-    pass
 
-
-class SwgohError:
+class SwgohError(BaseException):
     """Base class for swgoh module exceptions."""
 
     def __init__(self, *args, **kwargs):
@@ -41,6 +36,11 @@ class Swgoh:
         return {'Authorization': 'Bearer %s' % self.access_token}
 
     def authenticate(self):
+        try:
+            from .swgoh_local import SWGOH_USERNAME, SWGOH_PASSWORD
+        except ImportError:
+            raise AuthenticationError() from ImportError
+
         auth_payload = {
             "username": SWGOH_USERNAME,
             "password": SWGOH_PASSWORD,  # FIXME: secret
@@ -75,6 +75,7 @@ class Swgoh:
                     "match": {
                         "rarity": 7,
                         "obtainable": True,
+                        "obtainableTime": 0,
                         "combatType": 1
                     },
                     "enums": True
