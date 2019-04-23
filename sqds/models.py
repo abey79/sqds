@@ -6,10 +6,15 @@ from .swgoh import Swgoh
 _api = Swgoh()
 
 
-def update_game_data():
-    ability_data_list = _api.get_ability_list()
-    skill_data_list = _api.get_skill_list()
-    unit_data_list = _api.get_unit_list()
+def update_game_data(ability_data_list=None,
+                     skill_data_list=None,
+                     unit_data_list=None):
+    if ability_data_list is None:
+        ability_data_list = _api.get_ability_list()
+    if skill_data_list is None:
+        skill_data_list = _api.get_skill_list()
+    if unit_data_list is None:
+        unit_data_list = _api.get_unit_list()
 
     with transaction.atomic():
         placeholder_unit = Unit.objects.create()
@@ -29,12 +34,14 @@ def update_game_data():
                     'ability': placeholder_ability})
             skill.set_from_data(skill_data)
 
+        Unit.objects.update(name="DELETE_ME")
         for unit_data in unit_data_list:
             unit, _ = Unit.objects.get_or_create(api_id=unit_data['baseId'])
             unit.set_from_data(unit_data)
 
         # Clean-up
         Skill.objects.filter(unit=placeholder_unit).delete()
+        Unit.objects.filter(name="DELETE_ME").delete()
         placeholder_unit.delete()
         placeholder_ability.delete()
 
