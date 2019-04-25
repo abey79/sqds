@@ -161,3 +161,6 @@ class Swgoh:
             return response.json()
         except requests.exceptions.RequestException:
             raise ApiError(response=response)
+
+
+api = Swgoh()

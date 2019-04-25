@@ -41,6 +41,9 @@ class FilteredPlayerListView(SingleTableMixin, FilterView):
     model = Player
     template_name = 'sqds/players.html'
     filterset_class = PlayerFilter
+    table_pagination = {
+        'per_page': 50
+    }
 
 
 class PlayerUnitFilter(FilterSet):
@@ -57,3 +60,6 @@ class FilteredPlayerUnitListView(SingleTableMixin, FilterView):
     model = PlayerUnit
     template_name = 'sqds/players.html'
     filterset_class = PlayerUnitFilter
+    table_pagination = {
+        'per_page': 50
+    }

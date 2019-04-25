@@ -38,11 +38,13 @@ class PlayerTable(tables.Table):
     gp_char = LargeIntColumn()
     gp_ship = LargeIntColumn()
 
+    zeta_count = LargeIntColumn(orderable=False)
+
     class Meta:
         model = Player
         sequence = ('name', 'guild', 'ally_code',
-                    'level', 'gp', 'gp_char', 'gp_ship')
-        exclude = ('id', 'api_id')
+                    'level', 'gp', 'gp_char', 'gp_ship', 'zeta_count')
+        exclude = ('id', 'api_id', 'last_updated')
 
 
 class PlayerUnitTable(tables.Table):
@@ -67,10 +69,11 @@ class PlayerUnitTable(tables.Table):
     summary = tables.Column('Summary', initial_sort_descending=True,
                             order_by=['rarity', 'level', 'gear',
                                       'equipped_count'])
+    zeta_summary = tables.Column('Zetas', orderable=False)
 
     class Meta:
         model = PlayerUnit
-        sequence = ('unit', 'player', 'gp', 'summary', '...')
+        sequence = ('unit', 'player', 'gp', 'summary', 'zeta_summary', '...')
         exclude = ('id', 'rarity', 'level', 'gear',
                    'equipped_count', 'armor_penetration',
-                   'resistance_penetration', 'health_steal')
+                   'resistance_penetration', 'health_steal', 'last_updated')
