@@ -1,5 +1,5 @@
-import requests
 import datetime
+import requests
 
 
 class SwgohError(BaseException):
@@ -13,6 +13,8 @@ class SwgohError(BaseException):
         if (response is not None and not self.request
                 and hasattr(response, 'request')):
             self.request = self.response.request
+
+        super(SwgohError, self).__init__(args, kwargs)
 
 
 class AuthenticationError(SwgohError):
@@ -43,7 +45,7 @@ class Swgoh:
 
         auth_payload = {
             "username": SWGOH_USERNAME,
-            "password": SWGOH_PASSWORD,  # FIXME: secret
+            "password": SWGOH_PASSWORD,
             "grant_type": "password",
             "client_id": "abc",
             "client_secret": "123"
@@ -123,13 +125,36 @@ class Swgoh:
         except requests.exceptions.RequestException:
             raise ApiError(response=response)
 
-    def get_guild_list(self, allyCode):
+    def get_gear_list(self):
+        try:
+            response = requests.post(
+                url="%s/swgoh/data" % self.base_url,
+                headers=self.get_auth_header(),
+                json={
+                    "collection": "equipmentList",
+                    "language": "eng_us",
+                    "enums": "true",
+                    "project": {
+                        "nameKey": True,
+                        "id": True,
+                        "equipmentStat": True,
+                        "tier": True,
+                        "type": True,
+                        "requiredRarity": True,
+                        "requiredLevel": True
+                    }
+                })
+            return response.json()
+        except requests.exceptions.RequestException:
+            raise ApiError(response=response)
+
+    def get_guild_list(self, ally_code):
         try:
             response = requests.post(
                 url="%s/swgoh/guild" % self.base_url,
                 headers=self.get_auth_header(),
                 json={
-                    "allycodes": [allyCode],
+                    "allycodes": [ally_code],
                     "language": "eng_us",
                     "project": {
                         "roster": {
@@ -151,11 +176,11 @@ class Swgoh:
         except requests.exceptions.RequestException:
             raise ApiError(response=response)
 
-    def get_player_unit_list(self, allyCode):
+    def get_player_unit_list(self, ally_code):
         try:
             response = requests.get(
                 url="https://crinolo-swgoh.glitch.me"
-                "/statCalc/api/characters/player/%d" % allyCode,
+                "/statCalc/api/characters/player/%d" % ally_code,
                 # headers=self.get_auth_header(),
                 params={'flags': 'withModCalc,gameStyle'})
             return response.json()

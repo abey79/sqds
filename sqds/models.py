@@ -113,12 +113,48 @@ class Skill(models.Model):
         self.save()
 
 
+class GearManager(models.Manager):
+    def update_or_create_from_swgoh(self):
+        ''' Update gear table from server'''
+
+        gear_data_list = swgoh.api.get_gear_list()
+        with transaction.atomic():
+            gear_id_list = []
+            for gear_data in gear_data_list:
+                gear, _ = Gear.objects.update_or_create(
+                    api_id=gear_data['id'],
+                    defaults={
+                        'name': gear_data['nameKey'],
+                        'tier': gear_data['tier'],
+                        'required_rarity': gear_data['requiredRarity'],
+                        'required_level': gear_data['requiredLevel']
+                    })
+                gear_id_list.append(gear.id)
+            Gear.objects.exclude(id__in=gear_id_list).delete()
+
+
+class Gear(models.Model):
+    api_id = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
+    tier = models.IntegerField()
+    required_rarity = models.IntegerField()
+    required_level = models.IntegerField()
+
+    objects = GearManager()
+
+    class Meta:
+        indexes = [models.Index(fields=['api_id'])]
+
+    def __str__(self):  # pragma: no cover
+        return self.name
+
+
 class GuildManager(models.Manager):
     def update_or_create_from_swgoh(self, ally_code=116235559):
         ''' Create a guild that contains provided ally_code, or update it if
             it alread exists. '''
 
-        # TODO:
+        # TO DO:
         # - add a last_updated field to Guild and check against it before
         #   loading from Swgoh
         # - check last_updated to conditionally update player's unit
@@ -162,8 +198,10 @@ class GuildManager(models.Manager):
                 player_data = swgoh.api.get_player_unit_list(
                     int(player.ally_code))
             except swgoh.SwgohError as error:
-                s = "Error downloading data for player {} (status code: {})"
-                print(s.format(player.name, error.response.status_code))
+                error_string = \
+                    "Error downloading data for player {} (status code: {})"
+                print(error_string.format(
+                    player.name, error.response.status_code))
 
                 continue
 
@@ -334,10 +372,10 @@ class PlayerUnit(models.Model):
         str_list = []
         for skill in self.unit.skill_set.filter(is_zeta=True):
             if self.zeta_set.filter(skill=skill).exists():
-                s = '<b style="color: #96f">Z</b>'
+                output = '<b style="color: #96f">Z</b>'
             else:
-                s = '<span style="color: #EEE">Z</span>'
-            str_list.append(s)
+                output = '<span style="color: #EEE">Z</span>'
+            str_list.append(output)
         return format_html('&nbsp'.join(str_list) if str_list else '&nbsp')
 
 
