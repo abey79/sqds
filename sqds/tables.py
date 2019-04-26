@@ -1,5 +1,7 @@
 import locale
 
+from django.db.models import Count, Q
+
 import django_tables2 as tables
 
 from .models import Player, PlayerUnit
@@ -16,9 +18,9 @@ def nested_set(dic, keys, value):
 
 
 class LargeIntColumn(tables.Column):
-    def __init__(self, **kwargs):
-        nested_set(kwargs, ['attrs', 'td', 'style'], 'text-align: right;')
-        super(LargeIntColumn, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        #nested_set(kwargs, ['attrs', 'td', 'style'], 'text-align: right;')
+        super(LargeIntColumn, self).__init__(*args, **kwargs)
 
     def render(self, value):
         return '{0:n}'.format(value) if value != 0 else '-'
@@ -38,13 +40,56 @@ class PlayerTable(tables.Table):
     gp_char = LargeIntColumn()
     gp_ship = LargeIntColumn()
 
-    zeta_count = LargeIntColumn(orderable=False)
+    unit_count = LargeIntColumn(initial_sort_descending=True)
+    g12_unit_count = LargeIntColumn('G12', initial_sort_descending=True)
+    g11_unit_count = LargeIntColumn('G11', initial_sort_descending=True)
+    g10_unit_count = LargeIntColumn('G10', initial_sort_descending=True)
+
+    zeta_count = LargeIntColumn(initial_sort_descending=True)
+    right_hand_g12_gear_count = LargeIntColumn('G12+ pces',
+                                               initial_sort_descending=True)
+
+    def generic_order_unit_count(self, query_set, is_descending, gear_level):
+        query_set = query_set.annotate(
+            _unit_count=Count('unit_set', filter=Q(unit_set__gear=gear_level))
+        ).order_by(('-' if is_descending else '') + '_unit_count')
+        return (query_set, True)
+
+    def order_g12_unit_count(self, query_set, is_descending):
+        return self.generic_order_unit_count(query_set, is_descending, 12)
+
+    def order_g11_unit_count(self, query_set, is_descending):
+        return self.generic_order_unit_count(query_set, is_descending, 11)
+
+    def order_g10_unit_count(self, query_set, is_descending):
+        return self.generic_order_unit_count(query_set, is_descending, 10)
+
+    def order_unit_count(self, query_set, is_descending):
+        query_set = query_set.annotate(
+            _unit_count=Count('unit_set')
+        ).order_by(('-' if is_descending else '') + '_unit_count')
+        return (query_set, True)
+
+    def order_right_hand_g12_gear_count(self, query_set, is_descending):
+        query_set = query_set.annotate(
+            _rh_g12_count=Count(
+                'unit_set__gear_set',
+                filter=Q(unit_set__gear_set__gear__is_right_hand_g12=True))
+        ).order_by(('-' if is_descending else '') + '_rh_g12_count')
+        return (query_set, True)
+
+    def order_zeta_count(self, query_set, is_descending):
+        query_set = query_set.annotate(
+            _zeta_count=Count('unit_set__zeta_set')
+        ).order_by(('-' if is_descending else '') + '_zeta_count')
+        return (query_set, True)
 
     class Meta:
         model = Player
-        sequence = ('name', 'guild', 'ally_code',
-                    'level', 'gp', 'gp_char', 'gp_ship', 'zeta_count')
-        exclude = ('id', 'api_id', 'last_updated')
+        fields = ('name', 'guild', 'ally_code',
+                  'level', 'gp', 'gp_char', 'gp_ship', 'unit_count',
+                  'g12_unit_count', 'g11_unit_count',
+                  'g10_unit_count', 'right_hand_g12_gear_count', 'zeta_count')
 
 
 class PlayerUnitTable(tables.Table):
@@ -69,7 +114,13 @@ class PlayerUnitTable(tables.Table):
     summary = tables.Column('Summary', initial_sort_descending=True,
                             order_by=['rarity', 'level', 'gear',
                                       'equipped_count'])
-    zeta_summary = tables.Column('Zetas', orderable=False)
+    zeta_summary = tables.Column('Zetas', initial_sort_descending=True)
+
+    def order_zeta_summary(self, query_set, is_descending):
+        query_set = query_set.annotate(
+            _zeta_count=Count('zeta')
+        ).order_by(('-' if is_descending else '') + '_zeta_count')
+        return (query_set, True)
 
     class Meta:
         model = PlayerUnit

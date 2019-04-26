@@ -188,4 +188,5 @@ class Swgoh:
             raise ApiError(response=response)
 
 
+# pylint: disable=invalid-name
 api = Swgoh()

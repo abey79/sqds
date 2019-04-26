@@ -4,6 +4,10 @@ from django.utils.html import format_html
 from . import swgoh
 
 
+LEFT_HAND_G12_GEAR_ID = [158, 159, 160, 161, 162, 163, 164, 165]
+RIGHT_HAND_G12_GEAR_ID = [166, 167, 168, 169, 170, 171]
+
+
 def update_game_data(ability_data_list=None,
                      skill_data_list=None,
                      unit_data_list=None):
@@ -121,13 +125,17 @@ class GearManager(models.Manager):
         with transaction.atomic():
             gear_id_list = []
             for gear_data in gear_data_list:
+                gid = int(gear_data['id']) if str.isdigit(gear_data['id']) \
+                    else 0
                 gear, _ = Gear.objects.update_or_create(
                     api_id=gear_data['id'],
                     defaults={
                         'name': gear_data['nameKey'],
                         'tier': gear_data['tier'],
                         'required_rarity': gear_data['requiredRarity'],
-                        'required_level': gear_data['requiredLevel']
+                        'required_level': gear_data['requiredLevel'],
+                        'is_left_hand_g12': gid in LEFT_HAND_G12_GEAR_ID,
+                        'is_right_hand_g12': gid in RIGHT_HAND_G12_GEAR_ID
                     })
                 gear_id_list.append(gear.id)
             Gear.objects.exclude(id__in=gear_id_list).delete()
@@ -140,6 +148,9 @@ class Gear(models.Model):
     required_rarity = models.IntegerField()
     required_level = models.IntegerField()
 
+    is_left_hand_g12 = models.BooleanField()
+    is_right_hand_g12 = models.BooleanField()
+
     objects = GearManager()
 
     class Meta:
@@ -150,6 +161,7 @@ class Gear(models.Model):
 
 
 class GuildManager(models.Manager):
+    # pylint: disable=too-many-locals
     def update_or_create_from_swgoh(self, ally_code=116235559):
         ''' Create a guild that contains provided ally_code, or update it if
             it alread exists. '''
@@ -188,7 +200,7 @@ class GuildManager(models.Manager):
 
             guild.player_set.exclude(id__in=player_id_array).delete()
 
-        # D) For each Player, create or update PlayerUnits and Zetas
+        # (D) For each Player, create or update PlayerUnits and Zetas
         # Note:
         # - We assume that a PlayerUnit never disappear
         # - It's ok to fail a player's units update (504 error are common),
@@ -211,6 +223,7 @@ class GuildManager(models.Manager):
                     unit_data = player_data[unit_id]
                     unit_stats = unit_data['stats']['final']
 
+                    # (D1) Update player model
                     player_unit, _ = PlayerUnit.objects.update_or_create(
                         player=player, unit=unit,
                         defaults={
@@ -244,16 +257,25 @@ class GuildManager(models.Manager):
                             'health_steal': unit_stats.get('Health Steal', 0.0)
                         })
 
+                    # (D2) Update Zeta model
                     zeta_id_array = []
-
                     for zeta_data in unit_data['unit']['zetas']:
                         zeta, _ = Zeta.objects.update_or_create(
                             player_unit=player_unit,
                             skill=Skill.objects.get(api_id=zeta_data['id']))
                         zeta_id_array.append(zeta.id)
-
                     Zeta.objects.filter(player_unit=player_unit).exclude(
                         id__in=zeta_id_array).delete()
+
+                    # (D3) Update PlayerUnitGear model
+                    pug_id_array = []
+                    for gear_id in unit_data['unit']['gear']:
+                        pug, _ = PlayerUnitGear.objects.update_or_create(
+                            player_unit=player_unit,
+                            gear=Gear.objects.get(api_id=gear_id))
+                        pug_id_array.append(pug.id)
+                    PlayerUnitGear.objects.filter(player_unit=player_unit) \
+                        .exclude(id__in=pug_id_array).delete()
 
 
 class Guild(models.Model):
@@ -295,8 +317,30 @@ class Player(models.Model):
     def __str__(self):  # pragma: no cover
         return self.name
 
+    def unit_count(self):
+        return PlayerUnit.objects.filter(player=self).count()
+
+    def g12_unit_count(self):
+        return PlayerUnit.objects.filter(player=self, gear=12).count()
+
+    def g11_unit_count(self):
+        return PlayerUnit.objects.filter(player=self, gear=11).count()
+
+    def g10_unit_count(self):
+        return PlayerUnit.objects.filter(player=self, gear=10).count()
+
     def zeta_count(self):
         return Zeta.objects.filter(player_unit__player=self).count()
+
+    def right_hand_g12_gear_count(self):
+        return PlayerUnitGear.objects.filter(
+            player_unit__player=self,
+            gear__is_right_hand_g12=True).count()
+
+    def left_hand_g12_gear_count(self):
+        return PlayerUnitGear.objects.filter(
+            player_unit__player=self,
+            gear__is_right_hand_g12=True).count()
 
 
 class PlayerUnit(models.Model):
@@ -380,5 +424,12 @@ class PlayerUnit(models.Model):
 
 
 class Zeta(models.Model):
-    player_unit = models.ForeignKey(PlayerUnit, on_delete=models.CASCADE)
+    player_unit = models.ForeignKey(PlayerUnit, on_delete=models.CASCADE,
+                                    related_name='zeta_set')
     skill = models.ForeignKey(Skill, on_delete=models.PROTECT)
+
+
+class PlayerUnitGear(models.Model):
+    player_unit = models.ForeignKey(PlayerUnit, on_delete=models.CASCADE,
+                                    related_name='gear_set')
+    gear = models.ForeignKey(Gear, on_delete=models.PROTECT)
