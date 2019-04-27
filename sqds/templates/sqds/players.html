@@ -1,29 +1,15 @@
+{% extends 'sqds/base.html' %}
+
 {% load render_table from django_tables2 %}
-{% load static %}
 {% load bootstrap3 %}
 {% load crispy_forms_tags %}
 
-<!DOCTYPE html>
-<html>
+{% block title %}
+Players
+{% endblock %}
 
-<head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
-  {% bootstrap_css %}
-  {# bootstrap_javascript #}
-
-  <title>Players</title>
-
-</head>
-
-<body>
-  <!--
-  <form action="/your-name/" method="post">
-    {% csrf_token %}
-    {{ form|crispy }}
-    <input type="submit" value="Submit">
-  </form>
--->
+{% block content %}
   {% if filter %}
   <form action="" method="get" class="form form-inline">
     {% bootstrap_form filter.form layout='inline' %}
@@ -31,6 +17,4 @@
   </form>
   {% endif %}
   {% render_table table %}
-</body>
-
-</html>
+{% endblock %}

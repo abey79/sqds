@@ -19,7 +19,7 @@ def nested_set(dic, keys, value):
 
 class LargeIntColumn(tables.Column):
     def __init__(self, *args, **kwargs):
-        #nested_set(kwargs, ['attrs', 'td', 'style'], 'text-align: right;')
+        # nested_set(kwargs, ['attrs', 'td', 'style'], 'text-align: right;')
         super(LargeIntColumn, self).__init__(*args, **kwargs)
 
     def render(self, value):
@@ -40,7 +40,8 @@ class PlayerTable(tables.Table):
     gp_char = LargeIntColumn()
     gp_ship = LargeIntColumn()
 
-    unit_count = LargeIntColumn(initial_sort_descending=True)
+    unit_count = LargeIntColumn('Characters', initial_sort_descending=True)
+    seven_star_unit_count = LargeIntColumn('7*', initial_sort_descending=True)
     g12_unit_count = LargeIntColumn('G12', initial_sort_descending=True)
     g11_unit_count = LargeIntColumn('G11', initial_sort_descending=True)
     g10_unit_count = LargeIntColumn('G10', initial_sort_descending=True)
@@ -70,6 +71,14 @@ class PlayerTable(tables.Table):
         ).order_by(('-' if is_descending else '') + '_unit_count')
         return (query_set, True)
 
+    def order_seven_star_unit_count(self, query_set, is_descending):
+        query_set = query_set.annotate(
+            _7_unit_count=Count(
+                'unit_set',
+                filter=Q(unit_set__rarity=7))
+        ).order_by(('-' if is_descending else '') + '_7_unit_count')
+        return (query_set, True)
+
     def order_right_hand_g12_gear_count(self, query_set, is_descending):
         query_set = query_set.annotate(
             _rh_g12_count=Count(
@@ -88,7 +97,7 @@ class PlayerTable(tables.Table):
         model = Player
         fields = ('name', 'guild', 'ally_code',
                   'level', 'gp', 'gp_char', 'gp_ship', 'unit_count',
-                  'g12_unit_count', 'g11_unit_count',
+                  'seven_star_unit_count', 'g12_unit_count', 'g11_unit_count',
                   'g10_unit_count', 'right_hand_g12_gear_count', 'zeta_count')
 
 
@@ -118,12 +127,13 @@ class PlayerUnitTable(tables.Table):
 
     def order_zeta_summary(self, query_set, is_descending):
         query_set = query_set.annotate(
-            _zeta_count=Count('zeta')
+            _zeta_count=Count('zeta_set')
         ).order_by(('-' if is_descending else '') + '_zeta_count')
         return (query_set, True)
 
     class Meta:
         model = PlayerUnit
+        order_by = '-gp'
         sequence = ('unit', 'player', 'gp', 'summary', 'zeta_summary', '...')
         exclude = ('id', 'rarity', 'level', 'gear',
                    'equipped_count', 'armor_penetration',

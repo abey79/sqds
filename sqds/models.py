@@ -1,5 +1,6 @@
 from django.db import models, transaction
 from django.utils.html import format_html
+from django.db.models import Q
 
 from . import swgoh
 
@@ -162,9 +163,11 @@ class Gear(models.Model):
 
 class GuildManager(models.Manager):
     # pylint: disable=too-many-locals
-    def update_or_create_from_swgoh(self, ally_code=116235559):
+    def update_or_create_from_swgoh(
+            self, ally_code=116235559, all_player=True):
         ''' Create a guild that contains provided ally_code, or update it if
-            it alread exists. '''
+            it alread exists. If all_player is True, all players are then fully
+            imported. Otherwise, only ally_code is imported. '''
 
         # TO DO:
         # - add a last_updated field to Guild and check against it before
@@ -186,26 +189,31 @@ class GuildManager(models.Manager):
             player_id_array = []
 
             for player_data in guild_data['roster']:
-                player, _ = Player.objects.update_or_create(
-                    api_id=player_data['id'],
-                    defaults={
-                        'guild': guild,
-                        'name': player_data['name'],
-                        'level': player_data['level'],
-                        'ally_code': player_data['allyCode'],
-                        'gp': player_data['gp'],
-                        'gp_char': player_data['gpChar'],
-                        'gp_ship': player_data['gpShip']})
-                player_id_array.append(player.id)
+                if all_player or player_data['allyCode'] == ally_code:
+                    player, _ = Player.objects.update_or_create(
+                        api_id=player_data['id'],
+                        defaults={
+                            'guild': guild,
+                            'name': player_data['name'],
+                            'level': player_data['level'],
+                            'ally_code': player_data['allyCode'],
+                            'gp': player_data['gp'],
+                            'gp_char': player_data['gpChar'],
+                            'gp_ship': player_data['gpShip']})
+                    player_id_array.append(player.id)
 
-            guild.player_set.exclude(id__in=player_id_array).delete()
+            if all_player:
+                guild.player_set.exclude(id__in=player_id_array).delete()
 
         # (D) For each Player, create or update PlayerUnits and Zetas
         # Note:
         # - We assume that a PlayerUnit never disappear
         # - It's ok to fail a player's units update (504 error are common),
         #   just print some error message.
-        for player in guild.player_set.all():
+        players_to_update = guild.player_set.all() if all_player \
+            else guild.player_set.filter(ally_code=ally_code)
+
+        for player in players_to_update:
             try:
                 player_data = swgoh.api.get_player_unit_list(
                     int(player.ally_code))
@@ -320,6 +328,9 @@ class Player(models.Model):
     def unit_count(self):
         return PlayerUnit.objects.filter(player=self).count()
 
+    def seven_star_unit_count(self):
+        return PlayerUnit.objects.filter(player=self, rarity=7).count()
+
     def g12_unit_count(self):
         return PlayerUnit.objects.filter(player=self, gear=12).count()
 
@@ -332,6 +343,12 @@ class Player(models.Model):
     def zeta_count(self):
         return Zeta.objects.filter(player_unit__player=self).count()
 
+    def g12_gear_count(self):
+        return PlayerUnitGear.objects.filter(
+            Q(player_unit__player=self)
+            & (Q(gear__is_right_hand_g12=True)
+               | Q(gear__is_left_hand_g12=True))).count()
+
     def right_hand_g12_gear_count(self):
         return PlayerUnitGear.objects.filter(
             player_unit__player=self,
@@ -340,7 +357,7 @@ class Player(models.Model):
     def left_hand_g12_gear_count(self):
         return PlayerUnitGear.objects.filter(
             player_unit__player=self,
-            gear__is_right_hand_g12=True).count()
+            gear__is_left_hand_g12=True).count()
 
 
 class PlayerUnit(models.Model):
@@ -402,11 +419,12 @@ class PlayerUnit(models.Model):
     colored_gear.admin_order_field = 'gear'
 
     def summary(self):
-        return format_html('{} / L{} / {}+{}',
-                           self.star_count(),
-                           self.level,
-                           self.colored_gear(),
-                           self.equipped_count)
+        return format_html(
+            '{} / L{} / {}{}',
+            self.star_count(),
+            self.level,
+            self.colored_gear(),
+            '+' + str(self.equipped_count) if self.equipped_count > 0 else '')
     summary.admin_order_field = ['rarity', 'level', 'gear', 'equipped_count']
 
     def zeta_count(self):
@@ -424,7 +442,8 @@ class PlayerUnit(models.Model):
 
 
 class Zeta(models.Model):
-    player_unit = models.ForeignKey(PlayerUnit, on_delete=models.CASCADE,
+    player_unit = models.ForeignKey(PlayerUnit,
+                                    on_delete=models.CASCADE,
                                     related_name='zeta_set')
     skill = models.ForeignKey(Skill, on_delete=models.PROTECT)
 

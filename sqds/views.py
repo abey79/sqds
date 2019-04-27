@@ -7,7 +7,7 @@ from django_filters import FilterSet, ChoiceFilter
 from django_filters.views import FilterView
 
 from .tables import PlayerTable, PlayerUnitTable
-from .models import Player, PlayerUnit
+from .models import Guild, Player, PlayerUnit
 
 
 class PlayerFilter(FilterSet):
@@ -26,6 +26,7 @@ class PlayerFilter(FilterSet):
         (11, '5.5M-6M'),
     ), method='filter_gp')
 
+    # pylint: disable=unused-argument
     def filter_gp(self, queryset, name, value):
         start = int(value) * 500000
         stop = (int(value) + 1) * 500000
@@ -46,7 +47,7 @@ class FilteredPlayerListView(SingleTableMixin, FilterView):
     }
 
 
-class PlayerUnitFilter(FilterSet):
+class AllPlayerUnitsFilter(FilterSet):
     player = ChoiceFilter(choices=Player.objects.values_list(
         'id', 'name').order_by(Lower('name')))
 
@@ -55,11 +56,56 @@ class PlayerUnitFilter(FilterSet):
         fields = ['unit', 'player']
 
 
-class FilteredPlayerUnitListView(SingleTableMixin, FilterView):
+class AllPlayerUnitsListView(SingleTableMixin, FilterView):
     table_class = PlayerUnitTable
     model = PlayerUnit
     template_name = 'sqds/players.html'
-    filterset_class = PlayerUnitFilter
+    filterset_class = AllPlayerUnitsFilter
     table_pagination = {
         'per_page': 50
     }
+
+    def get_queryset(self):
+        if 'ally_code' in self.kwargs:
+            qs = self.model.objects.filter(
+                player__ally_code=self.kwargs['ally_code'])
+        else:
+            qs = self.model.objects.all()
+
+        return qs
+
+
+class SinglePlayerPlayerUnitsFilter(FilterSet):
+    class Meta:
+        model = PlayerUnit
+        fields = ['unit']
+
+
+class SinglePlayerView(SingleTableMixin, FilterView):
+    table_class = PlayerUnitTable
+    model = PlayerUnit
+    template_name = 'sqds/single_player.html'
+    filterset_class = SinglePlayerPlayerUnitsFilter
+    table_pagination = {
+        'per_page': 50
+    }
+
+    def get_queryset(self):
+        if 'ally_code' in self.kwargs:
+            if not Player.objects.filter(ally_code=self.kwargs['ally_code']):
+                Guild.objects.update_or_create_from_swgoh(
+                    self.kwargs['ally_code'],
+                    all_player=False)
+
+            qs = self.model.objects.filter(
+                player__ally_code=self.kwargs['ally_code'])
+        else:
+            qs = self.model.objects.none()
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['player'] = Player.objects.get(
+            ally_code=self.kwargs['ally_code'])
+        return context
