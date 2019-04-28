@@ -8,6 +8,11 @@ register = template.Library()
 
 
 def big_number(num):
+    try:
+        num = float(num)
+    except ValueError:
+        num = 0
+
     num = int(round(float(num), 0))
     return '{0:n}'.format(num)
 

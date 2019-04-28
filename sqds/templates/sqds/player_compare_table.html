@@ -1,0 +1,32 @@
+{% load sqds_filters %}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th></th>
+      <th class='info'>{{ player1.name }}</th>
+      <th>{{ player2.name }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Guild</th>
+      <td>{{ player1.guild.name }}</td>
+      <td>{{ player2.guild.name }}</td>
+    </tr>
+    <tr>
+      <th>Ally code</th>
+      <td>{{ player1.ally_code | ally_code }}</td>
+      <td>{{ player2.ally_code | ally_code }}</td>
+    </tr>
+
+    {% for line in lines %}
+    <tr>
+      <{{ line.label_type }}>{{ line.label|safe }}</{{ line.label_type }}>
+      <td class="{{ line.left_class }}">{{ line.left_data }}</td>
+      <td class="{{ line.right_class }}">{{ line.right_data }}</td>
+    </tr>
+    {% endfor %}
+
+  </tbody>
+</table>

@@ -1,4 +1,5 @@
 from django.db.models.functions import Lower
+from django.db.models import Q
 
 # from django_tables2 import RequestConfig
 from django_tables2.views import SingleTableMixin
@@ -108,4 +109,52 @@ class SinglePlayerView(SingleTableMixin, FilterView):
         context = super().get_context_data(**kwargs)
         context['player'] = Player.objects.get(
             ally_code=self.kwargs['ally_code'])
+        return context
+
+
+class PlayerCompareView(SingleTableMixin, FilterView):
+    table_class = PlayerUnitTable
+    model = PlayerUnit
+    template_name = 'sqds/player_compare.html'
+    filterset_class = SinglePlayerPlayerUnitsFilter
+    table_pagination = {
+        'per_page': 50
+    }
+
+    def get_table_kwargs(self):
+        return {
+            'row_attrs':
+            {
+                'class': lambda record:
+                ('info'
+                 if record.player.ally_code == self.kwargs['ally_code1']
+                 else '')
+            }}
+
+    def get_queryset(self):
+        if 'ally_code1' in self.kwargs and 'ally_code2' in self.kwargs:
+            if not Player.objects.filter(ally_code=self.kwargs['ally_code1']):
+                Guild.objects.update_or_create_from_swgoh(
+                    self.kwargs['ally_code1'],
+                    all_player=False)
+
+            if not Player.objects.filter(ally_code=self.kwargs['ally_code2']):
+                Guild.objects.update_or_create_from_swgoh(
+                    self.kwargs['ally_code2'],
+                    all_player=False)
+
+            qs = self.model.objects.filter(
+                Q(player__ally_code=self.kwargs['ally_code1'])
+                | Q(player__ally_code=self.kwargs['ally_code2']))
+        else:
+            qs = self.model.objects.none()
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['player1'] = Player.objects.get(
+            ally_code=self.kwargs['ally_code1'])
+        context['player2'] = Player.objects.get(
+            ally_code=self.kwargs['ally_code2'])
         return context
