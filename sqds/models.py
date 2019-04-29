@@ -11,65 +11,54 @@ RIGHT_HAND_G12_GEAR_ID = [166, 167, 168, 169, 170, 171]
 
 def update_game_data(ability_data_list=None,
                      skill_data_list=None,
-                     unit_data_list=None):
+                     unit_data_list=None,
+                     category_data_list=None):
     if ability_data_list is None:
         ability_data_list = swgoh.api.get_ability_list()
     if skill_data_list is None:
         skill_data_list = swgoh.api.get_skill_list()
     if unit_data_list is None:
         unit_data_list = swgoh.api.get_unit_list()
+    if category_data_list is None:
+        category_data_list = swgoh.api.get_category_list()
+
+    skill_dict = {item['id']: item for item in skill_data_list}
+    ability_dict = {item['id']: item for item in ability_data_list}
 
     with transaction.atomic():
-        placeholder_unit = Unit.objects.create()
-        placeholder_ability = Ability.objects.create()
+        for category_data in category_data_list:
+            category, _ = Category.objects.update_or_create(
+                api_id=category_data['id'],
+                defaults={'name': category_data['descKey']})
 
-        for ability_data in ability_data_list:
-            ability, _ = Ability.objects.get_or_create(
-                api_id=ability_data['id'])
-            ability.set_from_data(ability_data)
-
-        Skill.objects.update(unit=placeholder_unit)
-        for skill_data in skill_data_list:
-            skill, _ = Skill.objects.get_or_create(
-                api_id=skill_data['id'],
-                defaults={
-                    'unit': placeholder_unit,
-                    'ability': placeholder_ability})
-            skill.set_from_data(skill_data)
-
-        Unit.objects.update(name="DELETE_ME")
+        unit_id_list = []
         for unit_data in unit_data_list:
-            unit, _ = Unit.objects.get_or_create(api_id=unit_data['baseId'])
-            unit.set_from_data(unit_data)
+            unit, _ = Unit.objects.update_or_create(
+                api_id=unit_data['baseId'],
+                defaults={'name': unit_data['nameKey']}
+            )
+            unit_id_list.append(unit.id)
 
-        # Clean-up
-        Skill.objects.filter(unit=placeholder_unit).delete()
-        Unit.objects.filter(name="DELETE_ME").delete()
-        placeholder_unit.delete()
-        placeholder_ability.delete()
+            for skill_ref in unit_data['skillReferenceList']:
+                skill_data = skill_dict[skill_ref['skillId']]
+                skill, _ = Skill.objects.update_or_create(
+                    api_id=skill_data['id'],
+                    defaults={
+                        'unit': unit,
+                        'name': ability_dict[
+                            skill_data['abilityReference']]['nameKey'],
+                        'is_zeta': skill_data['isZeta']})
+
+            for category in Category.objects.filter(
+                    api_id__in=unit_data['categoryIdList']).all():
+                unit.categories.add(category)
+
+        Unit.objects.exclude(id__in=unit_id_list).delete()
 
 
-class Ability(models.Model):
+class Category(models.Model):
     api_id = models.CharField(max_length=200)
-    name = models.CharField(max_length=200, default='')
-    type = models.IntegerField(default=0)
-
-    class Meta:
-        indexes = [models.Index(fields=['api_id'])]
-
-    def __str__(self):  # pragma: no cover
-        return self.name
-
-    def set_from_data(self, data):
-        self.api_id = data['id']
-        self.name = data['nameKey']
-        self.type = data['abilityType']
-        self.save()
-
-
-class Unit(models.Model):
-    api_id = models.CharField(max_length=200)
-    name = models.CharField(max_length=200, default='')
+    name = models.CharField(max_length=200)
 
     class Meta:
         ordering = ['name', ]
@@ -78,44 +67,31 @@ class Unit(models.Model):
     def __str__(self):  # pragma: no cover
         return self.name
 
-    def set_from_data(self, data):
-        self.api_id = data['baseId']
-        self.name = data['nameKey']
-        self.save()
 
-        for skill_ref in data['skillReferenceList']:
-            skill = Skill.objects.get(api_id=skill_ref['skillId'])
-            skill.unit = self
-            skill.save()
+class Unit(models.Model):
+    api_id = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, default='')
+    categories = models.ManyToManyField(Category, related_name='unit_set')
 
-    @staticmethod
-    def create_from_dict(unit_data):
-        with transaction.atomic():
-            Unit.objects.all().delete()
+    class Meta:
+        ordering = ['name', ]
+        indexes = [models.Index(fields=['api_id'])]
 
-            for unit in unit_data:
-                Unit.objects.create(
-                    api_id=unit['baseId'],
-                    name=unit['nameKey'])
+    def __str__(self):  # pragma: no cover
+        return self.name
 
 
 class Skill(models.Model):
-    api_id = models.CharField(max_length=200, default='')
-    ability = models.ForeignKey(Ability, on_delete=models.PROTECT)
+    api_id = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
-    is_zeta = models.BooleanField(default=False)
+    is_zeta = models.BooleanField()
 
     class Meta:
         indexes = [models.Index(fields=['api_id'])]
 
     def __str__(self):  # pragma: no cover
         return self.ability.name
-
-    def set_from_data(self, data):
-        self.api_id = data['id']
-        self.ability = Ability.objects.get(api_id=data['abilityReference'])
-        self.is_zeta = data['isZeta']
-        self.save()
 
 
 class GearManager(models.Manager):

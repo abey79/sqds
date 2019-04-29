@@ -148,6 +148,27 @@ class Swgoh:
         except requests.exceptions.RequestException:
             raise ApiError(response=response)
 
+    def get_category_list(self):
+        try:
+            response = requests.post(
+                url="%s/swgoh/data" % self.base_url,
+                headers=self.get_auth_header(),
+                json={
+                    "collection": "categoryList",
+                    "language": "eng_us",
+                    "match": {
+                        "visible": True
+                    },
+                    "project": {
+                        "id": True,
+                        "descKey": True
+                    },
+                    "enums": "true"
+                })
+            return response.json()
+        except requests.exceptions.RequestException:
+            raise ApiError(response=response)
+
     def get_guild_list(self, ally_code):
         try:
             response = requests.post(

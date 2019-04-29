@@ -8,7 +8,7 @@ from django_filters import FilterSet, ChoiceFilter
 from django_filters.views import FilterView
 
 from .tables import PlayerTable, PlayerUnitTable
-from .models import Guild, Player, PlayerUnit
+from .models import Category, Guild, Player, PlayerUnit
 
 
 class PlayerFilter(FilterSet):
@@ -51,10 +51,13 @@ class FilteredPlayerListView(SingleTableMixin, FilterView):
 class AllPlayerUnitsFilter(FilterSet):
     player = ChoiceFilter(choices=Player.objects.values_list(
         'id', 'name').order_by(Lower('name')))
+    category = ChoiceFilter(field_name='unit__categories',
+                            choices=Category.objects.values_list(
+                                'id', 'name').order_by(Lower('name')))
 
     class Meta:
         model = PlayerUnit
-        fields = ['unit', 'player']
+        fields = ['unit', 'player', 'category']
 
 
 class AllPlayerUnitsListView(SingleTableMixin, FilterView):
@@ -77,9 +80,13 @@ class AllPlayerUnitsListView(SingleTableMixin, FilterView):
 
 
 class SinglePlayerPlayerUnitsFilter(FilterSet):
+    category = ChoiceFilter(field_name='unit__categories',
+                            choices=Category.objects.values_list(
+                                'id', 'name').order_by(Lower('name')))
+
     class Meta:
         model = PlayerUnit
-        fields = ['unit']
+        fields = ['unit', 'category']
 
 
 class SinglePlayerView(SingleTableMixin, FilterView):
