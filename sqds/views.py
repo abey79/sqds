@@ -101,9 +101,8 @@ class SinglePlayerView(SingleTableMixin, FilterView):
     def get_queryset(self):
         if 'ally_code' in self.kwargs:
             if not Player.objects.filter(ally_code=self.kwargs['ally_code']):
-                Guild.objects.update_or_create_from_swgoh(
-                    self.kwargs['ally_code'],
-                    all_player=False)
+                Player.objects.update_or_create_from_swgoh(
+                    self.kwargs['ally_code'])
 
             qs = self.model.objects.filter(
                 player__ally_code=self.kwargs['ally_code'])
@@ -141,14 +140,12 @@ class PlayerCompareView(SingleTableMixin, FilterView):
     def get_queryset(self):
         if 'ally_code1' in self.kwargs and 'ally_code2' in self.kwargs:
             if not Player.objects.filter(ally_code=self.kwargs['ally_code1']):
-                Guild.objects.update_or_create_from_swgoh(
-                    self.kwargs['ally_code1'],
-                    all_player=False)
+                Player.objects.update_or_create_from_swgoh(
+                    self.kwargs['ally_code1'])
 
             if not Player.objects.filter(ally_code=self.kwargs['ally_code2']):
-                Guild.objects.update_or_create_from_swgoh(
-                    self.kwargs['ally_code2'],
-                    all_player=False)
+                Player.objects.update_or_create_from_swgoh(
+                    self.kwargs['ally_code2'])
 
             qs = self.model.objects.filter(
                 Q(player__ally_code=self.kwargs['ally_code1'])

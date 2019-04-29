@@ -193,6 +193,29 @@ class Swgoh:
                     },
                     "enums": True
                 })
+
+            if response.status_code == 404:
+                return None
+            if response.status_code != 200:
+                raise ApiError(response=response)
+            return response.json()[0]
+        except requests.exceptions.RequestException:
+            raise ApiError(response=response)
+
+    def get_player_data(self, ally_code):
+        try:
+            response = requests.post(
+                url="%s/swgoh/player" % self.base_url,
+                headers=self.get_auth_header(),
+                json={
+                    "allycodes": ally_code,
+                    "language": "eng_us",
+                    "enums": True
+                })
+            if response.status_code == 404:
+                return None
+            if response.status_code != 200:
+                raise ApiError(response=response)
             return response.json()[0]
         except requests.exceptions.RequestException:
             raise ApiError(response=response)
@@ -204,6 +227,8 @@ class Swgoh:
                 "/statCalc/api/characters/player/%d" % ally_code,
                 # headers=self.get_auth_header(),
                 params={'flags': 'withModCalc,gameStyle'})
+            if response.status_code != 200:
+                raise ApiError(response=response)
             return response.json()
         except requests.exceptions.RequestException:
             raise ApiError(response=response)
