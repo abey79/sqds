@@ -40,14 +40,34 @@ Player: {{ player.name }}
         <td>{{ player.gp_ship | big_number }}</td>
       </tr>
       <tr>
-        <th>Zeta</th>
-        <td>{{ player.zeta_count }}</td>
+        <th>Mod count</th>
+        <td>{{ player.mod_count }}</td>
+      </tr>
+      <tr>
+        <td>&nbsp;&nbsp;&nbsp;+25</td>
+        <td>{{ player.mod_count_speed_25 }}</td>
+      </tr>
+      <tr>
+        <td>&nbsp;&nbsp;&nbsp;+20</td>
+        <td>{{ player.mod_count_speed_20 }}</td>
+      </tr>
+      <tr>
+        <td>&nbsp;&nbsp;&nbsp;+15</td>
+        <td>{{ player.mod_count_speed_15 }}</td>
+      </tr>
+      <tr>
+        <td>&nbsp;&nbsp;&nbsp;+10</td>
+        <td>{{ player.mod_count_speed_10 }}</td>
       </tr>
     </table>
   </div>
 
   <div class="col-md-6">
     <table class="table">
+      <tr>
+        <th>Zeta</th>
+        <td>{{ player.zeta_count }}</td>
+      </tr>
       <tr>
         <th>Unit count</th>
         <td>{{ player.unit_count }}</td>

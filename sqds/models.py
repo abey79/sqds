@@ -384,6 +384,27 @@ class Player(models.Model):
             player_unit__player=self,
             gear__is_left_hand_g12=True).count()
 
+    def mod_count(self):
+        return Mod.objects.filter(player_unit__player=self).count()
+
+    def mod_count_speed_n(self, min_value, max_value):
+        return Mod.objects.filter(
+            player_unit__player=self,
+            speed__gte=min_value,
+            speed__lte=max_value).exclude(slot=1).count()
+
+    def mod_count_speed_25(self):
+        return self.mod_count_speed_n(25, 100)
+
+    def mod_count_speed_20(self):
+        return self.mod_count_speed_n(20, 24)
+
+    def mod_count_speed_15(self):
+        return self.mod_count_speed_n(15, 19)
+
+    def mod_count_speed_10(self):
+        return self.mod_count_speed_n(10, 14)
+
 
 class PlayerUnit(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)

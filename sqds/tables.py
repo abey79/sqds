@@ -46,6 +46,11 @@ class PlayerTable(tables.Table):
     g11_unit_count = LargeIntColumn('G11', initial_sort_descending=True)
     g10_unit_count = LargeIntColumn('G10', initial_sort_descending=True)
 
+    mod_count_speed_25 = LargeIntColumn('+25', initial_sort_descending=True)
+    mod_count_speed_20 = LargeIntColumn('+20', initial_sort_descending=True)
+    mod_count_speed_15 = LargeIntColumn('+15', initial_sort_descending=True)
+    mod_count_speed_10 = LargeIntColumn('+10', initial_sort_descending=True)
+
     zeta_count = LargeIntColumn(initial_sort_descending=True)
     right_hand_g12_gear_count = LargeIntColumn('G12+ pces',
                                                initial_sort_descending=True)
@@ -93,12 +98,41 @@ class PlayerTable(tables.Table):
         ).order_by(('-' if is_descending else '') + '_zeta_count')
         return (query_set, True)
 
+    def generic_order_mod_count_speed(self, query_set, is_descending,
+                                      min_value, max_value):
+        query_set = query_set.annotate(
+            _mod_count=Count(
+                'unit_set__mod_set',
+                filter=(~Q(unit_set__mod_set__slot=1)
+                        & Q(unit_set__mod_set__speed__gte=min_value)
+                        & Q(unit_set__mod_set__speed__lte=max_value)))
+        ).order_by(('-' if is_descending else '') + '_mod_count')
+        return (query_set, True)
+
+    def order_mod_count_speed_25(self, query_set, is_descending):
+        return self.generic_order_mod_count_speed(
+            query_set, is_descending, 25, 100)
+
+    def order_mod_count_speed_20(self, query_set, is_descending):
+        return self.generic_order_mod_count_speed(
+            query_set, is_descending, 20, 24)
+
+    def order_mod_count_speed_15(self, query_set, is_descending):
+        return self.generic_order_mod_count_speed(
+            query_set, is_descending, 15, 19)
+
+    def order_mod_count_speed_10(self, query_set, is_descending):
+        return self.generic_order_mod_count_speed(
+            query_set, is_descending, 15, 19)
+
     class Meta:
         model = Player
         fields = ('name', 'guild', 'ally_code',
                   'level', 'gp', 'gp_char', 'gp_ship', 'unit_count',
                   'seven_star_unit_count', 'g12_unit_count', 'g11_unit_count',
-                  'g10_unit_count', 'right_hand_g12_gear_count', 'zeta_count')
+                  'g10_unit_count', 'right_hand_g12_gear_count', 'zeta_count',
+                  'mod_count_speed_25', 'mod_count_speed_20',
+                  'mod_count_speed_15', 'mod_count_speed_10')
 
 
 class PlayerUnitTable(tables.Table):

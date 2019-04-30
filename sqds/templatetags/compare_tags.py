@@ -88,5 +88,30 @@ def player_comparison(player1, player2):
                 **compute_data_and_classes(player1.right_hand_g12_gear_count(),
                                            player2.right_hand_g12_gear_count())
             },
+            {
+                'label': 'Mod count', 'label_type': 'th',
+                **compute_data_and_classes(player1.mod_count(),
+                                           player2.mod_count())
+            },
+            {
+                'label': '&nbsp;&nbsp;&nbsp;+25', 'label_type': 'td',
+                **compute_data_and_classes(player1.mod_count_speed_25(),
+                                           player2.mod_count_speed_25())
+            },
+            {
+                'label': '&nbsp;&nbsp;&nbsp;+20', 'label_type': 'td',
+                **compute_data_and_classes(player1.mod_count_speed_20(),
+                                           player2.mod_count_speed_20())
+            },
+            {
+                'label': '&nbsp;&nbsp;&nbsp;+15', 'label_type': 'td',
+                **compute_data_and_classes(player1.mod_count_speed_15(),
+                                           player2.mod_count_speed_15())
+            },
+            {
+                'label': '&nbsp;&nbsp;&nbsp;+10', 'label_type': 'td',
+                **compute_data_and_classes(player1.mod_count_speed_10(),
+                                           player2.mod_count_speed_10())
+            },
         ]
     }
