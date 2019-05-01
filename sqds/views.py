@@ -11,7 +11,7 @@ from .tables import PlayerTable, PlayerUnitTable
 from .models import Category, Guild, Player, PlayerUnit
 
 
-class PlayerFilter(FilterSet):
+class GPFilter(FilterSet):
     gp = ChoiceFilter(choices=(
         (0, '<500k'),
         (1, '500k-1M'),
@@ -35,6 +35,32 @@ class PlayerFilter(FilterSet):
 
     class Meta:
         model = Player
+        fields = ['gp']
+
+
+class GuildView(SingleTableMixin, FilterView):
+    table_class = PlayerTable
+    model = Player
+    template_name = 'sqds/guild.html'
+    filterset_class = GPFilter
+    table_pagination = {
+        'per_page': 50
+    }
+
+    def get_queryset(self):
+        qs = self.model.objects.filter(
+            guild__api_id=self.kwargs['api_id'])
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['guild'] = Guild.objects.get(
+            api_id=self.kwargs['api_id'])
+        return context
+
+
+class PlayerFilter(GPFilter):
+    class Meta(GPFilter.Meta):
         fields = ['guild', 'gp']
 
 

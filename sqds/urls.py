@@ -6,6 +6,7 @@ app_name = 'sqds'
 urlpatterns = [
     # path('players/', views.players, name='players')
     path('players/', views.FilteredPlayerListView.as_view(), name='players'),
+    path('guild/<str:api_id>/', views.GuildView.as_view(), name='guild'),
     path('units/', views.AllPlayerUnitsListView.as_view(), name='units'),
     path('player/<int:ally_code>/',
          views.SinglePlayerView.as_view(), name='player'),

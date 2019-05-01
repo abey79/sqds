@@ -1,8 +1,10 @@
 import locale
+from textwrap import wrap
 
 from django.db.models import Count, Q
 
 import django_tables2 as tables
+from django_tables2.utils import A
 
 from .models import Player, PlayerUnit
 
@@ -25,6 +27,10 @@ class LargeIntColumn(tables.Column):
     def render(self, value):
         return '{0:n}'.format(value) if value != 0 else '-'
 
+class AllyCodeColumn(tables.Column):
+    def render(self, value):
+        return '-'.join(wrap(str(value), 3))
+
 
 class PercentColumn(tables.Column):
     def __init__(self, **kwargs):
@@ -36,6 +42,10 @@ class PercentColumn(tables.Column):
 
 
 class PlayerTable(tables.Table):
+    name = tables.LinkColumn('sqds:player', args=[A('ally_code')])
+    guild = tables.LinkColumn('sqds:guild', args=[A('guild.api_id')])
+    ally_code = AllyCodeColumn()
+
     gp = LargeIntColumn()
     gp_char = LargeIntColumn()
     gp_ship = LargeIntColumn()

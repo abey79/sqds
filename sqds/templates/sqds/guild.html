@@ -1,0 +1,40 @@
+{% extends 'sqds/base.html' %}
+
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Guild: {{ guild.name }}
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+  <div class="col-md-2">
+    <table class="table">
+      <tr>
+        <th>Name</th>
+        <td>{{ guild.name }}</td>
+      </tr>
+      <tr>
+        <th>GP</th>
+        <td>{{ guild.gp }}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    {% if filter %}
+    <form action="" method="get" class="form form-inline">
+      {% bootstrap_form filter.form layout='inline' %}
+      {% bootstrap_button 'filter' %}
+    </form>
+    {% endif %}
+    {% render_table table %}
+  </div>
+</div>
+
+{% endblock %}
