@@ -1,0 +1,119 @@
+{% extends 'sqds/base.html' %}
+
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+{% load crispy_forms_tags %}
+{% load sqds_filters %}
+
+{% block title %}
+{{ player_unit.player.name }}'s {{ player_unit.unit.name }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-3">
+    <div class="panel panel-default">
+      <div class="panel-heading">Info</div>
+      <table class="table">
+        <tbody>
+          <tr>
+            <th>Player</th>
+            <td><a href="{% url 'sqds:player' player_unit.player.ally_code %}">{{ player_unit.player.name }}</a></td>
+          </tr>
+          <tr>
+            <th>Level</th>
+            <td>{{ player_unit.level }}</td>
+          </tr>
+          <tr>
+            <th>Rarity</th>
+            <td>{{ player_unit.rarity }}★</td>
+          </tr>
+          <tr>
+            <th>Gear tier</th>
+            <td>G{{ player_unit.gear }} {% if player_unit.equipped_count > 0 %}+{{ player_unit.equipped_count }}{% endif %}</td>
+          </tr>
+          <tr>
+            <th>Last updated</th>
+            <td>{{ player_unit.last_updated }}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="panel panel-default">
+      <div class="panel-heading">Statistics</div>
+      <table class="table">
+        <tbody>
+          <tr>
+            <th>Speed</th>
+            <td>{{ player_unit.speed }}</td>
+          </tr>
+          <tr>
+            <th>Health</th>
+            <td>{{ player_unit.health }}</td>
+          </tr>
+          <tr>
+            <th>Protection</th>
+            <td>{{ player_unit.protection }}</td>
+          </tr>
+
+          <tr>
+            <th>Physical Damage</th>
+            <td>{{ player_unit.physical_damage }}</td>
+          </tr>
+          <tr>
+            <th>Physical Crit. Chance</th>
+            <td>{{ player_unit.physical_crit_chance | percent }}</td>
+          </tr>
+          <tr>
+            <th>Special Damage</th>
+            <td>{{ player_unit.special_damage }}</td>
+          </tr>
+          <tr>
+            <th>Special Crit. Chance</th>
+            <td>{{ player_unit.special_crit_chance | percent }}</td>
+          </tr>
+          <tr>
+            <th>Critical Damage</th>
+            <td>{{ player_unit.crit_damage | percent }}</td>
+          </tr>
+
+          <tr>
+            <th>Potency</th>
+            <td>{{ player_unit.potency | percent }}</td>
+          </tr>
+          <tr>
+            <th>Tenacity</th>
+            <td>{{ player_unit.tenacity | percent }}</td>
+          </tr>
+          <tr>
+            <th>Armor</th>
+            <td>{{ player_unit.armor | percent }}</td>
+          </tr>
+          <tr>
+            <th>Resistance</th>
+            <td>{{ player_unit.resistance | percent }}</td>
+          </tr>
+          <tr>
+            <th>Armore Penetration</th>
+            <td>{{ player_unit.armor_penetration }}</td>
+          </tr>
+          <tr>
+            <th>Resistance Penetration</th>
+            <td>{{ player_unit.resistance_penetration }}</td>
+          </tr>
+          <tr>
+            <th>Health Steal</th>
+            <td>{{ player_unit.health_steal | percent }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

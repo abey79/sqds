@@ -13,106 +13,132 @@ Player: {{ player.name }}
 {% block content %}
 
 <div class="row">
+
+  <!-- Info panel -->
   <div class="col-md-6">
-    <table class="table">
-      <tr>
-        <th>Name</th>
-        <td>{{ player.name }}</td>
-      </tr>
-      <tr>
-        <th>Guild</th>
-        <td>{{ player.guild.name }}</td>
-      </tr>
-      <tr>
-        <th>Ally code</th>
-        <td>{{ player.ally_code | ally_code }}</td>
-      </tr>
-      <tr>
-        <th>GP</th>
-        <td>{{ player.gp | big_number }}</td>
-      </tr>
-      <tr>
-        <td>&nbsp;&nbsp;&nbsp;characters</td>
-        <td>{{ player.gp_char | big_number }}</td>
-      </tr>
-      <tr>
-        <td>&nbsp;&nbsp;&nbsp;ships</td>
-        <td>{{ player.gp_ship | big_number }}</td>
-      </tr>
-      <tr>
-        <th>Mod count</th>
-        <td>{{ player.mod_count }}</td>
-      </tr>
-      <tr>
-        <td>&nbsp;&nbsp;&nbsp;+25</td>
-        <td>{{ player.mod_count_speed_25 }}</td>
-      </tr>
-      <tr>
-        <td>&nbsp;&nbsp;&nbsp;+20</td>
-        <td>{{ player.mod_count_speed_20 }}</td>
-      </tr>
-      <tr>
-        <td>&nbsp;&nbsp;&nbsp;+15</td>
-        <td>{{ player.mod_count_speed_15 }}</td>
-      </tr>
-      <tr>
-        <td>&nbsp;&nbsp;&nbsp;+10</td>
-        <td>{{ player.mod_count_speed_10 }}</td>
-      </tr>
-    </table>
+    <div class="panel panel-default">
+      <div class="panel-heading">Info</div>
+
+      <table class="table">
+        <tbody>
+          <tr>
+            <th>Name</th>
+            <td>{{ player.name }}</td>
+          </tr>
+          <tr>
+            <th>Guild</th>
+            <td><a href="{% url 'sqds:guild' player.guild.api_id %}">{{ player.guild.name }}</a></td>
+          </tr>
+          <tr>
+            <th>Ally code</th>
+            <td>{{ player.ally_code | ally_code }}</td>
+          </tr>
+          <tr>
+            <th>Last updated</th>
+            <td>{{ player.last_updated }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
+  <!-- Stat panel -->
   <div class="col-md-6">
-    <table class="table">
-      <tr>
-        <th>Zeta</th>
-        <td>{{ player.zeta_count }}</td>
-      </tr>
-      <tr>
-        <th>Unit count</th>
-        <td>{{ player.unit_count }}</td>
-      </tr>
-      <tr>
-        <td>&nbsp;&nbsp;&nbsp;7*</td>
-        <td>{{ player.seven_star_unit_count }}</td>
-      </tr>
-      <tr>
-        <td>&nbsp;&nbsp;&nbsp;G12</td>
-        <td>{{ player.g12_unit_count }}</td>
-      </tr>
-      <tr>
-        <td>&nbsp;&nbsp;&nbsp;G11</td>
-        <td>{{ player.g11_unit_count }}</td>
-      </tr>
-      <tr>
-        <td>&nbsp;&nbsp;&nbsp;G10</td>
-        <td>{{ player.g10_unit_count }}</td>
-      </tr>
-      <tr>
-        <th>G12 gear pieces</th>
-        <td>{{ player.g12_gear_count }}</td>
-      </tr>
-      <tr>
-        <td>&nbsp;&nbsp;&nbsp;left</td>
-        <td>{{ player.left_hand_g12_gear_count }}</td>
-      </tr>
-      <tr>
-        <td>&nbsp;&nbsp;&nbsp;right</td>
-        <td>{{ player.right_hand_g12_gear_count }}</td>
-      </tr>
-    </table>
+    <div class="panel panel-default">
+      <div class="panel-heading">Statistics</div>
+      <table class="table">
+        <tbody>
+          <tr>
+            <th>GP</th>
+            <td>{{ player.gp | big_number }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;characters</td>
+            <td>{{ player.gp_char | big_number }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;ships</td>
+            <td>{{ player.gp_ship | big_number }}</td>
+          </tr>
+          <tr>
+            <th>Zeta</th>
+            <td>{{ player.zeta_count }}</td>
+          </tr>
+          <tr>
+            <th>Unit count</th>
+            <td>{{ player.unit_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;7*</td>
+            <td>{{ player.seven_star_unit_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;G12</td>
+            <td>{{ player.g12_unit_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;G11</td>
+            <td>{{ player.g11_unit_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;G10</td>
+            <td>{{ player.g10_unit_count }}</td>
+          </tr>
+          <tr>
+            <th>G12 gear pieces</th>
+            <td>{{ player.g12_gear_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;left</td>
+            <td>{{ player.left_hand_g12_gear_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;right</td>
+            <td>{{ player.right_hand_g12_gear_count }}</td>
+          </tr>
+          <tr>
+            <th>Mod count</th>
+            <td>{{ player.mod_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;+25</td>
+            <td>{{ player.mod_count_speed_25 }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;+20</td>
+            <td>{{ player.mod_count_speed_20 }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;+15</td>
+            <td>{{ player.mod_count_speed_15 }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;+10</td>
+            <td>{{ player.mod_count_speed_10 }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
+<!-- Characters table -->
 <div class="row">
   <div class="col-md-12">
-    {% if filter %}
-    <form action="" method="get" class="form form-inline">
-      {% bootstrap_form filter.form layout='inline' %}
-      {% bootstrap_button 'filter' %}
-    </form>
-    {% endif %}
-    {% render_table table %}
+    <div class="panel panel-default">
+      <div class="panel-heading">Characters</div>
+
+      {% if filter %}
+      <div class="panel-body">
+        <form action="" method="get" class="form form-inline">
+          {% bootstrap_form filter.form layout='inline' %}
+          {% bootstrap_button 'filter' %}
+        </form>
+      </div>
+      {% endif %}
+
+      {% render_table table %}
+    </div>
   </div>
 </div>
 

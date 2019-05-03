@@ -21,5 +21,10 @@ def ally_code(num):
     return '-'.join(wrap(str(num), 3))
 
 
+def percent(num):
+    return '{:0.1f}%'.format(num * 100)
+
+
 register.filter('big_number', big_number)
 register.filter('ally_code', ally_code)
+register.filter('percent', percent)

@@ -14,20 +14,30 @@
 {% block content %}
 
 <div class="row">
-  <div class="col-md-12">
-    {% player_comparison player1 player2 %}
+  <div class="col-md-6 col-md-offset-3">
+    <div class="panel panel-default">
+      <div class="panel-heading">Statistics comparison</div>
+      {% player_comparison player1 player2 %}
+    </div>
   </div>
 </div>
 
 <div class="row">
   <div class="col-md-12">
-    {% if filter %}
-    <form action="" method="get" class="form form-inline">
-      {% bootstrap_form filter.form layout='inline' %}
-      {% bootstrap_button 'filter' %}
-    </form>
-    {% endif %}
-    {% render_table table %}
+    <div class="panel panel-default">
+      <div class="panel-heading">Characters</div>
+
+      {% if filter %}
+      <div class="panel-body">
+        <form action="" method="get" class="form form-inline">
+          {% bootstrap_form filter.form layout='inline' %}
+          {% bootstrap_button 'filter' %}
+        </form>
+      </div>
+      {% endif %}
+
+      {% render_table table %}
+    </div>
   </div>
 </div>
 

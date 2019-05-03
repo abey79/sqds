@@ -27,6 +27,7 @@ class LargeIntColumn(tables.Column):
     def render(self, value):
         return '{0:n}'.format(value) if value != 0 else '-'
 
+
 class AllyCodeColumn(tables.Column):
     def render(self, value):
         return '-'.join(wrap(str(value), 3))
@@ -147,6 +148,7 @@ class PlayerTable(tables.Table):
 
 class PlayerUnitTable(tables.Table):
     gp = LargeIntColumn(initial_sort_descending=True)
+    unit = tables.LinkColumn('sqds:unit', args=[A('id')])
 
     speed = LargeIntColumn(initial_sort_descending=True)
     health = LargeIntColumn(initial_sort_descending=True)

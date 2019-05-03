@@ -1,5 +1,6 @@
 from django.db.models.functions import Lower
 from django.db.models import Q
+from django.shortcuts import render, get_object_or_404
 
 # from django_tables2 import RequestConfig
 from django_tables2.views import SingleTableMixin
@@ -9,6 +10,15 @@ from django_filters.views import FilterView
 
 from .tables import PlayerTable, PlayerUnitTable
 from .models import Category, Guild, Player, PlayerUnit
+
+
+def index(request):
+    return render(request, 'sqds/index.html')
+
+
+def unit(request, player_unit_id):
+    player_unit = get_object_or_404(PlayerUnit, pk=player_unit_id)
+    return render(request, 'sqds/unit.html', {'player_unit': player_unit})
 
 
 class GPFilter(FilterSet):
