@@ -13,5 +13,7 @@ urlpatterns = [
     path('player/<int:ally_code>/',
          views.SinglePlayerView.as_view(), name='player'),
     path('player/<int:ally_code1>/c/<int:ally_code2>/',
-         views.PlayerCompareView.as_view(), name='player_compare')
+         views.PlayerCompareView.as_view(), name='player_compare'),
+    path('player/<int:ally_code>/refresh/',
+         views.player_refresh, name='player_refresh')
 ]

@@ -23,7 +23,7 @@ Player: {{ player.name }}
         <tbody>
           <tr>
             <th>Name</th>
-            <td>{{ player.name }}</td>
+            <td>{{ player.name }} (<a href="{% url 'sqds:player_refresh' player.ally_code %}">refresh</a>)</td>
           </tr>
           <tr>
             <th>Guild</th>

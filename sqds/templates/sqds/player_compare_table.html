@@ -4,15 +4,15 @@
   <thead>
     <tr>
       <th></th>
-      <th class='info'>{{ player1.name }}</th>
-      <th>{{ player2.name }}</th>
+      <th class='info'><a href="{% url 'sqds:player' player1.ally_code %}">{{ player1.name }}</a></th>
+      <th><a href="{% url 'sqds:player' player2.ally_code %}">{{ player2.name }}</a></th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>Guild</th>
-      <td>{{ player1.guild.name }}</td>
-      <td>{{ player2.guild.name }}</td>
+      <td><a href="{% url 'sqds:guild' player1.guild.api_id %}">{{ player1.guild.name }}</a></td>
+      <td><a href="{% url 'sqds:guild' player2.guild.api_id %}">{{ player2.guild.name }}</a></td>
     </tr>
     <tr>
       <th>Ally code</th>

@@ -1,6 +1,6 @@
 from django.db.models.functions import Lower
 from django.db.models import Q
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 
 # from django_tables2 import RequestConfig
 from django_tables2.views import SingleTableMixin
@@ -19,6 +19,11 @@ def index(request):
 def unit(request, player_unit_id):
     player_unit = get_object_or_404(PlayerUnit, pk=player_unit_id)
     return render(request, 'sqds/unit.html', {'player_unit': player_unit})
+
+
+def player_refresh(request, ally_code):
+    Player.objects.update_or_create_from_swgoh(ally_code)
+    return redirect('sqds:player', ally_code=ally_code)
 
 
 class GPFilter(FilterSet):
