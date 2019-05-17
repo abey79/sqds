@@ -26,6 +26,74 @@ Guild: {{ guild.name }}
       </table>
     </div>
   </div>
+
+  <div class="col-md-2">
+    <div class="panel panel-default">
+      <div class="panel-heading">Statistics</div>
+      <table class="table">
+        <tr>
+          <th>Player count</th>
+          <td>{{ guild.player_set.count }}</td>
+        </tr>
+        <tr>
+          <th>Zeta</th>
+          <td>{{ guild.zeta_count }}</td>
+        </tr>
+        <tr>
+          <th>Unit count</th>
+          <td>{{ guild.unit_count }}</td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;7*</td>
+          <td>{{ guild.seven_star_unit_count }}</td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;G12</td>
+          <td>{{ guild.g12_unit_count }}</td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;G11</td>
+          <td>{{ guild.g11_unit_count }}</td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;G10</td>
+          <td>{{ guild.g10_unit_count }}</td>
+        </tr>
+        <tr>
+          <th>G12 gear pieces</th>
+          <td>{{ guild.g12_gear_count }}</td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;left</td>
+          <td>{{ guild.left_hand_g12_gear_count }}</td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;right</td>
+          <td>{{ guild.right_hand_g12_gear_count }}</td>
+        </tr>
+        <tr>
+          <th>Mod count</th>
+          <td>{{ guild.mod_count }}</td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;+25</td>
+          <td>{{ guild.mod_count_speed_25 }}</td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;+20</td>
+          <td>{{ guild.mod_count_speed_20 }}</td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;+15</td>
+          <td>{{ guild.mod_count_speed_15 }}</td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;+10</td>
+          <td>{{ guild.mod_count_speed_10 }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
 </div>
 
 <div class="row">

@@ -13,7 +13,7 @@ from .models import Category, Guild, Player, PlayerUnit
 
 
 def index(request):
-    return render(request, 'sqds/index.html')
+    return render(request, 'sqds/index.html', {'guilds': Guild.objects.all()})
 
 
 def unit(request, player_unit_id):
@@ -72,6 +72,35 @@ class GuildView(SingleTableMixin, FilterView):
         context['guild'] = Guild.objects.get(
             api_id=self.kwargs['api_id'])
         return context
+
+
+class GuildPlayerUnitsFilter(FilterSet):
+    category = ChoiceFilter(field_name='unit__categories',
+                            choices=Category.objects.values_list(
+                                'id', 'name').order_by(Lower('name')))
+
+    class Meta:
+        model = PlayerUnit
+        fields = ['unit', 'category']
+
+
+class GuildUnitsView(SingleTableMixin, FilterView):
+    table_class = PlayerUnitTable
+    model = PlayerUnit
+    template_name = 'sqds/players.html'
+    filterset_class = GuildPlayerUnitsFilter
+    table_pagination = {
+        'per_page': 50
+    }
+
+    def get_queryset(self):
+        if 'api_id' in self.kwargs:
+            qs = self.model.objects.filter(
+                player__guild__api_id=self.kwargs['api_id'])
+        else:
+            qs = self.model.objects.none()
+
+        return qs
 
 
 class PlayerFilter(GPFilter):

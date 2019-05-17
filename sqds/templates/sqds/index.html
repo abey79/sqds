@@ -11,9 +11,23 @@ PREPARE FTW
 {% block content %}
 
 <div class="row">
-  <div class="col-md-6 col-md-offset-3">
+  <div class="col-md-3">
     <div class="panel panel-default">
       <div class="panel-heading">Quick links</div>
+      <ul>
+        <li><a href="{% url 'sqds:guild' 'G2737841003' %}">PREPARE</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="panel panel-default">
+      <div class="panel-heading">Guilds</div>
+      <ul>
+        {% for guild in guilds %}
+          <li><a href="{% url 'sqds:guild' guild.api_id %}">{{ guild.name }}</a></li>
+        {% endfor %}
+      </ul>
     </div>
   </div>
 </div>

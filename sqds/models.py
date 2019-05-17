@@ -1,3 +1,5 @@
+from multiprocessing.dummy import Pool
+
 from django.db import models, transaction
 from django.utils.html import format_html
 from django.db.models import Q
@@ -59,38 +61,33 @@ def update_game_data(ability_data_list=None,
 
 
 class Category(models.Model):
-    api_id = models.CharField(max_length=200)
+    api_id = models.CharField(max_length=200, unique=True, db_index=True)
     name = models.CharField(max_length=200)
 
     class Meta:
         ordering = ['name', ]
-        indexes = [models.Index(fields=['api_id'])]
 
     def __str__(self):  # pragma: no cover
         return self.name
 
 
 class Unit(models.Model):
-    api_id = models.CharField(max_length=200)
+    api_id = models.CharField(max_length=200, unique=True, db_index=True)
     name = models.CharField(max_length=200, default='')
     categories = models.ManyToManyField(Category, related_name='unit_set')
 
     class Meta:
         ordering = ['name', ]
-        indexes = [models.Index(fields=['api_id'])]
 
     def __str__(self):  # pragma: no cover
         return self.name
 
 
 class Skill(models.Model):
-    api_id = models.CharField(max_length=200)
+    api_id = models.CharField(max_length=200, unique=True, db_index=True)
     name = models.CharField(max_length=200)
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
     is_zeta = models.BooleanField()
-
-    class Meta:
-        indexes = [models.Index(fields=['api_id'])]
 
     def __str__(self):  # pragma: no cover
         return self.ability.name
@@ -121,7 +118,7 @@ class GearManager(models.Manager):
 
 
 class Gear(models.Model):
-    api_id = models.CharField(max_length=200)
+    api_id = models.CharField(max_length=200, unique=True, db_index=True)
     name = models.CharField(max_length=200)
     tier = models.IntegerField()
     required_rarity = models.IntegerField()
@@ -131,9 +128,6 @@ class Gear(models.Model):
     is_right_hand_g12 = models.BooleanField()
 
     objects = GearManager()
-
-    class Meta:
-        indexes = [models.Index(fields=['api_id'])]
 
     def __str__(self):  # pragma: no cover
         return self.name
@@ -190,14 +184,35 @@ class GuildManager(models.Manager):
         # - We assume that a PlayerUnit never disappear
         # - It's ok to fail a player's units update (504 error are common),
         #   just print some error message.
+
+        player_data_map = {}
+        with Pool(processes=5) as pool:
+            pool.map(lambda player: self.download_player_data(player,
+                                                              player_data_map),
+                     guild.player_set.all())
+
         for player in guild.player_set.all():
-            Player.objects.update_player_units(player)
+            if player in player_data_map:
+                Player.objects.update_player_units(player,
+                                                   player_data_map[player])
 
         return guild
 
+    def download_player_data(self, player, player_data_map):
+        try:
+            player_data = swgoh.api.get_player_unit_list(
+                int(player.ally_code))
+        except swgoh.SwgohError as error:
+            error_string = \
+                "Error downloading data for player {} (status code: {})"
+            print(error_string.format(
+                player.name, error.response.status_code))
+            return
+        player_data_map[player] = player_data
+
 
 class Guild(models.Model):
-    api_id = models.CharField(max_length=20)
+    api_id = models.CharField(max_length=20, unique=True, db_index=True)
 
     name = models.CharField(max_length=200)
     gp = models.IntegerField()
@@ -208,10 +223,64 @@ class Guild(models.Model):
 
     class Meta:
         ordering = ['name', ]
-        indexes = [models.Index(fields=['api_id'])]
 
     def __str__(self):  # pragma: no cover
         return self.name
+
+    def unit_count(self):
+        return PlayerUnit.objects.filter(player__guild=self).count()
+
+    def seven_star_unit_count(self):
+        return PlayerUnit.objects.filter(player__guild=self, rarity=7).count()
+
+    def g12_unit_count(self):
+        return PlayerUnit.objects.filter(player__guild=self, gear=12).count()
+
+    def g11_unit_count(self):
+        return PlayerUnit.objects.filter(player__guild=self, gear=11).count()
+
+    def g10_unit_count(self):
+        return PlayerUnit.objects.filter(player__guild=self, gear=10).count()
+
+    def zeta_count(self):
+        return Zeta.objects.filter(player_unit__player__guild=self).count()
+
+    def g12_gear_count(self):
+        return PlayerUnitGear.objects.filter(
+            Q(player_unit__player__guild=self)
+            & (Q(gear__is_right_hand_g12=True)
+               | Q(gear__is_left_hand_g12=True))).count()
+
+    def right_hand_g12_gear_count(self):
+        return PlayerUnitGear.objects.filter(
+            player_unit__player__guild=self,
+            gear__is_right_hand_g12=True).count()
+
+    def left_hand_g12_gear_count(self):
+        return PlayerUnitGear.objects.filter(
+            player_unit__player__guild=self,
+            gear__is_left_hand_g12=True).count()
+
+    def mod_count(self):
+        return Mod.objects.filter(player_unit__player__guild=self).count()
+
+    def mod_count_speed_n(self, min_value, max_value):
+        return Mod.objects.filter(
+            player_unit__player__guild=self,
+            speed__gte=min_value,
+            speed__lte=max_value).exclude(slot=1).count()
+
+    def mod_count_speed_25(self):
+        return self.mod_count_speed_n(25, 100)
+
+    def mod_count_speed_20(self):
+        return self.mod_count_speed_n(20, 24)
+
+    def mod_count_speed_15(self):
+        return self.mod_count_speed_n(15, 19)
+
+    def mod_count_speed_10(self):
+        return self.mod_count_speed_n(10, 14)
 
 
 class PlayerManager(models.Manager):
@@ -239,98 +308,101 @@ class PlayerManager(models.Manager):
 
             self.update_player_units(player)
 
-    def update_player_units(self, player):
-        try:
-            player_data = swgoh.api.get_player_unit_list(
-                int(player.ally_code))
-        except swgoh.SwgohError as error:
-            error_string = \
-                "Error downloading data for player {} (status code: {})"
-            print(error_string.format(
-                player.name, error.response.status_code))
-            return
+    def update_player_units(self, player, player_data=None):
+        if player_data is None:
+            try:
+                player_data = swgoh.api.get_player_unit_list(
+                    int(player.ally_code))
+            except swgoh.SwgohError as error:
+                error_string = \
+                    "Error downloading data for player {} (status code: {})"
+                print(error_string.format(
+                    player.name, error.response.status_code))
+                return
 
         with transaction.atomic():
+            # Delete everything and batch create
+            PlayerUnit.objects.filter(player=player).delete()
+
+            zetas_to_create = []
+            pugs_to_create = []
+            mods_to_create = []
+
             for unit_id in player_data:
                 unit = Unit.objects.get(api_id=unit_id)
                 unit_data = player_data[unit_id]
                 unit_stats = unit_data['stats']['final']
 
                 # (D1) Update player model
-                player_unit, _ = PlayerUnit.objects.update_or_create(
-                    player=player, unit=unit,
-                    defaults={
-                        'gp': unit_data['unit']['gp'],
-                        'rarity': unit_data['unit']['starLevel'],
-                        'level': unit_data['unit']['level'],
-                        'gear': unit_data['unit']['gearLevel'],
-                        'equipped_count': len(unit_data['unit']['gear']),
+                player_unit = PlayerUnit(
+                    player=player,
+                    unit=unit,
 
-                        'speed': unit_stats['Speed'],
-                        'health': unit_stats['Health'],
-                        'protection': unit_stats.get('Protection', 0),
+                    gp=unit_data['unit']['gp'],
+                    rarity=unit_data['unit']['starLevel'],
+                    level=unit_data['unit']['level'],
+                    gear=unit_data['unit']['gearLevel'],
+                    equipped_count=len(unit_data['unit']['gear']),
 
-                        'physical_damage': unit_stats['Physical Damage'],
-                        'physical_crit_chance':
-                            unit_stats['Physical Critical Chance'],
-                        'special_damage':
-                            unit_stats['Special Damage'],
-                        'special_crit_chance':
-                            unit_stats['Special Critical Chance'],
-                        'crit_damage': unit_stats['Critical Damage'],
+                    speed=unit_stats['Speed'],
+                    health=unit_stats['Health'],
+                    protection=unit_stats.get('Protection', 0),
 
-                        'potency': unit_stats.get('Potency', 0.0),
-                        'tenacity': unit_stats.get('Tenacity', 0.0),
-                        'armor': unit_stats.get('Armor', 0.0),
-                        'resistance': unit_stats.get('Resistance', 0.0),
-                        'armor_penetration':
-                            unit_stats.get('Armor Penetration', 0),
-                        'resistance_penetration':
-                            unit_stats.get('Resistance Penetration', 0),
-                        'health_steal': unit_stats.get('Health Steal', 0.0)
-                    })
+                    physical_damage=unit_stats['Physical Damage'],
+                    physical_crit_chance=unit_stats[
+                        'Physical Critical Chance'],
+                    special_damage=unit_stats['Special Damage'],
+                    special_crit_chance=unit_stats['Special Critical Chance'],
+                    crit_damage=unit_stats['Critical Damage'],
+
+                    potency=unit_stats.get('Potency', 0.0),
+                    tenacity=unit_stats.get('Tenacity', 0.0),
+                    armor=unit_stats.get('Armor', 0.0),
+                    resistance=unit_stats.get('Resistance', 0.0),
+                    armor_penetration=unit_stats.get('Armor Penetration', 0),
+                    resistance_penetration=unit_stats.get(
+                        'Resistance Penetration', 0),
+                    health_steal=unit_stats.get('Health Steal', 0.0))
+                player_unit.save()
 
                 # (D2) Update Zeta model
-                zeta_id_array = []
                 for zeta_data in unit_data['unit']['zetas']:
-                    zeta, _ = Zeta.objects.update_or_create(
+                    zeta = Zeta(
                         player_unit=player_unit,
                         skill=Skill.objects.get(api_id=zeta_data['id']))
-                    zeta_id_array.append(zeta.id)
-                Zeta.objects.filter(player_unit=player_unit).exclude(
-                    id__in=zeta_id_array).delete()
+                    zetas_to_create.append(zeta)
 
                 # (D3) Update PlayerUnitGear model
-                pug_id_array = []
                 for gear_id in unit_data['unit']['gear']:
-                    pug, _ = PlayerUnitGear.objects.update_or_create(
+                    pug = PlayerUnitGear(
                         player_unit=player_unit,
                         gear=Gear.objects.get(api_id=gear_id))
-                    pug_id_array.append(pug.id)
-                PlayerUnitGear.objects.filter(player_unit=player_unit) \
-                    .exclude(id__in=pug_id_array).delete()
+                    pugs_to_create.append(pug)
 
                 # (D4) Update Mod model
                 for idx, mod_data in enumerate(unit_data['unit']['mods']):
                     if mod_data:
-                        mod, _ = Mod.objects.update_or_create(
+                        mod = Mod(
                             api_id=mod_data['id'],
-                            defaults={
-                                'player_unit': player_unit,
-                                'mod_set': mod_data['set'],
-                                'slot': idx,
-                                'level': mod_data['level'],
-                                'pips': mod_data['pips'],
-                                'tier': mod_data['tier']})
-                        # TODO: this is not optimal as it doubles the
-                        # number of queries
+                            player_unit=player_unit,
+                            mod_set=mod_data['set'],
+                            slot=idx,
+                            level=mod_data['level'],
+                            pips=mod_data['pips'],
+                            tier=mod_data['tier'])
                         mod.update_stats(mod_data['stat'])
+                        mods_to_create.append(mod)
+
+            Zeta.objects.bulk_create(zetas_to_create)
+            PlayerUnitGear.objects.bulk_create(pugs_to_create)
+            Mod.objects.bulk_create(mods_to_create)
 
 
 class Player(models.Model):
-    api_id = models.CharField(max_length=20)
+    api_id = models.CharField(max_length=20, unique=True, db_index=True)
 
-    guild = models.ForeignKey(Guild, null=True, on_delete=models.CASCADE)
+    guild = models.ForeignKey(Guild, null=True, on_delete=models.CASCADE,
+                              related_name="player_set")
     name = models.CharField(max_length=200)
     level = models.IntegerField()
     ally_code = models.IntegerField()
@@ -345,7 +417,6 @@ class Player(models.Model):
 
     class Meta:
         ordering = ['-gp', ]
-        indexes = [models.Index(fields=['api_id'])]
 
     def __str__(self):  # pragma: no cover
         return self.name
@@ -542,8 +613,8 @@ class ModSet(enum.Enum):
 
 
 class Mod(models.Model):
-    api_id = models.CharField(max_length=20)
-    player_unit = models.ForeignKey(PlayerUnit, on_delete=models.SET_NULL,
+    api_id = models.CharField(max_length=20, unique=True, db_index=True)
+    player_unit = models.ForeignKey(PlayerUnit, on_delete=models.CASCADE,
                                     null=True, related_name='mod_set')
 
     mod_set = enum.EnumField(ModSet)
@@ -568,13 +639,9 @@ class Mod(models.Model):
     critical_avoidance = models.FloatField(default=0.)
     accuracy = models.FloatField(default=0.)
 
-    class Meta:
-        indexes = [models.Index(fields=['api_id'])]
-
     def update_stats(self, stat_list):
         for stat in stat_list:
             if stat[0] != 0:
                 setattr(self,
                         MOD_STAT_MAP[stat[0]]['name'],
                         stat[1] * MOD_STAT_MAP[stat[0]]['mult'])
-        self.save()
