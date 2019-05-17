@@ -2,7 +2,7 @@ from multiprocessing.dummy import Pool
 
 from django.db import models, transaction
 from django.utils.html import format_html
-from django.db.models import Q
+from django.db.models import Q, Sum
 
 from django_enumfield import enum
 
@@ -282,6 +282,12 @@ class Guild(models.Model):
     def mod_count_speed_10(self):
         return self.mod_count_speed_n(10, 14)
 
+    def mod_total_speed_15plus(self):
+        res = Mod.objects.filter(
+            player_unit__player__guild=self,
+            speed__gte=15).exclude(slot=1).aggregate(Sum('speed'))
+        return res['speed__sum']
+
 
 class PlayerManager(models.Manager):
     def update_or_create_from_swgoh(self, ally_code):
@@ -475,6 +481,12 @@ class Player(models.Model):
 
     def mod_count_speed_10(self):
         return self.mod_count_speed_n(10, 14)
+
+    def mod_total_speed_15plus(self):
+        res = Mod.objects.filter(
+            player_unit__player=self,
+            speed__gte=15).exclude(slot=1).aggregate(Sum('speed'))
+        return res['speed__sum']
 
 
 class PlayerUnit(models.Model):

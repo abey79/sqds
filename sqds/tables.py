@@ -1,7 +1,7 @@
 import locale
 from textwrap import wrap
 
-from django.db.models import Count, Q
+from django.db.models import Count, Sum, Q
 
 import django_tables2 as tables
 from django_tables2.utils import A
@@ -61,6 +61,9 @@ class PlayerTable(tables.Table):
     mod_count_speed_20 = LargeIntColumn('+20', initial_sort_descending=True)
     mod_count_speed_15 = LargeIntColumn('+15', initial_sort_descending=True)
     mod_count_speed_10 = LargeIntColumn('+10', initial_sort_descending=True)
+
+    mod_total_speed_15plus = LargeIntColumn('∑15+',
+                                            initial_sort_descending=True)
 
     zeta_count = LargeIntColumn(initial_sort_descending=True)
     right_hand_g12_gear_count = LargeIntColumn('G12+ pces',
@@ -136,6 +139,15 @@ class PlayerTable(tables.Table):
         return self.generic_order_mod_count_speed(
             query_set, is_descending, 15, 19)
 
+    def order_mod_total_speed_15plus(self, query_set, is_descending):
+        query_set = query_set.annotate(
+            _mod_sum=Sum(
+                'unit_set__mod_set__speed',
+                filter=(~Q(unit_set__mod_set__slot=1)
+                        & Q(unit_set__mod_set__speed__gte=15)))
+        ).order_by(('-' if is_descending else '') + '_mod_sum')
+        return (query_set, True)
+
     class Meta:
         model = Player
         fields = ('name', 'guild', 'ally_code',
@@ -143,7 +155,8 @@ class PlayerTable(tables.Table):
                   'seven_star_unit_count', 'g12_unit_count', 'g11_unit_count',
                   'g10_unit_count', 'right_hand_g12_gear_count', 'zeta_count',
                   'mod_count_speed_25', 'mod_count_speed_20',
-                  'mod_count_speed_15', 'mod_count_speed_10')
+                  'mod_count_speed_15', 'mod_count_speed_10',
+                  'mod_total_speed_15plus')
 
 
 class PlayerUnitTable(tables.Table):

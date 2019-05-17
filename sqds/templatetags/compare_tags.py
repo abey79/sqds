@@ -113,5 +113,10 @@ def player_comparison(player1, player2):
                 **compute_data_and_classes(player1.mod_count_speed_10(),
                                            player2.mod_count_speed_10())
             },
+            {
+                'label': '&nbsp;&nbsp;&nbsp;∑15+', 'label_type': 'td',
+                **compute_data_and_classes(player1.mod_total_speed_15plus(),
+                                           player2.mod_total_speed_15plus())
+            },
         ]
     }
