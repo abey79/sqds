@@ -27,7 +27,7 @@ Player: {{ player.name }}
           </tr>
           <tr>
             <th>Guild</th>
-            <td><a href="{% url 'sqds:guild' player.guild.api_id %}">{{ player.guild.name }}</a></td>
+            <td>{% if player.guild %}<a href="{% url 'sqds:guild' player.guild.api_id %}">{{ player.guild.name }}</a>{% endif %}</td>
           </tr>
           <tr>
             <th>Ally code</th>

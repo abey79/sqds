@@ -11,8 +11,8 @@
   <tbody>
     <tr>
       <th>Guild</th>
-      <td><a href="{% url 'sqds:guild' player1.guild.api_id %}">{{ player1.guild.name }}</a></td>
-      <td><a href="{% url 'sqds:guild' player2.guild.api_id %}">{{ player2.guild.name }}</a></td>
+      <td>{% if player1.guild %}<a href="{% url 'sqds:guild' player1.guild.api_id %}">{{ player1.guild.name }}</a>{% endif %}</td>
+      <td>{% if player2.guild %}<a href="{% url 'sqds:guild' player2.guild.api_id %}">{{ player2.guild.name }}</a>{% endif %}</td>
     </tr>
     <tr>
       <th>Ally code</th>
