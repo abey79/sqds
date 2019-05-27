@@ -73,7 +73,7 @@ class PlayerTable(tables.Table):
         query_set = query_set.annotate(
             _unit_count=Count('unit_set', filter=Q(unit_set__gear=gear_level))
         ).order_by(('-' if is_descending else '') + '_unit_count')
-        return (query_set, True)
+        return query_set, True
 
     def order_g12_unit_count(self, query_set, is_descending):
         return self.generic_order_unit_count(query_set, is_descending, 12)

@@ -8,7 +8,6 @@ from django_enumfield import enum
 
 from . import swgoh
 
-
 LEFT_HAND_G12_GEAR_ID = [158, 159, 160, 161, 162, 163, 164, 165]
 RIGHT_HAND_G12_GEAR_ID = [166, 167, 168, 169, 170, 171]
 
@@ -90,12 +89,13 @@ class Skill(models.Model):
     is_zeta = models.BooleanField()
 
     def __str__(self):  # pragma: no cover
-        return self.ability.name
+        return self.name
 
 
 class GearManager(models.Manager):
-    def update_or_create_from_swgoh(self):
-        ''' Update gear table from server'''
+    @staticmethod
+    def update_or_create_from_swgoh():
+        """Update gear table from server"""
 
         gear_data_list = swgoh.api.get_gear_list()
         with transaction.atomic():
@@ -138,9 +138,9 @@ class GuildManager(models.Manager):
     # pylint: disable=too-many-locals
     def update_or_create_from_swgoh(
             self, ally_code=116235559, guild_only=False):
-        ''' Create a guild that contains provided ally_code, or update it if
+        """ Create a guild that contains provided ally_code, or update it if
             it alread exists. If all_player is True, all players are then fully
-            imported. Otherwise, only ally_code is imported. '''
+            imported. Otherwise, only ally_code is imported. """
 
         # TO DO:
         # - add a last_updated field to Guild and check against it before
@@ -187,8 +187,7 @@ class GuildManager(models.Manager):
 
         player_data_map = {}
         with Pool(processes=5) as pool:
-            pool.map(lambda player: self.download_player_data(player,
-                                                              player_data_map),
+            pool.map(lambda p: self.download_player_data(p, player_data_map),
                      guild.player_set.all())
 
         for player in guild.player_set.all():
@@ -198,7 +197,8 @@ class GuildManager(models.Manager):
 
         return guild
 
-    def download_player_data(self, player, player_data_map):
+    @staticmethod
+    def download_player_data(player, player_data_map):
         try:
             player_data = swgoh.api.get_player_unit_list(
                 int(player.ally_code))
@@ -314,7 +314,8 @@ class PlayerManager(models.Manager):
 
             self.update_player_units(player)
 
-    def update_player_units(self, player, player_data=None):
+    @staticmethod
+    def update_player_units(player, player_data=None):
         if player_data is None:
             try:
                 player_data = swgoh.api.get_player_unit_list(
@@ -528,6 +529,7 @@ class PlayerUnit(models.Model):
 
     def star_count(self):
         return "%d★" % self.rarity
+
     star_count.admin_order_field = 'rarity'
 
     def colored_gear(self):
@@ -545,6 +547,7 @@ class PlayerUnit(models.Model):
             ' 1px -1px 0 #333, -1px 1px 0 #333, 1px 1px 0 #333">G{}</b>',
             color_code,
             self.gear)
+
     colored_gear.admin_order_field = 'gear'
 
     def summary(self):
@@ -554,6 +557,7 @@ class PlayerUnit(models.Model):
             self.level,
             self.colored_gear(),
             '+' + str(self.equipped_count) if self.equipped_count > 0 else '')
+
     summary.admin_order_field = ['rarity', 'level', 'gear', 'equipped_count']
 
     def zeta_count(self):
