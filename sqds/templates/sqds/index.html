@@ -10,26 +10,65 @@ PREPARE FTW
 
 {% block content %}
 
-<div class="row">
-  <div class="col-md-3">
-    <div class="panel panel-default">
-      <div class="panel-heading">Quick links</div>
-      <ul>
-        <li><a href="{% url 'sqds:guild' 'G2737841003' %}">PREPARE</a></li>
-      </ul>
+  <div class="row">
+    <div class="col-md-3">
+      <div class="panel panel-default">
+        <div class="panel-heading">Quick action</div>
+        <div class="panel-body">
+          <p>Inspect <a href="{% url 'sqds:guild' 'G2737841003' %}">PREPARE</a>.</p>
+          <p>
+            Inspect new player:
+            <script type="text/javascript">
+              function setPlayerFormAction() {
+                  var my_form = document.getElementById('player_form');
+                  var ally_code = document.getElementById('ally_code').value.replace(/\D/g, '');
+                  my_form.action = "/player/" + ally_code + "/"
+              }
+            </script>
+            <form id="player_form" method="GET" class="form-inline" onsubmit="setPlayerFormAction()">
+              <label class="sr-only" for="ally_code2">Ally code</label>
+              <input type="text" class="form-control" id="ally_code" placeholder="XXX-XXX-XXX" />
+              <button type="submit" class="btn btn-default">Go</button>
+            </form>
+          </p>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="col-md-3">
-    <div class="panel panel-default">
-      <div class="panel-heading">Guilds</div>
-      <ul>
-        {% for guild in guilds %}
-          <li><a href="{% url 'sqds:guild' guild.api_id %}">{{ guild.name }}</a></li>
-        {% endfor %}
-      </ul>
+    <div class="col-md-3">
+      <div class="panel panel-default">
+        <div class="panel-heading">Guilds</div>
+        <div class="panel-body">
+          <ul>
+            {% for guild in guilds %}
+              <li><a href="{% url 'sqds:guild' guild.api_id %}">{{ guild.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="panel panel-default">
+        <div class="panel-heading">Release notes</div>
+        <div class="panel-body">
+          <p><b>28-May-2019</b></p>
+          <ul>
+            <li>Initial release</li>
+            <li>Guild/player/unit views</li>
+            <li>Player v. Player comparison</li>
+            <li>Inspect any player based on ally code</li>
+          </ul>
+
+          <p><b>TO DO (incomplete/short term list):</b></p>
+          <ul>
+            <li>Automatically refresh PREPARE roster every X hours</li>
+            <li>Add Guild v. Guild comparison</li>
+            <li>Add key unit comparison to Player v. Player comparison</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
 {% endblock %}

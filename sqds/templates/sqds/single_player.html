@@ -43,14 +43,15 @@ Player: {{ player.name }}
               <script type="text/javascript">
                 function setCompareFormAction() {
                     var my_form = document.getElementById('compare_form');
-                    var ally_code_field1 = document.getElementById('ally_code1');
-                    var ally_code_field2 = document.getElementById('ally_code2');
-                    my_form.action = "/player/" + ally_code_field1.value + "/c/" + ally_code_field2.value + "/"
+                    var ally_code_1 = document.getElementById('ally_code1').value.replace(/\D/g, '');
+                    var ally_code_2 = document.getElementById('ally_code2').value.replace(/\D/g, '');
+                    my_form.action = "/player/" + ally_code_1 + "/c/" + ally_code_2 + "/"
                 }
               </script>
 
               <form id="compare_form" method="GET" class="form-inline" onsubmit="setCompareFormAction()">
-                <input type="value" class="form-control" id="ally_code2" placeholder="XXX-XXX-XXX" />
+                <label class="sr-only" for="ally_code2">Ally code</label>
+                <input type="text" class="form-control" id="ally_code2" placeholder="XXX-XXX-XXX" />
                 <input type="hidden" class="form-control" id="ally_code1" value="{{ player.ally_code }}" />
                 <button type="submit" class="btn btn-default">Compare</button>
               </form>

@@ -552,7 +552,7 @@ class PlayerUnit(models.Model):
 
     def summary(self):
         return format_html(
-            '{} / L{} / {}{}',
+            '{}&nbsp;L{}&nbsp;{}{}',
             self.star_count(),
             self.level,
             self.colored_gear(),
@@ -571,7 +571,7 @@ class PlayerUnit(models.Model):
             else:
                 output = '<span style="color: #EEE">Z</span>'
             str_list.append(output)
-        return format_html('&nbsp'.join(str_list) if str_list else '&nbsp')
+        return format_html('&nbsp;'.join(str_list) if str_list else '&nbsp;')
 
 
 class Zeta(models.Model):
