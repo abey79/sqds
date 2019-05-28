@@ -11,7 +11,7 @@ Guild: {{ guild.name }}
 
 {% block content %}
 <div class="row">
-  <div class="col-md-2">
+  <div class="col-md-3">
     <div class="panel panel-default">
       <div class="panel-heading">Info</div>
       <table class="table">
@@ -23,11 +23,15 @@ Guild: {{ guild.name }}
           <th>GP</th>
           <td>{{ guild.gp }}</td>
         </tr>
+        <tr>
+          <th>Unit count</th>
+          <td><a href="{% url 'sqds:guild_units' guild.api_id %}">{{ guild.unit_count }}</a></td>
+        </tr>
       </table>
     </div>
   </div>
 
-  <div class="col-md-2">
+  <div class="col-md-3">
     <div class="panel panel-default">
       <div class="panel-heading">Statistics</div>
       <table class="table">
@@ -91,6 +95,10 @@ Guild: {{ guild.name }}
           <td>&nbsp;&nbsp;&nbsp;+10</td>
           <td>{{ guild.mod_count_speed_10 }}</td>
         </tr>
+        <tr>
+            <td>&nbsp;&nbsp;&nbsp;∑15+</td>
+            <td>{{ guild.mod_total_speed_15plus }}</td>
+          </tr>
       </table>
     </div>
   </div>
