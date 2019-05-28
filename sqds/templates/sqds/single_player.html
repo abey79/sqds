@@ -160,7 +160,9 @@ Player: {{ player.name }}
       </div>
       {% endif %}
 
-      {% render_table table %}
+      <div style="overflow-y: scroll">
+        {% render_table table %}
+      </div>
     </div>
   </div>
 </div>

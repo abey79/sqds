@@ -45,7 +45,6 @@ class PercentColumn(tables.Column):
 class PlayerTable(tables.Table):
     name = tables.LinkColumn('sqds:player', args=[A('ally_code')])
     guild = tables.LinkColumn('sqds:guild', args=[A('guild.api_id')])
-    ally_code = AllyCodeColumn()
 
     gp = LargeIntColumn()
     gp_char = LargeIntColumn()
@@ -150,7 +149,7 @@ class PlayerTable(tables.Table):
 
     class Meta:
         model = Player
-        fields = ('name', 'guild', 'ally_code',
+        fields = ('name', 'guild',
                   'level', 'gp', 'gp_char', 'gp_ship', 'unit_count',
                   'seven_star_unit_count', 'g12_unit_count', 'g11_unit_count',
                   'g10_unit_count', 'right_hand_g12_gear_count', 'zeta_count',

@@ -5,16 +5,31 @@
 {% load crispy_forms_tags %}
 
 {% block title %}
-Players
+Units
 {% endblock %}
 
 
 {% block content %}
-  {% if filter %}
-  <form action="" method="get" class="form form-inline">
-    {% bootstrap_form filter.form layout='inline' %}
-    {% bootstrap_button 'filter' %}
-  </form>
-  {% endif %}
-  {% render_table table %}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-heading">Characters</div>
+
+      {% if filter %}
+        <div class="panel-body">
+          <form action="" method="get" class="form form-inline">
+            {% bootstrap_form filter.form layout='inline' %}
+            {% bootstrap_button 'filter' %}
+          </form>
+        </div>
+      {% endif %}
+
+      <div style="overflow-y: scroll">
+        {% render_table table %}
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
