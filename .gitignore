@@ -8,3 +8,5 @@ sqds/swgoh_local.py
 *.sqlite3
 *.ipynb
 .ipynb_checkpoints
+.env
+static
