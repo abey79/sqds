@@ -105,10 +105,24 @@ class GuildUnitsView(SingleTableMixin, FilterView):
         'per_page': 50
     }
 
+    def get_table_kwargs(self):
+        return {
+            'row_attrs':
+            {
+                'class': lambda record:
+                ('info'
+                 if record.player.guild.api_id == self.kwargs['api_id1']
+                 else '')
+            }}
+
     def get_queryset(self):
         if 'api_id' in self.kwargs:
             qs = self.model.objects.filter(
                 player__guild__api_id=self.kwargs['api_id'])
+        elif 'api_id1' in self.kwargs and 'api_id2' in self.kwargs:
+            qs = self.model.objects.filter(
+                Q(player__guild__api_id=self.kwargs['api_id1'])
+                | Q(player__guild__api_id=self.kwargs['api_id2']))
         else:
             qs = self.model.objects.none()
 

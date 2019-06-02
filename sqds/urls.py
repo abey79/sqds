@@ -11,6 +11,8 @@ urlpatterns = [
     path('guild/<str:api_id>/', views.GuildView.as_view(), name='guild'),
     path('guild/<str:api_id>/units/', views.GuildUnitsView.as_view(),
         name='guild_units'),
+    path('guild/<str:api_id1>/c/<str:api_id2>/units/',
+         views.GuildUnitsView.as_view(), name='guild_compare_units'),
     path('units/', views.AllPlayerUnitsListView.as_view(), name='units'),
     path('player/<int:ally_code>/',
          views.SinglePlayerView.as_view(), name='player'),
