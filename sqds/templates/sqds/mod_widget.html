@@ -1,0 +1,19 @@
+{% if mod is not None %}
+  <div class="panel panel-default">
+    <div class="panel-heading">{{ set_text }} {{ slot_text }}</div>
+
+    <table class="table">
+      <tr>
+        <th>Rarity</th>
+        <td>{{ pips_text }}</td>
+      </tr>
+
+      {% for stat in stat_list %}
+        <tr>
+          <th>{{ stat.label }}</th>
+          <td>{{ stat.value }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+{% endif %}

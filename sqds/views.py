@@ -18,7 +18,16 @@ def index(request):
 
 def unit(request, player_unit_id):
     player_unit = get_object_or_404(PlayerUnit, pk=player_unit_id)
-    return render(request, 'sqds/unit.html', {'player_unit': player_unit})
+
+    return render(request, 'sqds/unit.html', {
+        'player_unit': player_unit,
+        'square_mod': player_unit.mod_set.filter(slot=0).first(),
+        'arrow_mod': player_unit.mod_set.filter(slot=1).first(),
+        'diamond_mod': player_unit.mod_set.filter(slot=2).first(),
+        'triangle_mod': player_unit.mod_set.filter(slot=3).first(),
+        'circle_mod': player_unit.mod_set.filter(slot=4).first(),
+        'cross_mod': player_unit.mod_set.filter(slot=5).first()
+    })
 
 
 def player_refresh(request, ally_code):

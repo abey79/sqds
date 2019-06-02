@@ -4,6 +4,7 @@
 {% load bootstrap3 %}
 {% load crispy_forms_tags %}
 {% load sqds_filters %}
+{% load mod_tags %}
 
 {% block title %}
 {{ player_unit.player.name }}'s {{ player_unit.unit.name }}
@@ -18,7 +19,11 @@
       <div class="panel-heading">Info</div>
       <table class="table">
         <tbody>
-          <tr>
+        <tr>
+            <th>Unit</th>
+            <td>{{ player_unit.unit.name }}</td>
+          </tr>
+        <tr>
             <th>Player</th>
             <td><a href="{% url 'sqds:player' player_unit.player.ally_code %}">{{ player_unit.player.name }}</a></td>
           </tr>
@@ -114,6 +119,17 @@
       </table>
     </div>
   </div>
+
+  <div class="col-md-3">
+   {%  mod_widget square_mod %}
+   {%  mod_widget diamond_mod %}
+   {%  mod_widget circle_mod %}
+  </div>
+  <div class="col-md-3">
+     {%  mod_widget arrow_mod %}
+     {%  mod_widget triangle_mod %}
+     {%  mod_widget cross_mod %}
+   </div>
 </div>
 
 {% endblock %}
