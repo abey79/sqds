@@ -139,8 +139,8 @@ class GuildManager(models.Manager):
     def update_or_create_from_swgoh(
             self, ally_code=116235559, guild_only=False):
         """ Create a guild that contains provided ally_code, or update it if
-            it alread exists. If all_player is True, all players are then fully
-            imported. Otherwise, only ally_code is imported. """
+            it already exists. If all_player is True, all players are then
+            fully imported. Otherwise, only ally_code is imported. """
 
         # TO DO:
         # - add a last_updated field to Guild and check against it before

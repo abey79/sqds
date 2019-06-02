@@ -5,7 +5,7 @@ from .sqds_filters import big_number
 register = template.Library()
 
 
-def compute_data_and_classes(data1, data2, filter=None):
+def compute_data_and_classes(data1, data2, data_filter=None):
     if data1 > data2:
         output_dict = {'left_class': 'success', 'right_class': 'danger'}
     elif data2 > data1:
@@ -13,9 +13,9 @@ def compute_data_and_classes(data1, data2, filter=None):
     else:
         output_dict = {'left_class': '', 'right_class': ''}
 
-    if filter is not None:
-        output_dict['left_data'] = filter(data1)
-        output_dict['right_data'] = filter(data2)
+    if data_filter is not None:
+        output_dict['left_data'] = data_filter(data1)
+        output_dict['right_data'] = data_filter(data2)
     else:
         output_dict['left_data'] = data1
         output_dict['right_data'] = data2

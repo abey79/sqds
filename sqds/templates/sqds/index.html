@@ -11,26 +11,27 @@ PREPARE FTW
 {% block content %}
 
   <div class="row">
+
     <div class="col-md-3">
       <div class="panel panel-default">
         <div class="panel-heading">Quick action</div>
         <div class="panel-body">
           <p>Inspect <a href="{% url 'sqds:guild' 'G2737841003' %}">PREPARE</a>.</p>
-          <p>
-            Inspect new player:
+          <div>
             <script type="text/javascript">
-              function setPlayerFormAction() {
-                  var my_form = document.getElementById('player_form');
-                  var ally_code = document.getElementById('ally_code').value.replace(/\D/g, '');
-                  my_form.action = "/player/" + ally_code + "/"
-              }
+                function setPlayerFormAction() {
+                    var my_form = document.getElementById('player_form');
+                    var ally_code = document.getElementById('ally_code').value.replace(/\D/g, '');
+                    my_form.action = "/player/" + ally_code + "/"
+                }
             </script>
+            Inspect new player:
             <form id="player_form" method="GET" class="form-inline" onsubmit="setPlayerFormAction()">
-              <label class="sr-only" for="ally_code2">Ally code</label>
+              <label class="sr-only" for="ally_code">Ally code</label>
               <input type="text" class="form-control" id="ally_code" placeholder="XXX-XXX-XXX" />
               <button type="submit" class="btn btn-default">Go</button>
             </form>
-          </p>
+          </div>
         </div>
       </div>
     </div>
@@ -52,6 +53,11 @@ PREPARE FTW
       <div class="panel panel-default">
         <div class="panel-heading">Release notes</div>
         <div class="panel-body">
+          <p><b>02-June-2019</b></p>
+          <ul>
+            <li>Link to all of the guild's units made more obvious</li>
+            <li>Added link to various unit guild ranking (e.g fat Nest, etc.)</li>
+          </ul>
           <p><b>28-May-2019</b></p>
           <ul>
             <li>Initial release</li>

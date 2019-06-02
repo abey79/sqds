@@ -23,9 +23,23 @@ Guild: {{ guild.name }}
           <th>GP</th>
           <td>{{ guild.gp }}</td>
         </tr>
+      </table>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">Units</div>
+      <table class="table">
         <tr>
-          <th>Unit count</th>
-          <td><a href="{% url 'sqds:guild_units' guild.api_id %}">{{ guild.unit_count }}</a></td>
+          <td>Inspect <a href="{% url 'sqds:guild_units' guild.api_id %}">all units</a></td>
+        </tr>
+        <tr>
+          <td>Inspect <a href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.DARTHREVAN.id }}&sort=-speed">fast Darth Revans</a></td>
+        </tr>
+        <tr>
+          <td>Inspect <a href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.ENFYSNEST.id }}&sort=-health">fat Nests</a></td>
+        </tr>
+        <tr>
+          <td>Inspect <a href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.GRANDMASTERYODA.id }}&sort=-special_damage">offensive GMYs</a></td>
         </tr>
       </table>
     </div>

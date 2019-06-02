@@ -9,7 +9,7 @@ from django_filters import FilterSet, ChoiceFilter
 from django_filters.views import FilterView
 
 from .tables import PlayerTable, PlayerUnitTable
-from .models import Category, Guild, Player, PlayerUnit
+from .models import Category, Guild, Player, PlayerUnit, Unit
 
 
 def index(request):
@@ -26,6 +26,7 @@ def player_refresh(request, ally_code):
     return redirect('sqds:player', ally_code=ally_code)
 
 
+# noinspection PyUnusedLocal,PyMethodMayBeStatic
 class GPFilter(FilterSet):
     gp = ChoiceFilter(choices=(
         (0, '<500k'),
@@ -71,6 +72,8 @@ class GuildView(SingleTableMixin, FilterView):
         context = super().get_context_data(**kwargs)
         context['guild'] = Guild.objects.get(
             api_id=self.kwargs['api_id'])
+        context['units_by_api_id'] = Unit.objects.in_bulk(
+            field_name='api_id')
         return context
 
 
