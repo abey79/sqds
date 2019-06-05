@@ -106,14 +106,19 @@ class GuildUnitsView(SingleTableMixin, FilterView):
     }
 
     def get_table_kwargs(self):
-        return {
-            'row_attrs':
-            {
-                'class': lambda record:
-                ('info'
-                 if record.player.guild.api_id == self.kwargs['api_id1']
-                 else '')
-            }}
+
+        if 'api_id1' in self.kwargs:
+            return {
+                'row_attrs':
+                {
+                    'class': lambda record:
+                    ('info'
+                     if record.player.guild.api_id == self.kwargs['api_id1']
+                     else '')
+                }}
+        else:
+            return {}
+
 
     def get_queryset(self):
         if 'api_id' in self.kwargs:
