@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'django_filters',
     'django_tables2',
     'crispy_forms',
-    'django_extensions'
+    'django_extensions',
+    'debug_toolbar'
 ]
 
 MIDDLEWARE = [
@@ -58,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'sqdssite.urls'
@@ -144,6 +146,12 @@ USE_TZ = True
 DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap.html'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+INTERNAL_IPS = ('51.154.2.60',)
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda _request: DEBUG
+}
 
 
 # Static files (CSS, JavaScript, Images)
