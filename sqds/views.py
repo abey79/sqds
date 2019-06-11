@@ -110,15 +110,15 @@ class GuildUnitsView(SingleTableMixin, FilterView):
         if 'api_id1' in self.kwargs:
             return {
                 'row_attrs':
-                {
-                    'class': lambda record:
-                    ('info'
-                     if record.player.guild.api_id == self.kwargs['api_id1']
-                     else '')
-                }}
+                    {
+                        'class': lambda record:
+                        ('info'
+                         if record.player.guild.api_id == self.kwargs[
+                            'api_id1']
+                         else '')
+                    }}
         else:
             return {}
-
 
     def get_queryset(self):
         if 'api_id' in self.kwargs:
@@ -231,12 +231,12 @@ class PlayerCompareView(SingleTableMixin, FilterView):
     def get_table_kwargs(self):
         return {
             'row_attrs':
-            {
-                'class': lambda record:
-                ('info'
-                 if record.player.ally_code == self.kwargs['ally_code1']
-                 else '')
-            }}
+                {
+                    'class': lambda record:
+                    ('info'
+                     if record.player.ally_code == self.kwargs['ally_code1']
+                     else '')
+                }}
 
     def get_queryset(self):
         if 'ally_code1' in self.kwargs and 'ally_code2' in self.kwargs:
