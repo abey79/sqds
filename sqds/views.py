@@ -68,9 +68,7 @@ class GuildView(SingleTableMixin, FilterView):
     model = Player
     template_name = 'sqds/guild.html'
     filterset_class = GPFilter
-    table_pagination = {
-        'per_page': 50
-    }
+    table_pagination = False
 
     def get_queryset(self):
         qs = self.model.objects.filter(
