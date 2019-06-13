@@ -1,5 +1,5 @@
 from django.db.models.functions import Lower
-from django.db.models import Q
+from django.db.models import Q, F
 from django.shortcuts import render, redirect, get_object_or_404
 
 # from django_tables2 import RequestConfig
@@ -74,7 +74,8 @@ class GuildView(SingleTableMixin, FilterView):
 
     def get_queryset(self):
         qs = self.model.objects.filter(
-            guild__api_id=self.kwargs['api_id'])
+            guild__api_id=self.kwargs['api_id']).annotate_stats().annotate(
+            guild_name=F('guild__name'), guild_api_id=F('guild__api_id'))
         return qs
 
     def get_context_data(self, **kwargs):
@@ -214,7 +215,7 @@ class SinglePlayerView(SingleTableMixin, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['player'] = Player.objects.get(
+        context['player'] = Player.objects.annotate_stats().get(
             ally_code=self.kwargs['ally_code'])
         return context
 
@@ -258,8 +259,8 @@ class PlayerCompareView(SingleTableMixin, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['player1'] = Player.objects.get(
+        context['player1'] = Player.objects.annotate_stats().get(
             ally_code=self.kwargs['ally_code1'])
-        context['player2'] = Player.objects.get(
-            ally_code=self.kwargs['ally_code2'])
+        context['player2'] = Player.objects.annotate_stats().get(
+            ally_code=self.kwargs['ally_code2']).annotate_stats()
         return context

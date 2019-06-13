@@ -8,7 +8,6 @@ from django_tables2.utils import A
 
 from .models import Player, PlayerUnit
 
-
 locale.setlocale(locale.LC_ALL, '')
 
 
@@ -44,7 +43,7 @@ class PercentColumn(tables.Column):
 
 class PlayerTable(tables.Table):
     name = tables.LinkColumn('sqds:player', args=[A('ally_code')])
-    guild = tables.LinkColumn('sqds:guild', args=[A('guild.api_id')])
+    guild_name = tables.LinkColumn('sqds:guild', args=[A('guild_api_id')])
 
     gp = LargeIntColumn()
     gp_char = LargeIntColumn()
@@ -68,76 +67,7 @@ class PlayerTable(tables.Table):
     right_hand_g12_gear_count = LargeIntColumn('G12+ pces',
                                                initial_sort_descending=True)
 
-    def generic_order_unit_count(self, query_set, is_descending, gear_level):
-        query_set = query_set.annotate(
-            _unit_count=Count('unit_set', filter=Q(unit_set__gear=gear_level))
-        ).order_by(('-' if is_descending else '') + '_unit_count')
-        return query_set, True
-
-    def order_g12_unit_count(self, query_set, is_descending):
-        return self.generic_order_unit_count(query_set, is_descending, 12)
-
-    def order_g11_unit_count(self, query_set, is_descending):
-        return self.generic_order_unit_count(query_set, is_descending, 11)
-
-    def order_g10_unit_count(self, query_set, is_descending):
-        return self.generic_order_unit_count(query_set, is_descending, 10)
-
-    def order_unit_count(self, query_set, is_descending):
-        query_set = query_set.annotate(
-            _unit_count=Count('unit_set')
-        ).order_by(('-' if is_descending else '') + '_unit_count')
-        return (query_set, True)
-
-    def order_seven_star_unit_count(self, query_set, is_descending):
-        query_set = query_set.annotate(
-            _7_unit_count=Count(
-                'unit_set',
-                filter=Q(unit_set__rarity=7))
-        ).order_by(('-' if is_descending else '') + '_7_unit_count')
-        return (query_set, True)
-
-    def order_right_hand_g12_gear_count(self, query_set, is_descending):
-        query_set = query_set.annotate(
-            _rh_g12_count=Count(
-                'unit_set__gear_set',
-                filter=Q(unit_set__gear_set__gear__is_right_hand_g12=True))
-        ).order_by(('-' if is_descending else '') + '_rh_g12_count')
-        return (query_set, True)
-
-    def order_zeta_count(self, query_set, is_descending):
-        query_set = query_set.annotate(
-            _zeta_count=Count('unit_set__zeta_set')
-        ).order_by(('-' if is_descending else '') + '_zeta_count')
-        return (query_set, True)
-
-    def generic_order_mod_count_speed(self, query_set, is_descending,
-                                      min_value, max_value):
-        query_set = query_set.annotate(
-            _mod_count=Count(
-                'unit_set__mod_set',
-                filter=(~Q(unit_set__mod_set__slot=1)
-                        & Q(unit_set__mod_set__speed__gte=min_value)
-                        & Q(unit_set__mod_set__speed__lte=max_value)))
-        ).order_by(('-' if is_descending else '') + '_mod_count')
-        return (query_set, True)
-
-    def order_mod_count_speed_25(self, query_set, is_descending):
-        return self.generic_order_mod_count_speed(
-            query_set, is_descending, 25, 100)
-
-    def order_mod_count_speed_20(self, query_set, is_descending):
-        return self.generic_order_mod_count_speed(
-            query_set, is_descending, 20, 24)
-
-    def order_mod_count_speed_15(self, query_set, is_descending):
-        return self.generic_order_mod_count_speed(
-            query_set, is_descending, 15, 19)
-
-    def order_mod_count_speed_10(self, query_set, is_descending):
-        return self.generic_order_mod_count_speed(
-            query_set, is_descending, 15, 19)
-
+    # noinspection PyMethodMayBeStatic
     def order_mod_total_speed_15plus(self, query_set, is_descending):
         query_set = query_set.annotate(
             _mod_sum=Sum(
@@ -145,11 +75,11 @@ class PlayerTable(tables.Table):
                 filter=(~Q(unit_set__mod_set__slot=1)
                         & Q(unit_set__mod_set__speed__gte=15)))
         ).order_by(('-' if is_descending else '') + '_mod_sum')
-        return (query_set, True)
+        return query_set, True
 
     class Meta:
         model = Player
-        fields = ('name', 'guild',
+        fields = ('name', 'guild_name',
                   'level', 'gp', 'gp_char', 'gp_ship', 'unit_count',
                   'seven_star_unit_count', 'g12_unit_count', 'g11_unit_count',
                   'g10_unit_count', 'right_hand_g12_gear_count', 'zeta_count',
@@ -183,11 +113,12 @@ class PlayerUnitTable(tables.Table):
                                       'equipped_count'])
     zeta_summary = tables.Column('Zetas', initial_sort_descending=True)
 
+    # noinspection PyMethodMayBeStatic
     def order_zeta_summary(self, query_set, is_descending):
         query_set = query_set.annotate(
             _zeta_count=Count('zeta_set')
         ).order_by(('-' if is_descending else '') + '_zeta_count')
-        return (query_set, True)
+        return query_set, True
 
     class Meta:
         model = PlayerUnit
