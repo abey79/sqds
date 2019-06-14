@@ -60,7 +60,7 @@ def update_game_data(ability_data_list=None,
 
 
 class Category(models.Model):
-    api_id = models.CharField(max_length=200, unique=True, db_index=True)
+    api_id = models.CharField(max_length=50, unique=True, db_index=True)
     name = models.CharField(max_length=200)
 
     class Meta:
@@ -71,7 +71,7 @@ class Category(models.Model):
 
 
 class Unit(models.Model):
-    api_id = models.CharField(max_length=200, unique=True, db_index=True)
+    api_id = models.CharField(max_length=50, unique=True, db_index=True)
     name = models.CharField(max_length=200, default='')
     categories = models.ManyToManyField(Category, related_name='unit_set')
 
@@ -83,7 +83,7 @@ class Unit(models.Model):
 
 
 class Skill(models.Model):
-    api_id = models.CharField(max_length=200, unique=True, db_index=True)
+    api_id = models.CharField(max_length=50, unique=True, db_index=True)
     name = models.CharField(max_length=200)
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
     is_zeta = models.BooleanField()
@@ -118,7 +118,7 @@ class GearManager(models.Manager):
 
 
 class Gear(models.Model):
-    api_id = models.CharField(max_length=200, unique=True, db_index=True)
+    api_id = models.CharField(max_length=50, unique=True, db_index=True)
     name = models.CharField(max_length=200)
     tier = models.IntegerField()
     required_rarity = models.IntegerField()
@@ -262,7 +262,7 @@ class GuildSet(models.QuerySet):
 
 
 class Guild(models.Model):
-    api_id = models.CharField(max_length=20, unique=True, db_index=True)
+    api_id = models.CharField(max_length=50, unique=True, db_index=True)
 
     name = models.CharField(max_length=200)
     gp = models.IntegerField()
@@ -496,7 +496,7 @@ class PlayerSet(models.QuerySet):
 
 
 class Player(models.Model):
-    api_id = models.CharField(max_length=20, unique=True, db_index=True)
+    api_id = models.CharField(max_length=50, unique=True, db_index=True)
 
     guild = models.ForeignKey(Guild, null=True, on_delete=models.CASCADE,
                               related_name="player_set")
@@ -668,7 +668,7 @@ class ModSet(enum.Enum):
 
 
 class Mod(models.Model):
-    api_id = models.CharField(max_length=20, unique=True, db_index=True)
+    api_id = models.CharField(max_length=50, unique=True, db_index=True)
     player_unit = models.ForeignKey(PlayerUnit, on_delete=models.CASCADE,
                                     null=True, related_name='mod_set')
 
