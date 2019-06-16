@@ -67,16 +67,6 @@ class PlayerTable(tables.Table):
     right_hand_g12_gear_count = LargeIntColumn('G12+ pces',
                                                initial_sort_descending=True)
 
-    # noinspection PyMethodMayBeStatic
-    def order_mod_total_speed_15plus(self, query_set, is_descending):
-        query_set = query_set.annotate(
-            _mod_sum=Sum(
-                'unit_set__mod_set__speed',
-                filter=(~Q(unit_set__mod_set__slot=1)
-                        & Q(unit_set__mod_set__speed__gte=15)))
-        ).order_by(('-' if is_descending else '') + '_mod_sum')
-        return query_set, True
-
     class Meta:
         model = Player
         fields = ('name', 'guild_name',
