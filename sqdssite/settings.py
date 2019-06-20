@@ -25,6 +25,8 @@ if 'DJANGO_SECRET_KEY' in os.environ:
 
 if 'DJANGO_DEBUG' in os.environ:
     DEBUG = True
+else:
+    DEBUG = False
 
 if 'DJANGO_ALLOWED_HOSTS' in os.environ:
     ALLOWED_HOSTS = [os.environ['DJANGO_ALLOWED_HOSTS']]
