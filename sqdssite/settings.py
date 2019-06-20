@@ -36,6 +36,7 @@ else:
 
 INSTALLED_APPS = [
     'sqds.apps.SqdsConfig',
+    'sqds_scoredunit.apps.SqdsScoredUnitConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
