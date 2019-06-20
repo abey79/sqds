@@ -8,12 +8,16 @@ class Job(BaseJob):
     help = "Update PREPARE data from swgoh.help"
 
     def execute(self):
+        should_execute = False
         try:
             guild = Guild.objects.get(api_id='G2737841003')
         except Guild.DoesNotExist:
-            return
+            should_execute = True
 
-        since_last_update = timezone.now() - guild.last_updated
+        if not should_execute:
+            since_last_update = timezone.now() - guild.last_updated
+            if since_last_update.total_seconds() >= 4*3600:
+                should_execute = True
 
-        if since_last_update.total_seconds() >= 4*3600:
+        if should_execute:
             Guild.objects.update_or_create_from_swgoh()

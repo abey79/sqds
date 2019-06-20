@@ -78,7 +78,7 @@ class GuildView(SingleTableMixin, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['guild'] = Guild.objects.get(
+        context['guild'] = Guild.objects.annotate_stats().get(
             api_id=self.kwargs['api_id'])
         context['units_by_api_id'] = Unit.objects.in_bulk(
             field_name='api_id')

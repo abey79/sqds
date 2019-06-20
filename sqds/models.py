@@ -213,52 +213,93 @@ class GuildManager(models.Manager):
 
 class GuildSet(models.QuerySet):
     def annotate_stats(self):
-        return self.annotate(
-            unit_count=Count(
-                'player_set__unit_set', distinct=True),
-            seven_star_unit_count=Count(
-                'player_set__unit_set', distinct=True,
-                filter=Q(player_set__unit_set__rarity=7)),
-            g12_unit_count=Count(
-                'player_set__unit_set', distinct=True,
-                filter=Q(player_set__unit_set__gear=12)),
-            g11_unit_count=Count(
-                'player_set__unit_set', distinct=True,
-                filter=Q(player_set__unit_set__gear=11)),
-            g10_unit_count=Count(
-                'player_set__unit_set', distinct=True,
-                filter=Q(player_set__unit_set__gear=10)),
-            zeta_count=Count('player_set__unit_set__zeta_set', distinct=True),
-            right_hand_g12_gear_count=Count(
+        unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set'))
+        seven_star_unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set', filter=Q(player_set__unit_set__rarity=7)))
+        g12_unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set', filter=Q(player_set__unit_set__gear=12)))
+        g11_unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set', filter=Q(player_set__unit_set__gear=11)))
+        g10_unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set', filter=Q(player_set__unit_set__gear=10)))
+        zeta_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set__zeta_set'))
+        g12_gear_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count(
                 'player_set__unit_set__pug_set',
-                distinct=True, filter=Q(
-                    player_set__unit_set__pug_set__gear__is_right_hand_g12=True)),
-            left_hand_g12_gear_count=Count(
-                'player_set__unit_set__pug_set', distinct=True,
-                filter=Q(player_set__unit_set__pug_set__gear__is_left_hand_g12=True)),
-            mod_count_speed_25=Count(
-                'player_set__unit_set__mod_set',
-                distinct=True,
-                filter=(Q(player_set__unit_set__mod_set__speed__gte=25) & ~Q(
-                    player_set__unit_set__mod_set__slot=1))),
-            mod_count_speed_20=Count(
-                'player_set__unit_set__mod_set',
-                distinct=True,
-                filter=(Q(player_set__unit_set__mod_set__speed__gte=20) & Q(
-                    player_set__unit_set__mod_set__speed__lt=25) & ~Q(
-                    player_set__unit_set__mod_set__slot=1))),
-            mod_count_speed_15=Count(
-                'player_set__unit_set__mod_set',
-                distinct=True,
-                filter=(Q(player_set__unit_set__mod_set__speed__gte=15) & Q(
-                    player_set__unit_set__mod_set__speed__lt=20) & ~Q(
-                    player_set__unit_set__mod_set__slot=1))),
-            mod_count_speed_10=Count(
-                'player_set__unit_set__mod_set',
-                distinct=True,
-                filter=(Q(player_set__unit_set__mod_set__speed__gte=10) & Q(
-                    player_set__unit_set__mod_set__speed__lt=15) & ~Q(
-                    player_set__unit_set__mod_set__slot=1))))
+                filter=(Q(
+                    player_set__unit_set__pug_set__gear__is_right_hand_g12=True)
+                        | Q(
+                            player_set__unit_set__pug_set__gear__is_left_hand_g12=True))))
+        right_hand_g12_gear_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set__pug_set',
+                      filter=Q(
+                          player_set__unit_set__pug_set__gear__is_right_hand_g12=True)))
+        left_hand_g12_gear_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set__pug_set',
+                      filter=Q(
+                          player_set__unit_set__pug_set__gear__is_left_hand_g12=True)))
+        mod_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set__mod_set'))
+        mod_count_speed_25 = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set__mod_set',
+                      filter=(Q(player_set__unit_set__mod_set__speed__gte=25) & ~Q(
+                          player_set__unit_set__mod_set__slot=1))))
+        mod_count_speed_20 = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set__mod_set',
+                      filter=(Q(player_set__unit_set__mod_set__speed__gte=20) & Q(
+                          player_set__unit_set__mod_set__speed__lt=25) & ~Q(
+                          player_set__unit_set__mod_set__slot=1))))
+        mod_count_speed_15 = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set__mod_set',
+                      filter=(Q(player_set__unit_set__mod_set__speed__gte=15) & Q(
+                          player_set__unit_set__mod_set__speed__lt=20) & ~Q(
+                          player_set__unit_set__mod_set__slot=1))))
+        mod_count_speed_10 = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set__mod_set',
+                      filter=(Q(player_set__unit_set__mod_set__speed__gte=10) & Q(
+                          player_set__unit_set__mod_set__speed__lt=15) & ~Q(
+                          player_set__unit_set__mod_set__slot=1))))
+        mod_total_speed_15plus = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            sum15=Sum('player_set__unit_set__mod_set__speed',
+                      filter=(Q(player_set__unit_set__mod_set__speed__gte=15) & ~Q(
+                          player_set__unit_set__mod_set__slot=1))))
+
+        return self.annotate(
+            unit_count=Subquery(unit_count.values('cnt'),
+                                output_field=models.IntegerField()),
+            seven_star_unit_count=Subquery(seven_star_unit_count.values('cnt'),
+                                           output_field=models.IntegerField()),
+            g12_unit_count=Subquery(g12_unit_count.values('cnt'),
+                                    output_field=models.IntegerField()),
+            g11_unit_count=Subquery(g11_unit_count.values('cnt'),
+                                    output_field=models.IntegerField()),
+            g10_unit_count=Subquery(g10_unit_count.values('cnt'),
+                                    output_field=models.IntegerField()),
+
+            zeta_count=Subquery(zeta_count.values('cnt'),
+                                output_field=models.IntegerField()),
+            g12_gear_count=Subquery(g12_gear_count.values('cnt'),
+                                    output_field=models.IntegerField()),
+            right_hand_g12_gear_count=Subquery(right_hand_g12_gear_count.values('cnt'),
+                                               output_field=models.IntegerField()),
+            left_hand_g12_gear_count=Subquery(left_hand_g12_gear_count.values('cnt'),
+                                              output_field=models.IntegerField()),
+            mod_count=Subquery(mod_count.values('cnt'),
+                               output_field=models.IntegerField()),
+            mod_count_speed_25=Subquery(mod_count_speed_25.values('cnt'),
+                                        output_field=models.IntegerField()),
+            mod_count_speed_20=Subquery(mod_count_speed_20.values('cnt'),
+                                        output_field=models.IntegerField()),
+            mod_count_speed_15=Subquery(mod_count_speed_15.values('cnt'),
+                                        output_field=models.IntegerField()),
+            mod_count_speed_10=Subquery(mod_count_speed_10.values('cnt'),
+                                        output_field=models.IntegerField()),
+
+            mod_total_speed_15plus=Subquery(mod_total_speed_15plus.values('sum15'),
+                                            output_field=models.IntegerField())
+        )
 
 
 class Guild(models.Model):
