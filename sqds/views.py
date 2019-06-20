@@ -72,7 +72,8 @@ class GuildView(SingleTableMixin, FilterView):
 
     def get_queryset(self):
         qs = self.model.objects.filter(
-            guild__api_id=self.kwargs['api_id']).annotate_stats().annotate(
+            guild__api_id=self.kwargs[
+                'api_id']).annotate_stats().annotate_separatist_gp().annotate(
             guild_name=F('guild__name'), guild_api_id=F('guild__api_id'))
         return qs
 

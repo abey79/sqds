@@ -67,10 +67,13 @@ class PlayerTable(tables.Table):
     right_hand_g12_gear_count = LargeIntColumn('G12+ pces',
                                                initial_sort_descending=True)
 
+    sep_gp = LargeIntColumn('Sep GP', initial_sort_descending=True,
+                            attrs={'td': {'class': 'danger'}})
+
     class Meta:
         model = Player
         fields = ('name', 'guild_name',
-                  'level', 'gp', 'gp_char', 'gp_ship', 'unit_count',
+                  'level', 'gp', 'gp_char', 'gp_ship', 'sep_gp', 'unit_count',
                   'seven_star_unit_count', 'g12_unit_count', 'g11_unit_count',
                   'g10_unit_count', 'right_hand_g12_gear_count', 'zeta_count',
                   'mod_count_speed_25', 'mod_count_speed_20',
