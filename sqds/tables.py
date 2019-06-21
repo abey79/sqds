@@ -1,7 +1,7 @@
 import locale
 from textwrap import wrap
 
-from django.db.models import Count, Sum, Q
+from django.db.models import Count
 
 import django_tables2 as tables
 from django_tables2.utils import A
@@ -42,8 +42,9 @@ class PercentColumn(tables.Column):
 
 
 class PlayerTable(tables.Table):
-    name = tables.LinkColumn('sqds:player', args=[A('ally_code')])
-    guild_name = tables.LinkColumn('sqds:guild', args=[A('guild_api_id')])
+    name = tables.LinkColumn('sqds:player', args=[A('ally_code')], verbose_name='Player')
+    guild_name = tables.LinkColumn('sqds:guild', args=[A('guild_api_id')],
+                                   verbose_name='Guild')
 
     gp = LargeIntColumn()
     gp_char = LargeIntColumn()
@@ -55,20 +56,41 @@ class PlayerTable(tables.Table):
     g11_unit_count = LargeIntColumn('G11', initial_sort_descending=True)
     g10_unit_count = LargeIntColumn('G10', initial_sort_descending=True)
 
-    mod_count_speed_25 = LargeIntColumn('+25', initial_sort_descending=True)
-    mod_count_speed_20 = LargeIntColumn('+20', initial_sort_descending=True)
-    mod_count_speed_15 = LargeIntColumn('+15', initial_sort_descending=True)
-    mod_count_speed_10 = LargeIntColumn('+10', initial_sort_descending=True)
-
-    mod_total_speed_15plus = LargeIntColumn('∑15+',
-                                            initial_sort_descending=True)
-
+    mod_count_speed_25 = LargeIntColumn(
+        '+25', initial_sort_descending=True,
+        attrs={
+            'th': {'data-toggle': 'tooltip',
+                   'title': "Total number of 25+ speed secondaries"}})
+    mod_count_speed_20 = LargeIntColumn(
+        '+20', initial_sort_descending=True,
+        attrs={
+            'th': {'data-toggle': 'tooltip',
+                   'title': "Total number of 20-24 speed secondaries"}})
+    mod_count_speed_15 = LargeIntColumn(
+        '+15', initial_sort_descending=True,
+        attrs={
+            'th': {'data-toggle': 'tooltip',
+                   'title': "Total number of 15-19 speed secondaries"}})
+    mod_count_speed_10 = LargeIntColumn(
+        '+10', initial_sort_descending=True,
+        attrs={
+            'th': {'data-toggle': 'tooltip',
+                   'title': "Total number of 10-14 speed secondaries"}})
+    mod_total_speed_15plus = LargeIntColumn(
+        '∑15+', initial_sort_descending=True,
+        attrs={
+            'th': {'data-toggle': 'tooltip',
+                   'title': "Sum of all the speed secondaries equal or greater than 15"}})
     zeta_count = LargeIntColumn(initial_sort_descending=True)
-    right_hand_g12_gear_count = LargeIntColumn('G12+ pces',
-                                               initial_sort_descending=True)
-
-    sep_gp = LargeIntColumn('Sep GP', initial_sort_descending=True,
-                            attrs={'td': {'class': 'danger'}})
+    right_hand_g12_gear_count = LargeIntColumn(
+        'G12+ pces', initial_sort_descending=True,
+        attrs={'th': {'data-toggle': 'tooltip',
+                      'title': "Total number of right-hand-side G12 pieces"}})
+    sep_gp = LargeIntColumn(
+        'Sep GP', initial_sort_descending=True,
+        attrs={'td': {'class': 'danger'},
+               'th': {'data-toggle': 'tooltip',
+                      'title': "Sum of the GP of all Separatists"}})
 
     class Meta:
         model = Player

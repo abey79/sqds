@@ -5,138 +5,154 @@
 {% load crispy_forms_tags %}
 
 {% block title %}
-Guild: {{ guild.name }}
+  Guild: {{ guild.name }}
 {% endblock %}
 
 
 {% block content %}
-<div class="row">
-  <div class="col-md-3">
-    <div class="panel panel-default">
-      <div class="panel-heading">Info</div>
-      <table class="table">
-        <tr>
-          <th>Name</th>
-          <td>{{ guild.name }}</td>
-        </tr>
-        <tr>
-          <th>GP</th>
-          <td>{{ guild.gp }}</td>
-        </tr>
-      </table>
+  <div class="row">
+    <div class="col-md-3">
+      <div class="panel panel-default">
+        <div class="panel-heading">Info</div>
+        <table class="table">
+          <tr>
+            <th>Name</th>
+            <td>{{ guild.name }}</td>
+          </tr>
+          <tr>
+            <th>GP</th>
+            <td>{{ guild.gp }}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">Units</div>
+        <table class="table">
+          <tr>
+            <td>Inspect <a href="{% url 'sqds:guild_units' guild.api_id %}">all units</a></td>
+          </tr>
+          <tr>
+            <td>Inspect <a
+                href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.DARTHREVAN.id }}&sort=-speed">fast
+              Darth Revans</a></td>
+          </tr>
+          <tr>
+            <td>Inspect <a
+                href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.ENFYSNEST.id }}&sort=-health">fat
+              Nests</a></td>
+          </tr>
+          <tr>
+            <td>Inspect <a
+                href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.GRANDMASTERYODA.id }}&sort=-special_damage">offensive
+              GMYs</a></td>
+          </tr>
+        </table>
+      </div>
     </div>
 
-    <div class="panel panel-default">
-      <div class="panel-heading">Units</div>
-      <table class="table">
-        <tr>
-          <td>Inspect <a href="{% url 'sqds:guild_units' guild.api_id %}">all units</a></td>
-        </tr>
-        <tr>
-          <td>Inspect <a href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.DARTHREVAN.id }}&sort=-speed">fast Darth Revans</a></td>
-        </tr>
-        <tr>
-          <td>Inspect <a href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.ENFYSNEST.id }}&sort=-health">fat Nests</a></td>
-        </tr>
-        <tr>
-          <td>Inspect <a href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.GRANDMASTERYODA.id }}&sort=-special_damage">offensive GMYs</a></td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="panel panel-default">
-      <div class="panel-heading">Statistics</div>
-      <table class="table">
-        <tr>
-          <th>Player count</th>
-          <td>{{ guild.player_set.count }}</td>
-        </tr>
-        <tr>
-          <th>Zeta</th>
-          <td>{{ guild.zeta_count }}</td>
-        </tr>
-        <tr>
-          <th>Unit count</th>
-          <td>{{ guild.unit_count }}</td>
-        </tr>
-        <tr>
-          <td>&nbsp;&nbsp;&nbsp;7*</td>
-          <td>{{ guild.seven_star_unit_count }}</td>
-        </tr>
-        <tr>
-          <td>&nbsp;&nbsp;&nbsp;G12</td>
-          <td>{{ guild.g12_unit_count }}</td>
-        </tr>
-        <tr>
-          <td>&nbsp;&nbsp;&nbsp;G11</td>
-          <td>{{ guild.g11_unit_count }}</td>
-        </tr>
-        <tr>
-          <td>&nbsp;&nbsp;&nbsp;G10</td>
-          <td>{{ guild.g10_unit_count }}</td>
-        </tr>
-        <tr>
-          <th>G12 gear pieces</th>
-          <td>{{ guild.g12_gear_count }}</td>
-        </tr>
-        <tr>
-          <td>&nbsp;&nbsp;&nbsp;left</td>
-          <td>{{ guild.left_hand_g12_gear_count }}</td>
-        </tr>
-        <tr>
-          <td>&nbsp;&nbsp;&nbsp;right</td>
-          <td>{{ guild.right_hand_g12_gear_count }}</td>
-        </tr>
-        <tr>
-          <th>Mod count</th>
-          <td>{{ guild.mod_count }}</td>
-        </tr>
-        <tr>
-          <td>&nbsp;&nbsp;&nbsp;+25</td>
-          <td>{{ guild.mod_count_speed_25 }}</td>
-        </tr>
-        <tr>
-          <td>&nbsp;&nbsp;&nbsp;+20</td>
-          <td>{{ guild.mod_count_speed_20 }}</td>
-        </tr>
-        <tr>
-          <td>&nbsp;&nbsp;&nbsp;+15</td>
-          <td>{{ guild.mod_count_speed_15 }}</td>
-        </tr>
-        <tr>
-          <td>&nbsp;&nbsp;&nbsp;+10</td>
-          <td>{{ guild.mod_count_speed_10 }}</td>
-        </tr>
-        <tr>
+    <div class="col-md-3">
+      <div class="panel panel-default">
+        <div class="panel-heading">Statistics</div>
+        <table class="table">
+          <tr>
+            <th>Player count</th>
+            <td>{{ guild.player_set.count }}</td>
+          </tr>
+          <tr>
+            <th>Zeta</th>
+            <td>{{ guild.zeta_count }}</td>
+          </tr>
+          <tr>
+            <th>Unit count</th>
+            <td>{{ guild.unit_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;7*</td>
+            <td>{{ guild.seven_star_unit_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;G12</td>
+            <td>{{ guild.g12_unit_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;G11</td>
+            <td>{{ guild.g11_unit_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;G10</td>
+            <td>{{ guild.g10_unit_count }}</td>
+          </tr>
+          <tr>
+            <th>G12 gear pieces</th>
+            <td>{{ guild.g12_gear_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;left</td>
+            <td>{{ guild.left_hand_g12_gear_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;right</td>
+            <td>{{ guild.right_hand_g12_gear_count }}</td>
+          </tr>
+          <tr>
+            <th>Mod count</th>
+            <td>{{ guild.mod_count }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;+25</td>
+            <td>{{ guild.mod_count_speed_25 }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;+20</td>
+            <td>{{ guild.mod_count_speed_20 }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;+15</td>
+            <td>{{ guild.mod_count_speed_15 }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;+10</td>
+            <td>{{ guild.mod_count_speed_10 }}</td>
+          </tr>
+          <tr>
             <td>&nbsp;&nbsp;&nbsp;∑15+</td>
             <td>{{ guild.mod_total_speed_15plus }}</td>
           </tr>
-      </table>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-md-12">
-    <div class="panel panel-default">
-      <div class="panel-heading">Characters</div>
-
-      {% if filter %}
-      <div class="panel-body">
-        <form action="" method="get" class="form form-inline">
-          {% bootstrap_form filter.form layout='inline' %}
-          {% bootstrap_button 'filter' %}
-        </form>
-      </div>
-      {% endif %}
-
-      <div style="overflow-y: scroll">
-      {% render_table table %}
+        </table>
       </div>
     </div>
   </div>
-</div>
 
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Characters</div>
+
+        {% if filter %}
+          <div class="panel-body">
+            <form action="" method="get" class="form form-inline">
+              {% bootstrap_form filter.form layout='inline' %}
+              {% bootstrap_button 'filter' %}
+            </form>
+          </div>
+        {% endif %}
+
+        <div style="overflow-y: scroll">
+          {% render_table table %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block post_body %}
+  <script>
+      $(function () {
+          $('[data-toggle="tooltip"]').tooltip({
+              container: 'body'
+          })
+      })
+  </script>
 {% endblock %}
