@@ -4,15 +4,52 @@
 {% load bootstrap3 %}
 
 {% block title %}
-PREPARE FTW
+  PREPARE FTW
 {% endblock %}
 
 
 {% block content %}
 
   <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Introduction</div>
+        <div class="panel-body">
+          <p><b>What is this site?</b></p>
+          <p>This site exists because I (hhip) wanted to learn about things like web apps, Python, Django, DevOps,
+            etc. and figured it would be a fun way to go about it.</p>
+          <p><b>Okay but what is this site <em>to me</em>?</b></p>
+          <p>At its core, it provides an efficient way to list, inspect and compare all of the guild's stats, both for
+            player and toons. I will also be adding various features such as player vs. player comparison (Grand Arena)
+            or guild vs. guild comparison (Territory War).
+          </p>
+          <p><b>Who is this site for?</b></p>
+          <p>Me (see first question above). Also, members of PREPARE and PREPAIRED guilds.</p>
+          <p><b>Aren't you basically duplicating swgoh.gg and/or Discord bots?</b></p>
+          <p>See first question above. Also, you will find some unique metrics/stats/lists that are impossible or
+            difficult to obtain from other sources.</p>
+          <p><b>How fresh is the data?</b></p>
+          <p>PREPARE and PREPAIRED data is updated every 4 hours. Data from other guilds/players is loaded on demand,
+            and then not kept up-to-date. Date and time of last update is usually displayed somewhere.</p>
+          <p><b>Can I have feature XYZ?</b></p>
+          <p>Possibly. Let me know about it.</p>
+          <p><b>Why is the design so shitty?</b></p>
+          <p>See first question above.</p>
+          <p><b>Why is the site bugged/broken/down?</b></p>
+          <p>See first question above.</p>
+          <p><b>With sneaky moves like highlighting Separatists' GP, aren't you trying to force me into farming
+            things?</b></p>
+          <p>Well, I hadn't thought of it but now that say I might do even more of that.</p>
+          <p><b>I am at the bottom of the list. This site is an insult to me!</b></p>
+          <p>Sorry what's the question again?</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <div class="col-md-3">
+  <div class="row">
+
+    <div class="col-md-6">
       <div class="panel panel-default">
         <div class="panel-heading">Quick action</div>
         <div class="panel-body">
@@ -28,7 +65,7 @@ PREPARE FTW
             Inspect new player:
             <form id="player_form" method="GET" class="form-inline" onsubmit="setPlayerFormAction()">
               <label class="sr-only" for="ally_code">Ally code</label>
-              <input type="text" class="form-control" id="ally_code" placeholder="XXX-XXX-XXX" />
+              <input type="text" class="form-control" id="ally_code" placeholder="XXX-XXX-XXX"/>
               <button type="submit" class="btn btn-default">Go</button>
             </form>
           </div>
@@ -36,6 +73,7 @@ PREPARE FTW
       </div>
     </div>
 
+    {% comment %}
     <div class="col-md-3">
       <div class="panel panel-default">
         <div class="panel-heading">Guilds</div>
@@ -48,8 +86,9 @@ PREPARE FTW
         </div>
       </div>
     </div>
+    {%  endcomment %}
 
-    <div class="col-md-3">
+    <div class="col-md-6">
       <div class="panel panel-default">
         <div class="panel-heading">Release notes</div>
         <div class="panel-body">
