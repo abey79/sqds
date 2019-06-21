@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Unit, Skill, Gear
+from .models import Unit, Skill, Gear, Guild
 
 
 # noinspection PyMethodMayBeStatic,PyUnusedLocal
@@ -32,4 +32,9 @@ class GearAdmin(ReadOnlyMixin, admin.ModelAdmin):
 
 @admin.register(Skill)
 class SkillAdmin(ReadOnlyMixin, admin.ModelAdmin):
+    pass
+
+
+@admin.register(Guild)
+class GuildAdmin(ReadOnlyMixin, admin.ModelAdmin):
     pass
