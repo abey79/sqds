@@ -15,24 +15,29 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
+# No debug by default
+DEBUG = False
+ALLOWED_HOSTS = []
+
+# Import local settings if any.
+try:
+    from .local_settings import *
+except ImportError:
+    pass
 
 if 'DJANGO_SECRET_KEY' in os.environ:
     SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 if 'DJANGO_DEBUG' in os.environ:
     DEBUG = True
-else:
-    DEBUG = False
 
+if DEBUG:
+    ALLOWED_HOSTS = ['*']
 if 'DJANGO_ALLOWED_HOSTS' in os.environ:
     ALLOWED_HOSTS = [os.environ['DJANGO_ALLOWED_HOSTS']]
-else:
-    ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -52,7 +57,8 @@ INSTALLED_APPS = [
     'django_tables2',
     'crispy_forms',
     'django_extensions',
-    'debug_toolbar'
+    'debug_toolbar',
+    'meta'
 ]
 
 MIDDLEWARE = [
@@ -86,7 +92,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sqdssite.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
@@ -101,14 +106,13 @@ if 'DJANGO_DB_ENGINE' in os.environ:
             'PORT': os.environ['DJANGO_DB_PORT']
         }
     }
-else:
+elif 'DATABASES' not in locals():
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3')
         }
     }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -133,7 +137,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
@@ -157,15 +160,17 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': lambda _request: DEBUG
 }
 
+# Meta configuration
+META_SITE_NAME = 'PREPARE-FTW'
+META_SITE_TYPE = 'website'
+META_USE_OG_PROPERTIES = True
+if DEBUG:
+    META_SITE_PROTOCOL = 'http'
+else:
+    META_SITE_PROTOCOL = 'https'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-# Import local settings if any.
-try:
-    from .local_settings import *
-except ImportError:
-    pass

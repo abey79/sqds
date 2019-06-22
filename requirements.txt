@@ -8,6 +8,7 @@ django-bootstrap3
 django-crispy-forms
 django-debug-toolbar
 django-enumfield
+django-meta
 
 # Database stuff
 mysqlclient

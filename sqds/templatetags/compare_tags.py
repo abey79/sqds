@@ -45,78 +45,77 @@ def player_comparison(player1, player2):
             },
             {
                 'label': 'Zeta', 'label_type': 'th',
-                **compute_data_and_classes(player1.zeta_count(),
-                                           player2.zeta_count())
+                **compute_data_and_classes(player1.zeta_count,
+                                           player2.zeta_count)
             },
             {
                 'label': 'Unit count', 'label_type': 'th',
-                **compute_data_and_classes(player1.unit_count(),
-                                           player2.unit_count())
+                **compute_data_and_classes(player1.unit_count,
+                                           player2.unit_count)
             },
             {
                 'label': '&nbsp;&nbsp;&nbsp;7*', 'label_type': 'td',
-                **compute_data_and_classes(player1.seven_star_unit_count(),
-                                           player2.seven_star_unit_count())
+                **compute_data_and_classes(player1.seven_star_unit_count,
+                                           player2.seven_star_unit_count)
             },
             {
                 'label': '&nbsp;&nbsp;&nbsp;G12', 'label_type': 'td',
-                **compute_data_and_classes(player1.g12_unit_count(),
-                                           player2.g12_unit_count())
+                **compute_data_and_classes(player1.g12_unit_count,
+                                           player2.g12_unit_count)
             },
             {
                 'label': '&nbsp;&nbsp;&nbsp;G11', 'label_type': 'td',
-                **compute_data_and_classes(player1.g11_unit_count(),
-                                           player2.g11_unit_count())
+                **compute_data_and_classes(player1.g11_unit_count,
+                                           player2.g11_unit_count)
             },
             {
                 'label': '&nbsp;&nbsp;&nbsp;G10', 'label_type': 'td',
-                **compute_data_and_classes(player1.g10_unit_count(),
-                                           player2.g10_unit_count())
+                **compute_data_and_classes(player1.g10_unit_count,
+                                           player2.g10_unit_count)
             },
             {
                 'label': 'G12 gear pieces', 'label_type': 'th',
-                **compute_data_and_classes(player1.g12_gear_count(),
-                                           player2.g12_gear_count())
+                **compute_data_and_classes(player1.g12_gear_count,
+                                           player2.g12_gear_count)
             },
             {
                 'label': '&nbsp;&nbsp;&nbsp;left', 'label_type': 'td',
-                **compute_data_and_classes(player1.left_hand_g12_gear_count(),
-                                           player2.left_hand_g12_gear_count())
+                **compute_data_and_classes(player1.left_hand_g12_gear_count,
+                                           player2.left_hand_g12_gear_count)
             },
             {
                 'label': '&nbsp;&nbsp;&nbsp;right', 'label_type': 'td',
-                **compute_data_and_classes(player1.right_hand_g12_gear_count(),
-                                           player2.right_hand_g12_gear_count())
+                **compute_data_and_classes(player1.right_hand_g12_gear_count,
+                                           player2.right_hand_g12_gear_count)
             },
             {
                 'label': 'Mod count', 'label_type': 'th',
-                **compute_data_and_classes(player1.mod_count(),
-                                           player2.mod_count())
+                'left_data': '', 'right_data': ''
             },
             {
                 'label': '&nbsp;&nbsp;&nbsp;+25', 'label_type': 'td',
-                **compute_data_and_classes(player1.mod_count_speed_25(),
-                                           player2.mod_count_speed_25())
+                **compute_data_and_classes(player1.mod_count_speed_25,
+                                           player2.mod_count_speed_25)
             },
             {
                 'label': '&nbsp;&nbsp;&nbsp;+20', 'label_type': 'td',
-                **compute_data_and_classes(player1.mod_count_speed_20(),
-                                           player2.mod_count_speed_20())
+                **compute_data_and_classes(player1.mod_count_speed_20,
+                                           player2.mod_count_speed_20)
             },
             {
                 'label': '&nbsp;&nbsp;&nbsp;+15', 'label_type': 'td',
-                **compute_data_and_classes(player1.mod_count_speed_15(),
-                                           player2.mod_count_speed_15())
+                **compute_data_and_classes(player1.mod_count_speed_15,
+                                           player2.mod_count_speed_15)
             },
             {
                 'label': '&nbsp;&nbsp;&nbsp;+10', 'label_type': 'td',
-                **compute_data_and_classes(player1.mod_count_speed_10(),
-                                           player2.mod_count_speed_10())
+                **compute_data_and_classes(player1.mod_count_speed_10,
+                                           player2.mod_count_speed_10)
             },
             {
                 'label': '&nbsp;&nbsp;&nbsp;∑15+', 'label_type': 'td',
-                **compute_data_and_classes(player1.mod_total_speed_15plus(),
-                                           player2.mod_total_speed_15plus())
+                **compute_data_and_classes(player1.mod_total_speed_15plus,
+                                           player2.mod_total_speed_15plus)
             },
         ]
     }

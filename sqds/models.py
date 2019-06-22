@@ -213,6 +213,8 @@ class GuildManager(models.Manager):
 
 class GuildSet(models.QuerySet):
     def annotate_stats(self):
+        player_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set'))
         unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('player_set__unit_set'))
         seven_star_unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
@@ -267,6 +269,8 @@ class GuildSet(models.QuerySet):
                           player_set__unit_set__mod_set__slot=1))))
 
         return self.annotate(
+            player_count=Subquery(player_count.values('cnt'),
+                                  output_field=models.IntegerField()),
             unit_count=Subquery(unit_count.values('cnt'),
                                 output_field=models.IntegerField()),
             seven_star_unit_count=Subquery(seven_star_unit_count.values('cnt'),
@@ -317,68 +321,6 @@ class Guild(models.Model):
 
     def __str__(self):  # pragma: no cover
         return self.name
-
-    # TODO: this should probably be removed if GuildSet.annotate_stats() is faster in prod
-    def unit_count(self):
-        return PlayerUnit.objects.filter(player__guild=self).count()
-
-    def seven_star_unit_count(self):
-        return PlayerUnit.objects.filter(player__guild=self, rarity=7).count()
-
-    def g12_unit_count(self):
-        return PlayerUnit.objects.filter(player__guild=self, gear=12).count()
-
-    def g11_unit_count(self):
-        return PlayerUnit.objects.filter(player__guild=self, gear=11).count()
-
-    def g10_unit_count(self):
-        return PlayerUnit.objects.filter(player__guild=self, gear=10).count()
-
-    def zeta_count(self):
-        return Zeta.objects.filter(player_unit__player__guild=self).count()
-
-    def g12_gear_count(self):
-        return PlayerUnitGear.objects.filter(
-            Q(player_unit__player__guild=self)
-            & (Q(gear__is_right_hand_g12=True)
-               | Q(gear__is_left_hand_g12=True))).count()
-
-    def right_hand_g12_gear_count(self):
-        return PlayerUnitGear.objects.filter(
-            player_unit__player__guild=self,
-            gear__is_right_hand_g12=True).count()
-
-    def left_hand_g12_gear_count(self):
-        return PlayerUnitGear.objects.filter(
-            player_unit__player__guild=self,
-            gear__is_left_hand_g12=True).count()
-
-    def mod_count(self):
-        return Mod.objects.filter(player_unit__player__guild=self).count()
-
-    def mod_count_speed_n(self, min_value, max_value):
-        return Mod.objects.filter(
-            player_unit__player__guild=self,
-            speed__gte=min_value,
-            speed__lte=max_value).exclude(slot=1).count()
-
-    def mod_count_speed_25(self):
-        return self.mod_count_speed_n(25, 100)
-
-    def mod_count_speed_20(self):
-        return self.mod_count_speed_n(20, 24)
-
-    def mod_count_speed_15(self):
-        return self.mod_count_speed_n(15, 19)
-
-    def mod_count_speed_10(self):
-        return self.mod_count_speed_n(10, 14)
-
-    def mod_total_speed_15plus(self):
-        res = Mod.objects.filter(
-            player_unit__player__guild=self,
-            speed__gte=15).exclude(slot=1).aggregate(Sum('speed'))
-        return res['speed__sum']
 
 
 class PlayerManager(models.Manager):
@@ -511,6 +453,10 @@ class PlayerSet(models.QuerySet):
             cnt=Count('unit_set', filter=Q(unit_set__gear=10)))
         zeta_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set__zeta_set'))
+        g12_gear_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('unit_set__pug_set',
+                      filter=(Q(unit_set__pug_set__gear__is_right_hand_g12=True) | Q(
+                          unit_set__pug_set__gear__is_left_hand_g12=True))))
         right_hand_g12_gear_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set__pug_set',
                       filter=Q(unit_set__pug_set__gear__is_right_hand_g12=True)))
@@ -554,6 +500,8 @@ class PlayerSet(models.QuerySet):
                                     output_field=models.IntegerField()),
             zeta_count=Subquery(zeta_count.values('cnt'),
                                 output_field=models.IntegerField()),
+            g12_gear_count=Subquery(g12_gear_count.values('cnt'),
+                                    output_field=models.IntegerField()),
             right_hand_g12_gear_count=Subquery(right_hand_g12_gear_count.values('cnt'),
                                                output_field=models.IntegerField()),
             left_hand_g12_gear_count=Subquery(left_hand_g12_gear_count.values('cnt'),

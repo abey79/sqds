@@ -4,10 +4,6 @@
 {% load bootstrap3 %}
 {% load crispy_forms_tags %}
 
-{% block title %}
-  Guild: {{ guild.name }}
-{% endblock %}
-
 
 {% block content %}
   <div class="row">
@@ -57,7 +53,7 @@
         <table class="table">
           <tr>
             <th>Player count</th>
-            <td>{{ guild.player_set.count }}</td>
+            <td>{{ guild.player_count }}</td>
           </tr>
           <tr>
             <th>Zeta</th>

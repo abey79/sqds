@@ -9,4 +9,4 @@ sqds/swgoh_local.py
 *.ipynb
 .ipynb_checkpoints
 .env
-static
+.static

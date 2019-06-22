@@ -6,6 +6,10 @@ from django.db import connection
 from .models import Guild, Player
 
 
+def format_large_int(value):
+    return '{0:n}'.format(value) if value != 0 else '-'
+
+
 class QueryLogger:
     def __init__(self):
         self.queries = []

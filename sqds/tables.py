@@ -6,6 +6,7 @@ from django.db.models import Count
 import django_tables2 as tables
 from django_tables2.utils import A
 
+from .utils import format_large_int
 from .models import Player, PlayerUnit
 
 locale.setlocale(locale.LC_ALL, '')
@@ -24,7 +25,7 @@ class LargeIntColumn(tables.Column):
         super(LargeIntColumn, self).__init__(*args, **kwargs)
 
     def render(self, value):
-        return '{0:n}'.format(value) if value != 0 else '-'
+        return format_large_int(value)
 
 
 class AllyCodeColumn(tables.Column):
