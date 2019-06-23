@@ -2,12 +2,11 @@ from textwrap import wrap
 
 from django.db.models.functions import Lower
 from django.db.models import Q, F
-from django.shortcuts import render, redirect, get_object_or_404
-
-# from django_tables2 import RequestConfig
+from django.shortcuts import render, redirect
 from django.utils.html import format_html
-from django_tables2.views import SingleTableMixin
+from django.views.generic import DetailView
 
+from django_tables2.views import SingleTableMixin
 from django_filters import FilterSet, ChoiceFilter
 from django_filters.views import FilterView
 from meta.views import MetadataMixin
@@ -21,18 +20,35 @@ def index(request):
     return render(request, 'sqds/index.html', {'guilds': Guild.objects.all()})
 
 
-def unit(request, player_unit_id):
-    player_unit = get_object_or_404(PlayerUnit, pk=player_unit_id)
+class UnitView(MetadataMixin, DetailView):
+    model = PlayerUnit
+    context_object_name = 'player_unit'
+    template_name = 'sqds/unit.html'
 
-    return render(request, 'sqds/unit.html', {
-        'player_unit': player_unit,
-        'square_mod': player_unit.mod_set.filter(slot=0).first(),
-        'arrow_mod': player_unit.mod_set.filter(slot=1).first(),
-        'diamond_mod': player_unit.mod_set.filter(slot=2).first(),
-        'triangle_mod': player_unit.mod_set.filter(slot=3).first(),
-        'circle_mod': player_unit.mod_set.filter(slot=4).first(),
-        'cross_mod': player_unit.mod_set.filter(slot=5).first()
-    })
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        player_unit = context['player_unit']
+        context['square_mod'] = player_unit.mod_set.filter(slot=0).first()
+        context['arrow_mod'] = player_unit.mod_set.filter(slot=1).first()
+        context['diamond_mod'] = player_unit.mod_set.filter(slot=2).first()
+        context['triangle_mod'] = player_unit.mod_set.filter(slot=3).first()
+        context['circle_mod'] = player_unit.mod_set.filter(slot=4).first()
+        context['cross_mod'] = player_unit.mod_set.filter(slot=5).first()
+        return context
+
+    def get_meta_title(self, context=None):
+        player_unit = context['player_unit']
+        return "{}'s {}".format(
+            player_unit.player.name,
+            player_unit.unit.name)
+
+    def get_meta_description(self, context=None):
+        player_unit = context['player_unit']
+        return "Gear {}, level {}, {}★, {} GP".format(
+            player_unit.gear,
+            player_unit.level,
+            player_unit.rarity,
+            format_large_int(player_unit.gp))
 
 
 def player_refresh(request, ally_code):

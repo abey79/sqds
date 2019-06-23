@@ -105,6 +105,8 @@ class PlayerTable(tables.Table):
 
 
 class PlayerUnitTable(tables.Table):
+    player = tables.Column(linkify=('sqds:player', {'ally_code': A('player.ally_code')}))
+
     gp = LargeIntColumn(initial_sort_descending=True)
     unit = tables.LinkColumn('sqds:unit', args=[A('id')])
 
