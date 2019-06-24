@@ -51,3 +51,5 @@ def generate_guild(player_count=45):
             # Equip some mods
             for slot in random_sublist(range(7)):
                 ModFactory(player_unit=player_unit, slot=slot)
+
+    return guild

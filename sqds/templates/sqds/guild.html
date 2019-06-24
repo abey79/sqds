@@ -3,6 +3,7 @@
 {% load render_table from django_tables2 %}
 {% load bootstrap3 %}
 {% load crispy_forms_tags %}
+{% load sqds_filters %}
 
 
 {% block content %}
@@ -17,7 +18,11 @@
           </tr>
           <tr>
             <th>GP</th>
-            <td>{{ guild.gp }}</td>
+            <td>{{ guild.gp | big_number}}</td>
+          </tr>
+          <tr>
+            <th class='danger'>Sep GP</th>
+            <td class='danger'>{{ guild.sep_gp | big_number}}</td>
           </tr>
         </table>
       </div>

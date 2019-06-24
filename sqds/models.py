@@ -305,6 +305,15 @@ class GuildSet(models.QuerySet):
                                             output_field=models.IntegerField())
         )
 
+    def annotate_separatist_gp(self):
+        unit_ids = Unit.objects.filter(
+            categories__api_id='affiliation_separatist').values('id')
+        sep_gp = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            sep_gp=Sum('player_set__unit_set__gp',
+                       filter=Q(player_set__unit_set__unit__id__in=unit_ids)))
+        return self.annotate(
+            sep_gp=Subquery(sep_gp.values('sep_gp'), output_field=models.IntegerField()))
+
 
 class Guild(models.Model):
     api_id = models.CharField(max_length=50, unique=True, db_index=True)

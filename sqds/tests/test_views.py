@@ -2,9 +2,11 @@ from bs4 import BeautifulSoup
 from django.test import TestCase
 from django.urls import reverse
 
-from sqds.models import Player, Guild
+from sqds.models import Player, Guild, Category
 from sqds.tests.utils import generate_game_data, generate_guild
-from sqds_seed.factories import CategoryFactory, UnitFactory, PlayerUnitFactory
+from sqds.templatetags.sqds_filters import big_number
+from sqds_seed.factories import CategoryFactory, UnitFactory, PlayerUnitFactory, \
+    PlayerFactory
 
 
 class ViewTests(TestCase):
@@ -81,6 +83,18 @@ class ViewTests(TestCase):
         self.assertTrue(self.table_column_contains_int(table, 'Level'))
         self.assertTrue(self.table_column_contains_int(table, 'Zeta count'))
         self.assertTemplateUsed(response, 'sqds/guild.html')
+
+    def test_guild_view_total_separatists(self):
+        guild = generate_guild(player_count=0)
+        players = PlayerFactory.create_batch(3, guild=guild)
+        unit = UnitFactory(
+            categories=Category.objects.filter(api_id='affiliation_separatist'))
+        for player in players:
+            PlayerUnitFactory(player=player, gp=1000, unit=unit)
+        url = reverse('sqds:guild', args=[guild.api_id])
+        response = self.client.get(url)
+        text = big_number(3000.)
+        self.assertContains(response, text)
 
     def test_guild_units_view_valid(self):
         guild = Guild.objects.first()

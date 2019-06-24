@@ -93,7 +93,10 @@ class GuildView(MetadataMixin, SingleTableMixin, FilterView):
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         # noinspection PyAttributeOutsideInit
-        self.guild = Guild.objects.annotate_stats().get(api_id=self.kwargs['api_id'])
+        self.guild = (Guild.objects
+                      .annotate_stats()
+                      .annotate_separatist_gp()
+                      .get(api_id=self.kwargs['api_id']))
 
     def get_queryset(self):
         qs = (self.model.objects
