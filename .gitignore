@@ -10,3 +10,5 @@ sqds/swgoh_local.py
 .ipynb_checkpoints
 .env
 .static
+.coverage
+htmlcov

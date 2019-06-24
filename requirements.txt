@@ -14,6 +14,14 @@ django-meta
 mysqlclient
 psycopg2
 
+# Test stuff
+faker
+factory_boy
+coverage
+pydotplus
+beautifulsoup4
+lxml
+
 # Deployment stuff
 python-dotenv
 

@@ -34,7 +34,7 @@ if 'DJANGO_SECRET_KEY' in os.environ:
 if 'DJANGO_DEBUG' in os.environ:
     DEBUG = True
 
-if DEBUG:
+if DEBUG or 'test' in sys.argv:
     ALLOWED_HOSTS = ['*']
 if 'DJANGO_ALLOWED_HOSTS' in os.environ:
     ALLOWED_HOSTS = [os.environ['DJANGO_ALLOWED_HOSTS']]
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'sqds.apps.SqdsConfig',
     'sqds_scoredunit.apps.SqdsScoredUnitConfig',
     'sqds_gphistory.apps.SqdsGPHistoryConfig',
+    'sqds_seed.apps.SqdsSeedConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -157,7 +158,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 INTERNAL_IPS = ('51.154.2.60',)
 
 DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': lambda _request: DEBUG
+    'SHOW_TOOLBAR_CALLBACK': lambda _request: DEBUG and 'test' not in sys.argv
 }
 
 # Meta configuration

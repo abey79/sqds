@@ -325,11 +325,12 @@ class PlayerFilter(GPFilter):
 class FilteredPlayerListView(SingleTableMixin, FilterView):
     table_class = PlayerTable
     model = Player
-    template_name = 'sqds/guild_units.html'
+    template_name = 'sqds/player_list.html'
     filterset_class = PlayerFilter
-    table_pagination = {
-        'per_page': 50
-    }
+    table_pagination = {'per_page': 50}
+
+    def get_queryset(self):
+        return self.model.objects.annotate_stats().annotate_separatist_gp()
 
 
 class AllPlayerUnitsFilter(FilterSet):
@@ -347,11 +348,9 @@ class AllPlayerUnitsFilter(FilterSet):
 class AllPlayerUnitsListView(SingleTableMixin, FilterView):
     table_class = PlayerUnitTable
     model = PlayerUnit
-    template_name = 'sqds/guild_units.html'
+    template_name = 'sqds/unit_list.html'
     filterset_class = AllPlayerUnitsFilter
-    table_pagination = {
-        'per_page': 50
-    }
+    table_pagination = {'per_page': 50}
 
     def get_queryset(self):
         if 'ally_code' in self.kwargs:
