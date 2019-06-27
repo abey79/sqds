@@ -1,3 +1,4 @@
+import itertools
 import locale
 from textwrap import wrap
 
@@ -42,7 +43,20 @@ class PercentColumn(tables.Column):
         return '{:0.1f}%'.format(value * 100)
 
 
-class PlayerTable(tables.Table):
+class RowCounterTable(tables.Table):
+    row_counter = tables.Column('', empty_values=(), orderable=False, attrs={
+        'td': {
+            'style': 'color: #ddd'
+        }})
+
+    def render_row_counter(self):
+        self.row_counter = getattr(
+            self, 'row_counter',
+            itertools.count(self.page.start_index() if hasattr(self, 'page') else 1))
+        return next(self.row_counter)
+
+
+class PlayerTable(RowCounterTable):
     name = tables.LinkColumn('sqds:player', args=[A('ally_code')], verbose_name='Player')
     guild_name = tables.LinkColumn('sqds:guild', args=[A('guild_api_id')],
                                    verbose_name='Guild')
@@ -95,7 +109,7 @@ class PlayerTable(tables.Table):
 
     class Meta:
         model = Player
-        fields = ('name', 'guild_name',
+        fields = ('row_counter', 'name', 'guild_name',
                   'level', 'gp', 'gp_char', 'gp_ship', 'sep_gp', 'unit_count',
                   'seven_star_unit_count', 'g12_unit_count', 'g11_unit_count',
                   'g10_unit_count', 'right_hand_g12_gear_count', 'zeta_count',
@@ -104,7 +118,7 @@ class PlayerTable(tables.Table):
                   'mod_total_speed_15plus')
 
 
-class PlayerUnitTable(tables.Table):
+class PlayerUnitTable(RowCounterTable):
     player = tables.Column(linkify=('sqds:player', {'ally_code': A('player.ally_code')}))
 
     gp = LargeIntColumn(initial_sort_descending=True)
@@ -141,7 +155,8 @@ class PlayerUnitTable(tables.Table):
     class Meta:
         model = PlayerUnit
         order_by = '-gp'
-        sequence = ('unit', 'player', 'gp', 'summary', 'zeta_summary', '...')
+        sequence = ('row_counter', 'unit', 'player', 'gp', 'summary', 'zeta_summary',
+                    '...')
         exclude = ('id', 'rarity', 'level', 'gear',
                    'equipped_count', 'armor_penetration',
                    'resistance_penetration', 'health_steal', 'last_updated')
