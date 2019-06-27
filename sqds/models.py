@@ -136,16 +136,12 @@ class Gear(models.Model):
 class GuildManager(models.Manager):
 
     # pylint: disable=too-many-locals
+    # noinspection PyMethodMayBeStatic
     def update_or_create_from_swgoh(
             self, ally_code=116235559, guild_only=False):
         """ Create a guild that contains provided ally_code, or update it if
             it already exists. If all_player is True, all players are then
             fully imported. Otherwise, only ally_code is imported. """
-
-        # TO DO:
-        # - add a last_updated field to Guild and check against it before
-        #   loading from Swgoh
-        # - check last_updated to conditionally update player's unit
 
         # (A) Get guild data from server
         guild_data = swgoh.api.get_guild_list(ally_code)
@@ -159,56 +155,50 @@ class GuildManager(models.Manager):
         if guild_only:
             return guild
 
+        # (C) For all of the guild players, download their info, roster, mods and skills.
+        ally_codes = [p['allyCode'] for p in guild_data['roster']]
+        all_player_data = []
+
+        def download_player_data(the_ally_codes):
+            print(f'downloading for {the_ally_codes}')
+            data = swgoh.api.get_player_data(the_ally_codes)
+            all_player_data.extend(data)
+
+        batches = []
+        while len(ally_codes) > 5:
+            batches.append(ally_codes[:5])
+            del ally_codes[:5]
+        batches.append(ally_codes)
+
+        with Pool(processes=3) as pool:
+            pool.map(download_player_data, batches)
+
         # (C) Create or update all Player instance, deleting players no longer
         # present
         with transaction.atomic():
             player_id_array = []
 
-            for player_data in guild_data['roster']:
+            for player_data in all_player_data:
+                ally_code = player_data['allyCode']
                 player, _ = Player.objects.update_or_create(
                     api_id=player_data['id'],
                     defaults={
                         'guild': guild,
                         'name': player_data['name'],
                         'level': player_data['level'],
-                        'ally_code': player_data['allyCode'],
-                        'gp': player_data['gp'],
-                        'gp_char': player_data['gpChar'],
-                        'gp_ship': player_data['gpShip']})
+                        'ally_code': ally_code,
+                        'gp': player_data['stats'][0]['value'],
+                        'gp_char': player_data['stats'][1]['value'],
+                        'gp_ship': player_data['stats'][2]['value']})
+                player.save()  # force last updated change
+
+                # Create all the data related to this player
+                Player.objects.update_player_units(player, player_data['roster'])
                 player_id_array.append(player.id)
 
             guild.player_set.exclude(id__in=player_id_array).delete()
 
-        # (D) For each Player, create or update PlayerUnits and Zetas
-        # Note:
-        # - We assume that a PlayerUnit never disappear
-        # - It's ok to fail a player's units update (504 error are common),
-        #   just print some error message.
-
-        player_data_map = {}
-        with Pool(processes=5) as pool:
-            pool.map(lambda p: self.download_player_data(p, player_data_map),
-                     guild.player_set.all())
-
-        for player in guild.player_set.all():
-            if player in player_data_map:
-                Player.objects.update_player_units(player,
-                                                   player_data_map[player])
-
         return guild
-
-    @staticmethod
-    def download_player_data(player, player_data_map):
-        try:
-            player_data = swgoh.api.get_player_unit_list(
-                int(player.ally_code))
-        except swgoh.SwgohError as error:
-            error_string = \
-                "Error downloading data for player {} (status code: {})"
-            print(error_string.format(
-                player.name, error.response.status_code))
-            return
-        player_data_map[player] = player_data
 
 
 class GuildSet(models.QuerySet):
@@ -335,7 +325,7 @@ class Guild(models.Model):
 class PlayerManager(models.Manager):
     def update_or_create_from_swgoh(self, ally_code):
         # Get player data
-        player_data = swgoh.api.get_player_data(ally_code)
+        player_data = swgoh.api.get_player_data(ally_code)[0]
 
         if player_data['guildRefId'] != '':
             guild = Guild.objects.update_or_create_from_swgoh(
@@ -355,21 +345,10 @@ class PlayerManager(models.Manager):
                     'gp_char': player_data['stats'][1]['value'],
                     'gp_ship': player_data['stats'][2]['value']})
 
-            self.update_player_units(player)
+            self.update_player_units(player, all_units_data=player_data['roster'])
 
     @staticmethod
-    def update_player_units(player, player_data=None):
-        if player_data is None:
-            try:
-                player_data = swgoh.api.get_player_unit_list(
-                    int(player.ally_code))
-            except swgoh.SwgohError as error:
-                error_string = \
-                    "Error downloading data for player {} (status code: {})"
-                print(error_string.format(
-                    player.name, error.response.status_code))
-                return
-
+    def update_player_units(player, all_units_data):
         with transaction.atomic():
             # Delete everything and batch create
             PlayerUnit.objects.filter(player=player).delete()
@@ -378,9 +357,12 @@ class PlayerManager(models.Manager):
             pugs_to_create = []
             mods_to_create = []
 
-            for unit_id in player_data:
-                unit = Unit.objects.get(api_id=unit_id)
-                unit_data = player_data[unit_id]
+            for unit_data in all_units_data:
+                # ignore ships
+                if unit_data['combatType'] != 1:
+                    continue
+
+                unit = Unit.objects.get(api_id=unit_data['defId'])
                 unit_stats = unit_data['stats']['final']
 
                 # (D1) Update player model
@@ -388,11 +370,11 @@ class PlayerManager(models.Manager):
                     player=player,
                     unit=unit,
 
-                    gp=unit_data['unit']['gp'],
-                    rarity=unit_data['unit']['starLevel'],
-                    level=unit_data['unit']['level'],
-                    gear=unit_data['unit']['gearLevel'],
-                    equipped_count=len(unit_data['unit']['gear']),
+                    gp=unit_data['gp'],
+                    rarity=unit_data['rarity'],
+                    level=unit_data['level'],
+                    gear=unit_data['gear'],
+                    equipped_count=len(unit_data['equipped']),
 
                     speed=unit_stats['Speed'],
                     health=unit_stats['Health'],
@@ -416,32 +398,32 @@ class PlayerManager(models.Manager):
                 player_unit.save()
 
                 # (D2) Update Zeta model
-                for zeta_data in unit_data['unit']['zetas']:
-                    zeta = Zeta(
-                        player_unit=player_unit,
-                        skill=Skill.objects.get(api_id=zeta_data['id']))
-                    zetas_to_create.append(zeta)
+                for skill_data in unit_data['skills']:
+                    if skill_data['isZeta'] and skill_data['tier'] == 8:
+                        zeta = Zeta(
+                            player_unit=player_unit,
+                            skill=Skill.objects.get(api_id=skill_data['id']))
+                        zetas_to_create.append(zeta)
 
                 # (D3) Update PlayerUnitGear model
-                for gear_id in unit_data['unit']['gear']:
+                for gear_data in unit_data['equipped']:
                     pug = PlayerUnitGear(
                         player_unit=player_unit,
-                        gear=Gear.objects.get(api_id=gear_id))
+                        gear=Gear.objects.get(api_id=gear_data['equipmentId']))
                     pugs_to_create.append(pug)
 
                 # (D4) Update Mod model
-                for idx, mod_data in enumerate(unit_data['unit']['mods']):
-                    if mod_data:
-                        mod = Mod(
-                            api_id=mod_data['id'],
-                            player_unit=player_unit,
-                            mod_set=mod_data['set'],
-                            slot=idx,
-                            level=mod_data['level'],
-                            pips=mod_data['pips'],
-                            tier=mod_data['tier'])
-                        mod.update_stats(mod_data['stat'])
-                        mods_to_create.append(mod)
+                for mod_data in unit_data['mods']:
+                    mod = Mod(
+                        api_id=mod_data['id'],
+                        player_unit=player_unit,
+                        mod_set=mod_data['set'],
+                        slot=mod_data['slot'] - 1,
+                        level=mod_data['level'],
+                        pips=mod_data['pips'],
+                        tier=mod_data['tier'])
+                    mod.update_stats(mod_data)
+                    mods_to_create.append(mod)
 
             Zeta.objects.bulk_create(zetas_to_create)
             PlayerUnitGear.objects.bulk_create(pugs_to_create)
@@ -729,9 +711,8 @@ class Mod(models.Model):
     critical_avoidance = models.FloatField(default=0.)
     accuracy = models.FloatField(default=0.)
 
-    def update_stats(self, stat_list):
-        for stat in stat_list:
-            if stat[0] != 0:
-                setattr(self,
-                        MOD_STAT_MAP[stat[0]]['name'],
-                        stat[1] * MOD_STAT_MAP[stat[0]]['mult'])
+    def update_stats(self, mod_data):
+        for stat in [mod_data['primaryStat'], *mod_data['secondaryStat']]:
+            modified_stat_info = MOD_STAT_MAP[stat['unitStat']]
+            setattr(self, modified_stat_info['name'],
+                    stat['value'] * modified_stat_info['mult'])

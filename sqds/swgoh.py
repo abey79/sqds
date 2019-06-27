@@ -61,8 +61,7 @@ class Swgoh:
         try:
             data = response.json()
             self.access_token = data['access_token']
-            self.auth_expiry_time = now + \
-                datetime.timedelta(seconds=data['expires_in'])
+            self.auth_expiry_time = now + datetime.timedelta(seconds=data['expires_in'])
         except KeyError:
             raise AuthenticationError(response=response)
 
@@ -84,7 +83,7 @@ class Swgoh:
                 })
             return response.json()
         except requests.exceptions.RequestException:
-            raise ApiError(response=response)
+            raise ApiError()
 
     def get_skill_list(self):
         try:
@@ -104,7 +103,7 @@ class Swgoh:
                 })
             return response.json()
         except requests.exceptions.RequestException:
-            raise ApiError(response=response)
+            raise ApiError()
 
     def get_ability_list(self):
         try:
@@ -123,7 +122,7 @@ class Swgoh:
                 })
             return response.json()
         except requests.exceptions.RequestException:
-            raise ApiError(response=response)
+            raise ApiError()
 
     def get_gear_list(self):
         try:
@@ -146,7 +145,7 @@ class Swgoh:
                 })
             return response.json()
         except requests.exceptions.RequestException:
-            raise ApiError(response=response)
+            raise ApiError()
 
     def get_category_list(self):
         try:
@@ -167,7 +166,7 @@ class Swgoh:
                 })
             return response.json()
         except requests.exceptions.RequestException:
-            raise ApiError(response=response)
+            raise ApiError()
 
     def get_guild_list(self, ally_code):
         try:
@@ -200,38 +199,57 @@ class Swgoh:
                 raise ApiError(response=response)
             return response.json()[0]
         except requests.exceptions.RequestException:
-            raise ApiError(response=response)
+            raise ApiError()
 
-    def get_player_data(self, ally_code):
+    def get_player_data(self, ally_codes, calc_stats=True):
         try:
             response = requests.post(
                 url="%s/swgoh/player" % self.base_url,
                 headers=self.get_auth_header(),
                 json={
-                    "allycodes": ally_code,
+                    "allycodes": ally_codes,
                     "language": "eng_us",
-                    "enums": True
+                    "enums": False,
+                    "project": {
+                        "roster": True,
+                        "updated": True,
+                        "id": True,
+                        "guildRefId": True,
+                        "allyCode": True,
+                        "level": True,
+                        "stats": True,
+                        "lastActivity": True,
+                        "name": True
+                    }
                 })
             if response.status_code == 404:
                 return None
             if response.status_code != 200:
                 raise ApiError(response=response)
-            return response.json()[0]
-        except requests.exceptions.RequestException:
-            raise ApiError(response=response)
 
-    def get_player_unit_list(self, ally_code):
-        try:
-            response = requests.get(
-                url="https://crinolo-swgoh.glitch.me"
-                "/statCalc/api/characters/player/%d" % ally_code,
-                # headers=self.get_auth_header(),
-                params={'flags': 'withModCalc,gameStyle'})
-            if response.status_code != 200:
-                raise ApiError(response=response)
-            return response.json()
+            if calc_stats:
+                response2 = requests.post(
+                    url="https://crinolo-swgoh.glitch.me/testCalc/api/characters",
+                    params={
+                        "flags": "gameStyle",
+                        "language": "eng_us",
+                    },
+                    headers={
+                        "Content-Type": "application/json",
+                    },
+                    json=response.json()
+                )
+
+                if response2.status_code == 404:
+                    return None
+                if response2.status_code != 200:
+                    raise ApiError(response=response2)
+
+                return response2.json()
+            else:
+                return response.json()
         except requests.exceptions.RequestException:
-            raise ApiError(response=response)
+            raise ApiError()
 
 
 # pylint: disable=invalid-name

@@ -10,6 +10,9 @@ django-debug-toolbar
 django-enumfield
 django-meta
 
+# API stuff
+requests
+
 # Database stuff
 mysqlclient
 psycopg2
