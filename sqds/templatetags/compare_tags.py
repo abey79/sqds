@@ -59,6 +59,11 @@ def player_comparison(player1, player2):
                                            player2.seven_star_unit_count)
             },
             {
+                'label': '&nbsp;&nbsp;&nbsp;G13', 'label_type': 'td',
+                **compute_data_and_classes(player1.g13_unit_count,
+                                           player2.g13_unit_count)
+            },
+            {
                 'label': '&nbsp;&nbsp;&nbsp;G12', 'label_type': 'td',
                 **compute_data_and_classes(player1.g12_unit_count,
                                            player2.g12_unit_count)

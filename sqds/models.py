@@ -209,6 +209,8 @@ class GuildSet(models.QuerySet):
             cnt=Count('player_set__unit_set'))
         seven_star_unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('player_set__unit_set', filter=Q(player_set__unit_set__rarity=7)))
+        g13_unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set', filter=Q(player_set__unit_set__gear=13)))
         g12_unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('player_set__unit_set', filter=Q(player_set__unit_set__gear=12)))
         g11_unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
@@ -265,6 +267,8 @@ class GuildSet(models.QuerySet):
                                 output_field=models.IntegerField()),
             seven_star_unit_count=Subquery(seven_star_unit_count.values('cnt'),
                                            output_field=models.IntegerField()),
+            g13_unit_count=Subquery(g13_unit_count.values('cnt'),
+                                    output_field=models.IntegerField()),
             g12_unit_count=Subquery(g12_unit_count.values('cnt'),
                                     output_field=models.IntegerField()),
             g11_unit_count=Subquery(g11_unit_count.values('cnt'),
@@ -436,6 +440,8 @@ class PlayerSet(models.QuerySet):
             cnt=Count('unit_set'))
         seven_star_unit_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set', filter=Q(unit_set__rarity=7)))
+        g13_unit_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('unit_set', filter=Q(unit_set__gear=13)))
         g12_unit_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set', filter=Q(unit_set__gear=12)))
         g11_unit_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
@@ -483,6 +489,8 @@ class PlayerSet(models.QuerySet):
                                 output_field=models.IntegerField()),
             seven_star_unit_count=Subquery(seven_star_unit_count.values('cnt'),
                                            output_field=models.IntegerField()),
+            g13_unit_count=Subquery(g13_unit_count.values('cnt'),
+                                    output_field=models.IntegerField()),
             g12_unit_count=Subquery(g12_unit_count.values('cnt'),
                                     output_field=models.IntegerField()),
             g11_unit_count=Subquery(g11_unit_count.values('cnt'),
@@ -598,6 +606,8 @@ class PlayerUnit(models.Model):
             color_code = '95F'
         elif self.gear in [12]:
             color_code = 'FD6'
+        elif self.gear in [13]:
+            color_code = 'D53'
         return format_html(
             '<b style="color: #{}; text-shadow: -1px -1px 0 #333,'
             ' 1px -1px 0 #333, -1px 1px 0 #333, 1px 1px 0 #333">G{}</b>',

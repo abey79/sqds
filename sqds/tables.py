@@ -67,6 +67,7 @@ class PlayerTable(RowCounterTable):
 
     unit_count = LargeIntColumn('Characters', initial_sort_descending=True)
     seven_star_unit_count = LargeIntColumn('7*', initial_sort_descending=True)
+    g13_unit_count = LargeIntColumn('G13', initial_sort_descending=True)
     g12_unit_count = LargeIntColumn('G12', initial_sort_descending=True)
     g11_unit_count = LargeIntColumn('G11', initial_sort_descending=True)
     g10_unit_count = LargeIntColumn('G10', initial_sort_descending=True)
@@ -111,9 +112,9 @@ class PlayerTable(RowCounterTable):
         model = Player
         fields = ('row_counter', 'name', 'guild_name',
                   'level', 'gp', 'gp_char', 'gp_ship', 'sep_gp', 'unit_count',
-                  'seven_star_unit_count', 'g12_unit_count', 'g11_unit_count',
-                  'g10_unit_count', 'right_hand_g12_gear_count', 'zeta_count',
-                  'mod_count_speed_25', 'mod_count_speed_20',
+                  'seven_star_unit_count', 'g13_unit_count', 'g12_unit_count',
+                  'g11_unit_count', 'g10_unit_count', 'right_hand_g12_gear_count',
+                  'zeta_count', 'mod_count_speed_25', 'mod_count_speed_20',
                   'mod_count_speed_15', 'mod_count_speed_10',
                   'mod_total_speed_15plus')
 
