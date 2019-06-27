@@ -6,9 +6,8 @@ sqdssite/local_settings.py
 sqds/swgoh_local.py
 *.sqlite
 *.sqlite3
-*.ipynb
-.ipynb_checkpoints
 .env
-.static
+/static
 .coverage
 htmlcov
+/notebooks
