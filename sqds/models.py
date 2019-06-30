@@ -375,7 +375,7 @@ class PlayerManager(models.Manager):
                     player=player,
                     unit=unit,
 
-                    gp=unit_data['gp'],
+                    gp=unit_data['gp'] if unit_data['gp'] is not None else 0,
                     rarity=unit_data['rarity'],
                     level=unit_data['level'],
                     gear=unit_data['gear'],
