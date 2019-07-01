@@ -3,10 +3,10 @@ from django.test import TestCase
 from django.urls import reverse
 
 from sqds.models import Player, Guild, Category, Unit
-from sqds.tests.utils import generate_game_data, generate_guild
 from sqds.templatetags.sqds_filters import big_number
+from sqds.tests.utils import generate_game_data, generate_guild
 from sqds_seed.factories import CategoryFactory, UnitFactory, PlayerUnitFactory, \
-    PlayerFactory
+    PlayerFactory, ModFactory
 
 
 def string_to_float(s):
@@ -54,6 +54,39 @@ class TableTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         generate_game_data()
+
+    def test_player_unit_table_mod_speed_vs_pure_mod_speed(self):
+        player = PlayerFactory()
+
+        def create_mod_set(player_unit, speeds):
+            for i in range(6):
+                ModFactory(player_unit=player_unit, slot=i,
+                           speed=speeds[i])
+
+        pu1 = PlayerUnitFactory(player=player, unit=Unit.objects.first(), gp=1000,
+                                mod_speed=0)
+        create_mod_set(pu1, [0, 0, 0, 0, 0, 0])
+
+        pu2 = PlayerUnitFactory(player=player, unit=Unit.objects.first(), gp=999,
+                                mod_speed=45)
+        create_mod_set(pu2, [5, 6, 7, 8, 9, 10])
+
+        pu3 = PlayerUnitFactory(player=player, unit=Unit.objects.first(), gp=998,
+                                mod_speed=100)
+        create_mod_set(pu3, [8, 8, 8, 8, 8, 8])
+
+        url = reverse('sqds:units')
+        response = self.client.get(url)
+        soup = BeautifulSoup(response.content, 'lxml')
+        table = soup.find_all('div', class_='table-container')[0].table
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(string_to_float(table_get_cell(table, 'Mod speed', 0)), 0)
+        self.assertEqual(string_to_float(table_get_cell(table, 'Pure mod speed', 0)), 0)
+        self.assertEqual(string_to_float(table_get_cell(table, 'Mod speed', 1)), 45)
+        self.assertEqual(string_to_float(table_get_cell(table, 'Pure mod speed', 1)), 45)
+        self.assertEqual(string_to_float(table_get_cell(table, 'Mod speed', 2)), 100)
+        self.assertEqual(string_to_float(table_get_cell(table, 'Pure mod speed', 2)), 48)
 
     def test_player_unit_table_single_unit(self):
         player = PlayerFactory()

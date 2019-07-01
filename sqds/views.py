@@ -148,8 +148,9 @@ class GuildUnitsView(MetadataMixin, SingleTableMixin, FilterView):
         self.guild = Guild.objects.get(api_id=self.kwargs['api_id'])
 
     def get_queryset(self):
-        qs = self.model.objects.filter(player__guild__api_id=self.kwargs['api_id'])
-        return qs
+        return (self.model.objects
+                .filter(player__guild__api_id=self.kwargs['api_id'])
+                .annotate_stats())
 
     def get_meta_title(self, **kwargs):
         return "Guild units: " + self.guild.name
@@ -189,11 +190,10 @@ class GuildComparisonUnitsView(MetadataMixin, SingleTableMixin, FilterView):
                 }}
 
     def get_queryset(self):
-        qs = self.model.objects.filter(
-            Q(player__guild__api_id=self.kwargs['api_id1'])
-            | Q(player__guild__api_id=self.kwargs['api_id2']))
-
-        return qs
+        return (self.model.objects
+                .filter(Q(player__guild__api_id=self.kwargs['api_id1'])
+                        | Q(player__guild__api_id=self.kwargs['api_id2']))
+                .annotate_stats())
 
     def get_meta_title(self, **kwargs):
         return format_html("Guild comparison units: <b>{}</b> vs. {}",
@@ -233,7 +233,9 @@ class SinglePlayerView(MetadataMixin, SingleTableMixin, FilterView):
                        .get(ally_code=self.kwargs['ally_code']))
 
     def get_queryset(self):
-        return self.model.objects.filter(player__ally_code=self.kwargs['ally_code'])
+        return (self.model.objects
+                .filter(player__ally_code=self.kwargs['ally_code'])
+                .annotate_stats())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -287,9 +289,10 @@ class PlayerCompareView(MetadataMixin, SingleTableMixin, FilterView):
                 }}
 
     def get_queryset(self):
-        return self.model.objects.filter(
-            Q(player__ally_code=self.kwargs['ally_code1'])
-            | Q(player__ally_code=self.kwargs['ally_code2']))
+        return (self.model.objects
+                .filter(Q(player__ally_code=self.kwargs['ally_code1'])
+                        | Q(player__ally_code=self.kwargs['ally_code2']))
+                .annotate_stats())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -298,7 +301,8 @@ class PlayerCompareView(MetadataMixin, SingleTableMixin, FilterView):
         return context
 
     def get_meta_title(self, **kwargs):
-        return "Player compare: {} vs. {}".format(self.player1.name, self.player2.name)
+        return "Player compare: {} vs. {}".format(self.player1.name,
+                                                  self.player2.name)
 
     def get_meta_description(self, context=None):
         sort_string = str(context['table'].order_by)
@@ -357,9 +361,10 @@ class AllPlayerUnitsListView(SingleTableMixin, FilterView):
 
     def get_queryset(self):
         if 'ally_code' in self.kwargs:
-            qs = self.model.objects.filter(
-                player__ally_code=self.kwargs['ally_code'])
+            qs = (self.model.objects
+                  .filter(player__ally_code=self.kwargs['ally_code'])
+                  .annotate_stats())
         else:
-            qs = self.model.objects.all()
+            qs = self.model.objects.all().annotate_stats()
 
         return qs

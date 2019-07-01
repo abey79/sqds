@@ -1,6 +1,7 @@
 from multiprocessing.dummy import Pool
 
 from django.db import models, transaction
+from django.db.models.functions import Coalesce
 from django.utils.html import format_html
 from django.db.models import Q, Sum, Count, Subquery, OuterRef
 
@@ -572,6 +573,15 @@ class Player(models.Model):
         return self.name
 
 
+class PlayerUnitSet(models.QuerySet):
+    def annotate_stats(self):
+        mod_speed_no_set = PlayerUnit.objects.filter(pk=OuterRef('pk')).annotate(
+            mod_speed_no_set=Coalesce(Sum('mod_set__speed'), 0))
+        return self.annotate(
+            mod_speed_no_set=Subquery(mod_speed_no_set.values('mod_speed_no_set'),
+                                      output_field=models.IntegerField()))
+
+
 class PlayerUnit(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
     player = models.ForeignKey(
@@ -620,6 +630,8 @@ class PlayerUnit(models.Model):
     mod_accuracy = models.FloatField(verbose_name="Mod acc.")
 
     last_updated = models.DateTimeField(auto_now=True)
+
+    objects = PlayerUnitSet.as_manager()
 
     class Meta:
         ordering = ['player__name', 'unit__name']

@@ -158,7 +158,10 @@ class PlayerUnitTable(RowCounterTable):
                                       'equipped_count'])
     zeta_summary = tables.Column('Zetas', initial_sort_descending=True)
 
-    mod_speed = LargeIntColumn(initial_sort_descending=True, plus_prefix=True)
+    mod_speed = LargeIntColumn(
+        initial_sort_descending=True, plus_prefix=True, attrs={
+            'th': {'data-toggle': 'tooltip',
+                   'title': "Speed from mods, including any mod set bonus."}})
     mod_health = LargeIntColumn(initial_sort_descending=True, plus_prefix=True)
     mod_protection = LargeIntColumn(initial_sort_descending=True, plus_prefix=True)
     mod_physical_damage = LargeIntColumn(initial_sort_descending=True, plus_prefix=True)
@@ -169,6 +172,11 @@ class PlayerUnitTable(RowCounterTable):
                                             plus_prefix=True)
     mod_potency = PercentColumn(initial_sort_descending=True, plus_prefix=True)
     mod_tenacity = PercentColumn(initial_sort_descending=True, plus_prefix=True)
+
+    mod_speed_no_set = LargeIntColumn(
+        initial_sort_descending=True, plus_prefix=True, verbose_name='Pure mod speed',
+        attrs={'th': {'data-toggle': 'tooltip',
+                      'title': "Speed from mods, without accounting for mod set bonus."}})
 
     # noinspection PyMethodMayBeStatic
     def order_zeta_summary(self, query_set, is_descending):
@@ -181,12 +189,12 @@ class PlayerUnitTable(RowCounterTable):
         model = PlayerUnit
         order_by = '-gp'
         sequence = ('row_counter', 'unit', 'player', 'gp', 'summary', 'zeta_summary',
-                    'speed', 'mod_speed', 'health', 'mod_health', 'protection',
-                    'mod_protection', 'physical_damage', 'mod_physical_damage',
-                    'physical_crit_chance', 'mod_physical_crit_chance',
-                    'special_damage', 'mod_special_damage', 'special_crit_chance',
-                    'mod_special_crit_chance', 'crit_damage', 'potency',
-                    'mod_potency', 'tenacity', 'mod_tenacity', '...')
+                    'speed', 'mod_speed', 'mod_speed_no_set', 'health', 'mod_health',
+                    'protection', 'mod_protection', 'physical_damage',
+                    'mod_physical_damage', 'physical_crit_chance',
+                    'mod_physical_crit_chance', 'special_damage', 'mod_special_damage',
+                    'special_crit_chance', 'mod_special_crit_chance', 'crit_damage',
+                    'potency', 'mod_potency', 'tenacity', 'mod_tenacity', '...')
 
         exclude = ('id', 'rarity', 'level', 'gear',
                    'equipped_count', 'armor_penetration',
