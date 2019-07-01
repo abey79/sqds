@@ -135,6 +135,22 @@ class PlayerUnitFactory(factory.DjangoModelFactory):
     armor_penetration = factory.Faker('pyint', min=0, max=200)
     resistance_penetration = factory.Faker('pyint', min=0, max=200)
     health_steal = factory.Faker('gaussian_percent')
+    accuracy = factory.Faker('gaussian_percent')
+
+    mod_speed = factory.Faker('pyint', min=0, max=150)
+    mod_health = factory.Faker('pyint', min=50, max=1500)
+    mod_protection = factory.Faker('pyint', min=100, max=10000)
+    mod_physical_damage = factory.Faker('pyint', min=50, max=2000)
+    mod_special_damage = factory.Faker('pyint', min=50, max=2000)
+    mod_physical_crit_chance = factory.Faker('gaussian_percent')
+    mod_special_crit_chance = factory.Faker('gaussian_percent')
+    mod_crit_damage = factory.Faker('gaussian_percent')
+    mod_potency = factory.Faker('gaussian_percent')
+    mod_tenacity = factory.Faker('gaussian_percent')
+    mod_armor = factory.Faker('gaussian_percent')
+    mod_resistance = factory.Faker('gaussian_percent')
+    mod_critical_avoidance = factory.Faker('gaussian_percent')
+    mod_accuracy = factory.Faker('gaussian_percent')
 
 
 class ZetaFactory(factory.DjangoModelFactory):

@@ -11,3 +11,5 @@ sqds/swgoh_local.py
 .coverage
 htmlcov
 /notebooks
+/.ipynb_checkpoints
+*.ipynb

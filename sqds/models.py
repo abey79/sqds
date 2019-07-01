@@ -369,6 +369,7 @@ class PlayerManager(models.Manager):
 
                 unit = Unit.objects.get(api_id=unit_data['defId'])
                 unit_stats = unit_data['stats']['final']
+                mod_stats = unit_data['stats']['mods']
 
                 # (D1) Update player model
                 player_unit = PlayerUnit(
@@ -399,7 +400,25 @@ class PlayerManager(models.Manager):
                     armor_penetration=unit_stats.get('Armor Penetration', 0),
                     resistance_penetration=unit_stats.get(
                         'Resistance Penetration', 0),
-                    health_steal=unit_stats.get('Health Steal', 0.0))
+                    health_steal=unit_stats.get('Health Steal', 0.0),
+                    accuracy=unit_stats.get('Accuracy', 0.0),
+
+                    mod_speed=mod_stats.get('Speed', 0.0),
+                    mod_health=mod_stats.get('Health', 0.0),
+                    mod_protection=mod_stats.get('Protection', 0.0),
+                    mod_physical_damage=mod_stats.get('Physical Damage', 0.0),
+                    mod_special_damage=mod_stats.get('Special Damage', 0.0),
+                    mod_physical_crit_chance=mod_stats.get('Physical Critical Chance',
+                                                           0.0),
+                    mod_special_crit_chance=mod_stats.get('Special Critical Chance', 0.0),
+                    mod_crit_damage=mod_stats.get('Critical Damage', 0.0),
+                    mod_potency=mod_stats.get('Potency', 0.0),
+                    mod_tenacity=mod_stats.get('Tenacity', 0.0),
+                    mod_armor=mod_stats.get('Armor', 0.0),
+                    mod_resistance=mod_stats.get('Resistance', 0.0),
+                    mod_critical_avoidance=mod_stats.get('Critical Avoidance', 0.0),
+                    mod_accuracy=mod_stats.get('Accuracy', 0.0)
+                )
                 player_unit.save()
 
                 # (D2) Update Zeta model
@@ -536,7 +555,7 @@ class Player(models.Model):
                               related_name="player_set")
     name = models.CharField(max_length=200)
     level = models.IntegerField()
-    ally_code = models.IntegerField()
+    ally_code = models.IntegerField(db_index=True)
 
     gp = models.IntegerField(verbose_name='GP')
     gp_char = models.IntegerField(verbose_name='GP (Characters)')
@@ -583,6 +602,22 @@ class PlayerUnit(models.Model):
     armor_penetration = models.IntegerField()
     resistance_penetration = models.IntegerField()
     health_steal = models.FloatField()
+    accuracy = models.FloatField(verbose_name="Acc.")
+
+    mod_speed = models.IntegerField(verbose_name="Mod speed")
+    mod_health = models.IntegerField(verbose_name="Mod HP")
+    mod_protection = models.IntegerField(verbose_name="Mod prot.")
+    mod_physical_damage = models.IntegerField(verbose_name="Mod phys. dmg")
+    mod_special_damage = models.IntegerField(verbose_name="Mod spec. dmg")
+    mod_physical_crit_chance = models.FloatField(verbose_name="Mod phys. CC")
+    mod_special_crit_chance = models.FloatField(verbose_name="Mod spec. CC")
+    mod_crit_damage = models.FloatField(verbose_name="Mod CD")
+    mod_potency = models.FloatField(verbose_name="Mod pot.")
+    mod_tenacity = models.FloatField(verbose_name="Mod ten.")
+    mod_armor = models.FloatField(verbose_name="Mod armor")
+    mod_resistance = models.FloatField(verbose_name="Mod res.")
+    mod_critical_avoidance = models.FloatField(verbose_name="Mod CA")
+    mod_accuracy = models.FloatField(verbose_name="Mod acc.")
 
     last_updated = models.DateTimeField(auto_now=True)
 
