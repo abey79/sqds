@@ -1,19 +1,21 @@
 from textwrap import wrap
 
-from django.db.models.functions import Lower
+import numpy as np
+import plotly.graph_objs as go
+import plotly.offline as opy
 from django.db.models import Q, F
+from django.db.models.functions import Lower
 from django.shortcuts import render, redirect
 from django.utils.html import format_html
 from django.views.generic import DetailView
-
-from django_tables2.views import SingleTableMixin
 from django_filters import FilterSet, ChoiceFilter
 from django_filters.views import FilterView
+from django_tables2.views import SingleTableMixin
 from meta.views import MetadataMixin
 
-from .utils import format_large_int
-from .tables import PlayerTable, PlayerUnitTable
 from .models import Category, Guild, Player, PlayerUnit, Unit
+from .tables import PlayerTable, PlayerUnitTable
+from .utils import format_large_int
 
 
 def index(request):
@@ -256,6 +258,10 @@ class SinglePlayerView(MetadataMixin, SingleTableMixin, FilterView):
             '-'.join(wrap(str(self.player.ally_code), 3)))
 
 
+##########################################################################################
+## PLAYER COMPARE VIEW                                                                  ##
+##########################################################################################
+
 class PlayerCompareView(MetadataMixin, SingleTableMixin, FilterView):
     table_class = PlayerUnitTable
     model = PlayerUnit
@@ -298,6 +304,8 @@ class PlayerCompareView(MetadataMixin, SingleTableMixin, FilterView):
         context = super().get_context_data(**kwargs)
         context['player1'] = self.player1
         context['player2'] = self.player2
+        context['mod_speed_graph'] = self.generate_mod_speed_graph()
+        context['gp_analysis_graph'] = self.generate_gp_analysis_graph()
         return context
 
     def get_meta_title(self, **kwargs):
@@ -317,6 +325,54 @@ class PlayerCompareView(MetadataMixin, SingleTableMixin, FilterView):
             self.player2.guild.name,
             self.player2.name,
             '-'.join(wrap(str(self.player2.ally_code), 3)))
+
+    def generate_mod_speed_graph(self):
+        traces = []
+        for player in [self.player1, self.player2]:
+            qs = (PlayerUnit.objects
+                  .filter(player__name=player)
+                  .order_by('-mod_speed')
+                  .values_list('mod_speed', 'unit__name'))
+            values = list(zip(*qs))
+            y_data = values[0]
+            labels = values[1]
+            traces.append(go.Scatter(
+                x=list(range(len(y_data))),
+                y=y_data,
+                text=labels,
+                name=player.name,
+                line=dict(shape='hv')))
+
+        layout = go.Layout(xaxis={'title': 'Characters, sorted by decreasing mod speed'},
+                           yaxis={'title': 'mod speed bonus'},
+                           showlegend=False,
+                           height=400,
+                           margin=go.layout.Margin(l=60, r=10, b=60, t=40, pad=4))
+        figure = go.Figure(data=traces, layout=layout)
+        return opy.plot(figure, auto_open=False, output_type='div')
+
+    def generate_gp_analysis_graph(self):
+        gp1, gp2 = [np.cumsum(np.array(PlayerUnit.objects
+                                       .filter(player__name=player)
+                                       .order_by('-gp')
+                                       .values_list('gp', flat=True)))
+                    for player in [self.player1, self.player2]]
+
+        max_len = min(len(gp1), len(gp2), 100)
+        gp1 = gp1[:max_len]
+        gp2 = gp2[:max_len]
+        mean_gp = (gp1 + gp2) * 0.5
+
+        traces = [go.Scatter(y=gp - mean_gp, name=player.name) for gp, player in
+                  [(gp1, self.player1), (gp2, self.player2)]]
+
+        layout = go.Layout(xaxis={'title': 'Characters, sorted by decreasing GP'},
+                           yaxis={'title': 'Dev. from mean cumul. GP'},
+                           showlegend=False,
+                           height=400,
+                           margin=go.layout.Margin(l=60, r=10, b=60, t=40, pad=4))
+        figure = go.Figure(data=traces, layout=layout)
+        return opy.plot(figure, auto_open=False, output_type='div')
 
 
 #######################################################################

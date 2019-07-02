@@ -159,8 +159,15 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 INTERNAL_IPS = ('51.154.2.60',)
 
+
+# noinspection PyUnusedLocal
+def custom_show_toolbar(request):
+    return (DEBUG
+            and 'test' not in sys.argv)
+
+
 DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': lambda _request: DEBUG and 'test' not in sys.argv
+    'SHOW_TOOLBAR_CALLBACK': 'sqdssite.settings.custom_show_toolbar'
 }
 
 # Meta configuration

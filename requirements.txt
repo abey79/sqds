@@ -17,6 +17,10 @@ requests
 mysqlclient
 psycopg2
 
+# Plot stuff
+numpy
+plotly
+
 # Test stuff
 faker
 factory_boy

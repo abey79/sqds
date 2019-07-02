@@ -6,35 +6,66 @@
 {% load sqds_filters %}
 {% load compare_tags %}
 
+{% block head %}
+  <!--suppress JSUnresolvedLibraryURL -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script lang="JavaScript">
+      $(function () {
+          $('[data-toggle="popover"]').popover()
+      })
+  </script>
+{% endblock %}
+
 
 {% block content %}
 
-<div class="row">
-  <div class="col-md-6 col-md-offset-3">
-    <div class="panel panel-default">
-      <div class="panel-heading">Statistics comparison</div>
-      {% player_comparison player1 player2 %}
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-md-12">
-    <div class="panel panel-default">
-      <div class="panel-heading">Characters</div>
-
-      {% if filter %}
-      <div class="panel-body">
-        <form action="" method="get" class="form form-inline">
-          {% bootstrap_form filter.form layout='inline' %}
-          {% bootstrap_button 'filter' %}
-        </form>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="panel panel-default">
+        <div class="panel-heading">Statistics comparison</div>
+        {% player_comparison player1 player2 %}
       </div>
-      {% endif %}
+    </div>
+    <div class="col-md-8">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <div class="panel-heading">Mod speed graph</div>
+            <div>
+              {{ mod_speed_graph|safe }}
+            </div>
+          </div>
+        </div>
 
-      {% render_table table %}
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <div class="panel-heading">GP analysis</div>
+            <div>
+              {{ gp_analysis_graph|safe }}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Characters</div>
+
+        {% if filter %}
+          <div class="panel-body">
+            <form action="" method="get" class="form form-inline">
+              {% bootstrap_form filter.form layout='inline' %}
+              {% bootstrap_button 'filter' %}
+            </form>
+          </div>
+        {% endif %}
+
+        {% render_table table %}
+      </div>
+    </div>
+  </div>
 
 {% endblock %}
