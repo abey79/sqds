@@ -1,0 +1,22 @@
+{% extends 'sqds/base.html' %}
+
+{% block title %}
+  PREPARE Separatist Farm
+{% endblock %}
+
+{% block head %}
+  <!--suppress JSUnresolvedLibraryURL -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">PREPARE's Separatist farm status</div>
+
+        {{ sep_farm_graph|safe }}
+      </div>
+    </div>
+  </div>
+{% endblock %}

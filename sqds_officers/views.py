@@ -1,11 +1,27 @@
-from django.db.models import Sum, Q, Case, When, BooleanField
+import pandas as pd
+import plotly.graph_objs as go
+import plotly.offline as opy
+from django.db.models import Sum, Q, Case, When, BooleanField, OuterRef, Subquery
+from django.db.models.functions import TruncDay
+from django.shortcuts import render
+from django.views.generic import TemplateView
 from django_filters import FilterSet, ChoiceFilter
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 from meta.views import MetadataMixin
 
 from sqds.models import Player, Unit, PlayerUnit
+from sqds_gphistory.models import GP
 from .tables import GeoTBPlayerTable
+
+
+def index(request):
+    return render(request, 'sqds_officers/index.html')
+
+
+##########################################################################################
+## GEO TB PLAYER VIEW                                                                   ##
+##########################################################################################
 
 
 class DRMalakFilterSet(FilterSet):
@@ -91,3 +107,59 @@ class GeoTBPlayerView(MetadataMixin, SingleTableMixin, FilterView):
 
     def get_meta_description(self, **kwargs):
         return "GeoTB analysis page for PREPARE's officers"
+
+
+##########################################################################################
+## SEPARATIST FARM PROGRESS VIEW                                                        ##
+##########################################################################################
+
+
+class SepFarmProgressView(MetadataMixin, TemplateView):
+    template_name = 'sqds_officers/sep_farm.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['sep_farm_graph'] = self.get_sep_farm_graph()
+        return context
+
+    # noinspection PyMethodMayBeStatic
+    def get_sep_farm_graph(self):
+        subquery = (GP.objects
+                    .filter(player_api_id=OuterRef('api_id'),
+                            unit__categories__api_id='affiliation_separatist')
+                    .annotate(created_date=TruncDay('created'))
+                    .values('created_date')
+                    .annotate(gp=Sum('gp'))
+                    .values('gp'))
+
+        qs = (Player.objects
+              .filter(guild__api_id='G2737841003')
+              .annotate(start_gp=Subquery(subquery.order_by('created_date')[:1]))
+              .annotate(end_gp=Subquery(subquery.order_by('-created_date')[:1]))
+              .values('name', 'start_gp', 'end_gp'))
+
+        df = pd.DataFrame(qs).sort_values(by='end_gp', ascending=False)
+        df['diff'] = df['end_gp'] - df['start_gp']
+
+        traces = [
+            go.Bar(
+                x=df['name'],
+                y=df['start_gp'],
+                name='June 21st'
+            ),
+            go.Bar(
+                x=df['name'],
+                y=df['diff'],
+                name='Improvement'
+            )
+        ]
+
+        layout = go.Layout(
+            yaxis={'title': 'Separatists total GP'},
+            barmode='stack',
+            showlegend=False,
+            height=600,
+            margin=go.layout.Margin(l=60, r=10, b=130, t=40, pad=4)
+        )
+        figure = go.Figure(data=traces, layout=layout)
+        return opy.plot(figure, auto_open=False, output_type='div')

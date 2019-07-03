@@ -20,6 +20,7 @@ psycopg2
 # Plot stuff
 numpy
 plotly
+pandas
 
 # Test stuff
 faker
