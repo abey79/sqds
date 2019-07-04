@@ -132,10 +132,12 @@ class PlayerTable(RowCounterTable):
 
 
 class PlayerUnitTable(RowCounterTable):
-    player = tables.Column(linkify=('sqds:player', {'ally_code': A('player.ally_code')}))
+    player = tables.Column(linkify=('sqds:player', {'ally_code': A('player.ally_code')}),
+                           attrs={'td': {'nowrap': 'nowrap'}})
 
     gp = LargeIntColumn(initial_sort_descending=True)
-    unit = tables.LinkColumn('sqds:unit', args=[A('id')])
+    unit = tables.LinkColumn('sqds:unit', args=[A('id')],
+                             attrs={'td': {'nowrap': 'nowrap'}})
 
     speed = LargeIntColumn(initial_sort_descending=True)
     health = LargeIntColumn(initial_sort_descending=True)
