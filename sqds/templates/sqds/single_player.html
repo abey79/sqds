@@ -26,6 +26,10 @@ Player: {{ player.name }}
             <td>{{ player.name }} (<a href="{% url 'sqds:player_refresh' player.ally_code %}">refresh</a>)</td>
           </tr>
           <tr>
+            <th>&nbsp;</th>
+            <td><a href="https://swgoh.gg/p/{{ player.ally_code }}/">swgoh.gg profile</a></td>
+          </tr>
+          <tr>
             <th>Guild</th>
             <td>{% if player.guild %}<a href="{% url 'sqds:guild' player.guild.api_id %}">{{ player.guild.name }}</a>{% endif %}</td>
           </tr>
