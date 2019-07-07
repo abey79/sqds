@@ -1,19 +1,33 @@
+{% load mod_tags %}
+
 {% if mod is not None %}
-  <div class="panel panel-default">
-    <div class="panel-heading">{{ set_text }} {{ slot_text }}</div>
+  {% comment %} <div class="panel panel-default">
+    <div class="panel-heading">{{ set_text }} {{ slot_text }}</div>{% endcomment %}
 
-    <table class="table">
-      <tr>
-        <th>Rarity</th>
-        <td>{{ pips_text }}</td>
-      </tr>
+  <div>
 
-      {% for stat in stat_list %}
-        <tr>
-          <th>{{ stat.label }}</th>
-          <td>{{ stat.value }}</td>
-        </tr>
-      {% endfor %}
-    </table>
+    <div style="text-align: center">
+
+
+      <div style="display: inline-block">
+        <div style="zoom: 0.75">
+          {% mod_icon mod %}
+        </div>
+        <p style="font-size: large; margin: 0; padding: -2px;">{% for i in pips_loop %}•{% endfor %}</p>
+      </div>
+    </div>
+    <div style="text-align: center">
+      <div style="display: inline-block">
+        <table style="text-align: left; border-spacing: 10px 0; border-collapse: separate;">
+          {% for stat in stat_list %}
+            <tr>
+              <th>{{ stat.label }}</th>
+              <td>{{ stat.value }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
   </div>
+
 {% endif %}

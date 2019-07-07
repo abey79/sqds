@@ -1,0 +1,144 @@
+div.mod {
+    width: 90px;
+    height: 90px;
+    position: relative;
+}
+
+div.mod.mod-square-e { background: url(mod-shape-atlas.png) 0 0; }
+div.mod.mod-arrow-e { background: url(mod-shape-atlas.png) -90px 0; }
+div.mod.mod-diamond-e { background: url(mod-shape-atlas.png) -180px 0; }
+div.mod.mod-triangle-e { background: url(mod-shape-atlas.png) -270px 0; }
+div.mod.mod-circle-e { background: url(mod-shape-atlas.png) -360px 0; }
+div.mod.mod-cross-e { background: url(mod-shape-atlas.png) -450px 0; }
+
+div.mod.mod-square-d { background: url(mod-shape-atlas.png) 0 -90px; }
+div.mod.mod-arrow-d { background: url(mod-shape-atlas.png) -90px -90px; }
+div.mod.mod-diamond-d { background: url(mod-shape-atlas.png) -180px -90px; }
+div.mod.mod-triangle-d { background: url(mod-shape-atlas.png) -270px -90px; }
+div.mod.mod-circle-d { background: url(mod-shape-atlas.png) -360px -90px; }
+div.mod.mod-cross-d { background: url(mod-shape-atlas.png) -450px -90px; }
+
+div.mod.mod-square-c { background: url(mod-shape-atlas.png) 0 -180px; }
+div.mod.mod-arrow-c { background: url(mod-shape-atlas.png) -90px -180px; }
+div.mod.mod-diamond-c { background: url(mod-shape-atlas.png) -180px -180px; }
+div.mod.mod-triangle-c { background: url(mod-shape-atlas.png) -270px -180px; }
+div.mod.mod-circle-c { background: url(mod-shape-atlas.png) -360px -180px; }
+div.mod.mod-cross-c { background: url(mod-shape-atlas.png) -450px -180px; }
+
+div.mod.mod-square-b { background: url(mod-shape-atlas.png) 0 -270px; }
+div.mod.mod-arrow-b { background: url(mod-shape-atlas.png) -90px -270px; }
+div.mod.mod-diamond-b { background: url(mod-shape-atlas.png) -180px -270px; }
+div.mod.mod-triangle-b { background: url(mod-shape-atlas.png) -270px -270px; }
+div.mod.mod-circle-b { background: url(mod-shape-atlas.png) -360px -270px; }
+div.mod.mod-cross-b { background: url(mod-shape-atlas.png) -450px -270px; }
+
+div.mod.mod-square-a { background: url(mod-shape-atlas.png) 0 -360px; }
+div.mod.mod-arrow-a { background: url(mod-shape-atlas.png) -90px -360px; }
+div.mod.mod-diamond-a { background: url(mod-shape-atlas.png) -180px -360px; }
+div.mod.mod-triangle-a { background: url(mod-shape-atlas.png) -270px -360px; }
+div.mod.mod-circle-a { background: url(mod-shape-atlas.png) -360px -360px; }
+div.mod.mod-cross-a { background: url(mod-shape-atlas.png) -450px -360px; }
+
+div.mod.mod-square-e-6pips { background: url(mod-shape-atlas.png) -540px 0; }
+div.mod.mod-arrow-e-6pips { background: url(mod-shape-atlas.png) -630px 0; }
+div.mod.mod-diamond-e-6pips { background: url(mod-shape-atlas.png) -720px 0; }
+div.mod.mod-triangle-e-6pips { background: url(mod-shape-atlas.png) -810px 0; }
+div.mod.mod-circle-e-6pips { background: url(mod-shape-atlas.png) -900px 0; }
+div.mod.mod-cross-e-6pips { background: url(mod-shape-atlas.png) -990px 0; }
+
+div.mod div.mod-set {
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    zoom: 0.8;
+    -moz-transform: scale(0.8);
+    transform-origin: 0 0;
+    -moz-transform-origin: 0 0;
+}
+
+div.mod.mod-square-e div.mod-set,
+div.mod.mod-square-e-6pips div.mod-set,
+div.mod.mod-square-d div.mod-set,
+div.mod.mod-square-c div.mod-set,
+div.mod.mod-square-b div.mod-set,
+div.mod.mod-square-a div.mod-set {top: 31px; left: 51px;}
+
+div.mod.mod-arrow-e div.mod-set,
+div.mod.mod-arrow-e-6pips div.mod-set,
+div.mod.mod-arrow-d div.mod-set,
+div.mod.mod-arrow-c div.mod-set,
+div.mod.mod-arrow-b div.mod-set,
+div.mod.mod-arrow-a div.mod-set {top: 25px; left: 53px;}
+
+div.mod.mod-diamond-e div.mod-set,
+div.mod.mod-diamond-e-6pips div.mod-set,
+div.mod.mod-diamond-d div.mod-set,
+div.mod.mod-diamond-c div.mod-set,
+div.mod.mod-diamond-b div.mod-set,
+div.mod.mod-diamond-a div.mod-set {top: 40px; left: 40px;}
+
+div.mod.mod-triangle-e div.mod-set,
+div.mod.mod-triangle-e-6pips div.mod-set,
+div.mod.mod-triangle-d div.mod-set,
+div.mod.mod-triangle-c div.mod-set,
+div.mod.mod-triangle-b div.mod-set,
+div.mod.mod-triangle-a div.mod-set {top: 47px; left: 40px;}
+
+div.mod.mod-circle-e div.mod-set,
+div.mod.mod-circle-e-6pips div.mod-set,
+div.mod.mod-circle-d div.mod-set,
+div.mod.mod-circle-c div.mod-set,
+div.mod.mod-circle-b div.mod-set,
+div.mod.mod-circle-a div.mod-set  {top: 40px; left: 40px;}
+
+div.mod.mod-cross-e div.mod-set,
+div.mod.mod-cross-e-6pips div.mod-set,
+div.mod.mod-cross-d div.mod-set,
+div.mod.mod-cross-c div.mod-set,
+div.mod.mod-cross-b div.mod-set,
+div.mod.mod-cross-a div.mod-set {top: 40px; left: 40px;}
+
+div.mod-set.mod-hp-e { background: url(mod-icon-atlas.png) 0 0;}
+div.mod-set.mod-off-e { background: url(mod-icon-atlas.png) -32px 0;}
+div.mod-set.mod-def-e { background: url(mod-icon-atlas.png) -64px 0;}
+div.mod-set.mod-sp-e { background: url(mod-icon-atlas.png) -96px 0;}
+div.mod-set.mod-cc-e { background: url(mod-icon-atlas.png) -128px 0;}
+div.mod-set.mod-cd-e { background: url(mod-icon-atlas.png) -160px 0;}
+div.mod-set.mod-pot-e { background: url(mod-icon-atlas.png) -192px 0;}
+div.mod-set.mod-ten-e { background: url(mod-icon-atlas.png) -224px 0;}
+
+div.mod-set.mod-hp-d { background: url(mod-icon-atlas.png) 0 -32px;}
+div.mod-set.mod-off-d { background: url(mod-icon-atlas.png) -32px -32px;}
+div.mod-set.mod-def-d { background: url(mod-icon-atlas.png) -64px -32px;}
+div.mod-set.mod-sp-d { background: url(mod-icon-atlas.png) -96px -32px;}
+div.mod-set.mod-cc-d { background: url(mod-icon-atlas.png) -128px -32px;}
+div.mod-set.mod-cd-d { background: url(mod-icon-atlas.png) -160px -32px;}
+div.mod-set.mod-pot-d { background: url(mod-icon-atlas.png) -192px -32px;}
+div.mod-set.mod-ten-d { background: url(mod-icon-atlas.png) -224px -32px;}
+
+div.mod-set.mod-hp-c { background: url(mod-icon-atlas.png) 0 -64px;}
+div.mod-set.mod-off-c { background: url(mod-icon-atlas.png) -32px -64px;}
+div.mod-set.mod-def-c { background: url(mod-icon-atlas.png) -64px -64px;}
+div.mod-set.mod-sp-c { background: url(mod-icon-atlas.png) -96px -64px;}
+div.mod-set.mod-cc-c { background: url(mod-icon-atlas.png) -128px -64px;}
+div.mod-set.mod-cd-c { background: url(mod-icon-atlas.png) -160px -64px;}
+div.mod-set.mod-pot-c { background: url(mod-icon-atlas.png) -192px -64px;}
+div.mod-set.mod-ten-c { background: url(mod-icon-atlas.png) -224px -64px;}
+
+div.mod-set.mod-hp-b { background: url(mod-icon-atlas.png) 0 -96px;}
+div.mod-set.mod-off-b { background: url(mod-icon-atlas.png) -32px -96px;}
+div.mod-set.mod-def-b { background: url(mod-icon-atlas.png) -64px -96px;}
+div.mod-set.mod-sp-b { background: url(mod-icon-atlas.png) -96px -96px;}
+div.mod-set.mod-cc-b { background: url(mod-icon-atlas.png) -128px -96px;}
+div.mod-set.mod-cd-b { background: url(mod-icon-atlas.png) -160px -96px;}
+div.mod-set.mod-pot-b { background: url(mod-icon-atlas.png) -192px -96px;}
+div.mod-set.mod-ten-b { background: url(mod-icon-atlas.png) -224px -96px;}
+
+div.mod-set.mod-hp-a { background: url(mod-icon-atlas.png) 0 -128px;}
+div.mod-set.mod-off-a { background: url(mod-icon-atlas.png) -32px -128px;}
+div.mod-set.mod-def-a { background: url(mod-icon-atlas.png) -64px -128px;}
+div.mod-set.mod-sp-a { background: url(mod-icon-atlas.png) -96px -128px;}
+div.mod-set.mod-cc-a { background: url(mod-icon-atlas.png) -128px -128px;}
+div.mod-set.mod-cd-a { background: url(mod-icon-atlas.png) -160px -128px;}
+div.mod-set.mod-pot-a { background: url(mod-icon-atlas.png) -192px -128px;}
+div.mod-set.mod-ten-a { background: url(mod-icon-atlas.png) -224px -128px;}

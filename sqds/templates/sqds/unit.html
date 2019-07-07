@@ -101,7 +101,7 @@
             <td>{{ player_unit.resistance | percent }}</td>
           </tr>
           <tr>
-            <th>Armore Penetration</th>
+            <th>Armor Penetration</th>
             <td>{{ player_unit.armor_penetration }}</td>
           </tr>
           <tr>
@@ -118,14 +118,35 @@
     </div>
 
     <div class="col-md-3">
-      {% mod_widget square_mod %}
-      {% mod_widget diamond_mod %}
-      {% mod_widget circle_mod %}
-    </div>
-    <div class="col-md-3">
-      {% mod_widget arrow_mod %}
-      {% mod_widget triangle_mod %}
-      {% mod_widget cross_mod %}
+      <div class="panel panel-default" style="width: max-content">
+        <div class="panel-heading">Mods</div>
+        <table style="border-spacing: 10px 20px; border-collapse: separate;">
+          <tr>
+            <td>
+              {% mod_widget square_mod %}
+            </td>
+            <td>
+              {% mod_widget arrow_mod %}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              {% mod_widget diamond_mod %}
+            </td>
+            <td>
+              {% mod_widget triangle_mod %}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              {% mod_widget circle_mod %}
+            </td>
+            <td>
+              {% mod_widget cross_mod %}
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
   </div>
 
