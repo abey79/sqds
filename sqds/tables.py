@@ -2,9 +2,8 @@ import itertools
 import locale
 from textwrap import wrap
 
-from django.db.models import Count
-
 import django_tables2 as tables
+from django.utils.html import format_html
 from django_tables2.utils import A
 
 from .utils import format_large_int
@@ -158,7 +157,7 @@ class PlayerUnitTable(RowCounterTable):
     summary = tables.Column('Summary', initial_sort_descending=True,
                             order_by=['rarity', 'level', 'gear',
                                       'equipped_count'])
-    zeta_summary = tables.Column('Zetas', initial_sort_descending=True)
+    zeta_count = tables.Column('Zetas', initial_sort_descending=True)
 
     mod_speed = LargeIntColumn(
         initial_sort_descending=True, plus_prefix=True, attrs={
@@ -181,16 +180,13 @@ class PlayerUnitTable(RowCounterTable):
                       'title': "Speed from mods, without accounting for mod set bonus."}})
 
     # noinspection PyMethodMayBeStatic
-    def order_zeta_summary(self, query_set, is_descending):
-        query_set = query_set.annotate(
-            _zeta_count=Count('zeta_set')
-        ).order_by(('-' if is_descending else '') + '_zeta_count')
-        return query_set, True
+    def render_zeta_count(self, value):
+        return format_html('<b style="color: #96f">Z</b>' * value) if value > 0 else '-'
 
     class Meta:
         model = PlayerUnit
         order_by = '-gp'
-        sequence = ('row_counter', 'unit', 'player', 'gp', 'summary', 'zeta_summary',
+        sequence = ('row_counter', 'unit', 'player', 'gp', 'summary', 'zeta_count',
                     'speed', 'mod_speed', 'mod_speed_no_set', 'health', 'mod_health',
                     'protection', 'mod_protection', 'physical_damage',
                     'mod_physical_damage', 'physical_crit_chance',

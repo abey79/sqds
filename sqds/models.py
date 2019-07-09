@@ -577,9 +577,13 @@ class PlayerUnitSet(models.QuerySet):
     def annotate_stats(self):
         mod_speed_no_set = PlayerUnit.objects.filter(pk=OuterRef('pk')).annotate(
             mod_speed_no_set=Coalesce(Sum('mod_set__speed'), 0))
+        zeta_count = PlayerUnit.objects.filter(pk=OuterRef('pk')).annotate(
+            zeta_count=Count('zeta_set'))
         return self.annotate(
             mod_speed_no_set=Subquery(mod_speed_no_set.values('mod_speed_no_set'),
-                                      output_field=models.IntegerField()))
+                                      output_field=models.IntegerField()),
+            zeta_count=Subquery(zeta_count.values('zeta_count'),
+                                output_field=models.IntegerField()))
 
 
 class PlayerUnit(models.Model):
@@ -673,19 +677,6 @@ class PlayerUnit(models.Model):
             '+' + str(self.equipped_count) if self.equipped_count > 0 else '')
 
     summary.admin_order_field = ['rarity', 'level', 'gear', 'equipped_count']
-
-    def zeta_count(self):
-        return self.zeta_set.count()
-
-    def zeta_summary(self):
-        str_list = []
-        for skill in self.unit.skill_set.filter(is_zeta=True):
-            if self.zeta_set.filter(skill=skill).exists():
-                output = '<b style="color: #96f">Z</b>'
-            else:
-                output = '<span style="color: #EEE">Z</span>'
-            str_list.append(output)
-        return format_html('&nbsp;'.join(str_list) if str_list else '&nbsp;')
 
 
 class Zeta(models.Model):

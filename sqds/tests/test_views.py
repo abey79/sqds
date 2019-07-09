@@ -6,7 +6,7 @@ from sqds.models import Player, Guild, Category, Unit
 from sqds.templatetags.sqds_filters import big_number
 from sqds.tests.utils import generate_game_data, generate_guild
 from sqds_seed.factories import CategoryFactory, UnitFactory, PlayerUnitFactory, \
-    PlayerFactory, ModFactory
+    PlayerFactory, ModFactory, SkillFactory, ZetaFactory
 
 
 def string_to_float(s):
@@ -45,7 +45,7 @@ def table_get_cell(table, column_header, row_index):
                 break
             column_index += 1
 
-        return table.tbody.find_all('tr')[row_index].find_all('td')[column_index].string
+        return table.tbody.find_all('tr')[row_index].find_all('td')[column_index].text
     except ValueError:
         return None
 
@@ -54,6 +54,51 @@ class TableTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         generate_game_data()
+
+    def test_player_unit_table_zeta(self):
+        player = PlayerFactory()
+
+        # Should have zero zeta
+        unit_no_zeta = UnitFactory()
+        pu_no_zeta = PlayerUnitFactory(player=player, unit=unit_no_zeta, gp=1000)
+        SkillFactory(unit=unit_no_zeta, is_zeta=True)
+
+        # Should have one zetas
+        unit_one_zeta = UnitFactory()
+        pu_one_zeta = PlayerUnitFactory(player=player, unit=unit_one_zeta, gp=999)
+        SkillFactory(unit=unit_one_zeta, is_zeta=False)
+        ZetaFactory(skill=SkillFactory(unit=unit_one_zeta, is_zeta=True),
+                    player_unit=pu_one_zeta)
+        SkillFactory(unit=unit_one_zeta, is_zeta=False)
+
+        # Should have two zetas
+        unit_two_zetas = UnitFactory()
+        pu_two_zetas = PlayerUnitFactory(player=player, unit=unit_two_zetas, gp=998)
+        ZetaFactory(skill=SkillFactory(unit=unit_two_zetas, is_zeta=True),
+                    player_unit=pu_two_zetas)
+        ZetaFactory(skill=SkillFactory(unit=unit_two_zetas, is_zeta=True),
+                    player_unit=pu_two_zetas)
+
+        # Should two zetas as well
+        unit_three_zetas = UnitFactory()
+        pu_three_zetas = PlayerUnitFactory(player=player, unit=unit_three_zetas, gp=997)
+        ZetaFactory(skill=SkillFactory(unit=unit_three_zetas, is_zeta=True),
+                    player_unit=pu_three_zetas)
+        ZetaFactory(skill=SkillFactory(unit=unit_three_zetas, is_zeta=True),
+                    player_unit=pu_three_zetas)
+        SkillFactory(unit=unit_three_zetas, is_zeta=False)
+        SkillFactory(unit=unit_three_zetas, is_zeta=True)
+
+        url = reverse('sqds:units')
+        response = self.client.get(url)
+        soup = BeautifulSoup(response.content, 'lxml')
+        table = soup.find_all('div', class_='table-container')[0].table
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual('-', table_get_cell(table, 'Zetas', 0))
+        self.assertEqual('Z', table_get_cell(table, 'Zetas', 1))
+        self.assertEqual('ZZ', table_get_cell(table, 'Zetas', 2))
+        self.assertEqual('ZZ', table_get_cell(table, 'Zetas', 3))
 
     def test_player_unit_table_mod_speed_vs_pure_mod_speed(self):
         player = PlayerFactory()
