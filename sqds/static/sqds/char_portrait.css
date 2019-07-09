@@ -1,0 +1,201 @@
+.char-portrait-full {
+    position: relative;
+    margin: 18px;
+    width: 80px;
+    height: 80px;
+    background-color: #000;
+    box-shadow: 0 0 0 2px #555;
+    border-radius: 50%
+}
+
+.char-portrait-full-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #000
+}
+
+.char-portrait-full-gear {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    z-index: 2;
+    top: 0;
+    left: 0
+}
+
+.char-portrait-full-gear-t1 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g1.svg)
+}
+
+.char-portrait-full-gear-t2 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g2.svg)
+}
+
+.char-portrait-full-gear-t3 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g3.svg)
+}
+
+.char-portrait-full-gear-t4 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g4.svg)
+}
+
+.char-portrait-full-gear-t5 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g5.svg)
+}
+
+.char-portrait-full-gear-t6 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g6.svg)
+}
+
+.char-portrait-full-gear-t7 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g7.svg)
+}
+
+.char-portrait-full-gear-t8 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g8.svg)
+}
+
+.char-portrait-full-gear-t9 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g9.svg)
+}
+
+.char-portrait-full-gear-t10 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g10.svg)
+}
+
+.char-portrait-full-gear-t11 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g11.svg)
+}
+
+.char-portrait-full-gear-t12 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g12.svg)
+}
+
+.char-portrait-full-gear-t13 .char-portrait-full-gear {
+    background-image: url(https://swgoh.gg/static/img/ui/gear-icon-g13.svg)
+}
+
+.char-portrait-full-gear-level, .char-portrait-full-level {
+    position: absolute;
+    -webkit-transform: translate(-50%);
+    transform: translate(-50%);
+    color: #fff;
+    font-weight: 700;
+    background-color: #264257;
+    border: 2px solid #fff;
+    text-align: center;
+    border-radius: 100%/130% 130% 15px 15px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+    text-shadow: -1px -1px 0 #000, 2px -1px 0 #000, 2px 2px 0 #000, -1px 2px 0 #000, 2px 3px 0 #000, 1px 3px 0 #000, 2px 3px 0 #000
+}
+
+.char-portrait-full-level {
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    z-index: 4;
+    width: 30px;
+    padding: 0 5px
+}
+
+.char-portrait-full-gear-level {
+    left: 80%;
+    bottom: 0;
+    font-size: 12px;
+    min-width: 26px;
+    padding: 0 6px 0 5px;
+    z-index: 2;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .5), inset 0 0 8px 1px rgba(0, 0, 0, .5)
+}
+
+.char-portrait-full-zeta {
+    background: 50% transparent url(https://swgoh.gg/static/img/assets/tex.skill_zeta.png) no-repeat;
+    background-size: contain;
+    width: 50px;
+    height: 40px;
+    position: absolute;
+    top: 36px;
+    z-index: 4;
+    left: -14px;
+    color: #fff;
+    text-align: center;
+    line-height: 35px;
+    font-size: 11px
+}
+
+.char-portrait-full-gear-t1 .char-portrait-full-gear-level {
+    background-color: #a5d0da
+}
+
+.char-portrait-full-gear-t2 .char-portrait-full-gear-level, .char-portrait-full-gear-t3 .char-portrait-full-gear-level {
+    background-color: #98fd33
+}
+
+.char-portrait-full-gear-t4 .char-portrait-full-gear-level, .char-portrait-full-gear-t5 .char-portrait-full-gear-level, .char-portrait-full-gear-t6 .char-portrait-full-gear-level {
+    background-color: #00bdfe
+}
+
+.char-portrait-full-gear-t7 .char-portrait-full-gear-level, .char-portrait-full-gear-t8 .char-portrait-full-gear-level, .char-portrait-full-gear-t9 .char-portrait-full-gear-level, .char-portrait-full-gear-t10 .char-portrait-full-gear-level, .char-portrait-full-gear-t11 .char-portrait-full-gear-level {
+    background-color: #9241ff
+}
+
+.char-portrait-full-gear-t12 .char-portrait-full-gear-level {
+    background-color: #fc3
+}
+
+.char-portrait-full-gear-t13 .char-portrait-full-gear-level {
+    background-color: #f56820
+}
+
+.star {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    width: 15px;
+    height: 55px;
+    color: #000;
+    -webkit-transform-origin: center bottom;
+    transform-origin: center bottom;
+    background: center 0 transparent url(https://swgoh.gg/static/img/star.png) no-repeat;
+    background-size: 100%
+}
+
+.star-inactive {
+    background-image: url(https://swgoh.gg/static/img/star-inactive.png)
+}
+
+.star1 {
+    -webkit-transform: translateX(-50%) rotate(-60deg);
+    transform: translateX(-50%) rotate(-60deg)
+}
+
+.star2 {
+    -webkit-transform: translateX(-50%) rotate(-40deg);
+    transform: translateX(-50%) rotate(-40deg)
+}
+
+.star3 {
+    -webkit-transform: translateX(-50%) rotate(-20deg);
+    transform: translateX(-50%) rotate(-20deg)
+}
+
+.star4 {
+    -webkit-transform: translateX(-50%) rotate(0deg);
+    transform: translateX(-50%) rotate(0deg)
+}
+
+.star5 {
+    -webkit-transform: translateX(-50%) rotate(20deg);
+    transform: translateX(-50%) rotate(20deg)
+}
+
+.star6 {
+    -webkit-transform: translateX(-50%) rotate(40deg);
+    transform: translateX(-50%) rotate(40deg)
+}
+
+.star7 {
+    -webkit-transform: translateX(-50%) rotate(60deg);
+    transform: translateX(-50%) rotate(60deg)
+}
