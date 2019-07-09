@@ -29,7 +29,7 @@ def char_portrait(pu: PlayerUnit):
         inactive_string = 'star-inactive' if i > pu.rarity else ''
         rarity_string += f'<div class="star star{i} {inactive_string}"></div>'
     zeta_string = str()
-    zeta = pu.zeta_count()
+    zeta = pu.zeta_count
     if zeta > 0:
         zeta_string = f'<div class="char-portrait-full-zeta">{zeta}</div>'
     return format_html(f'''

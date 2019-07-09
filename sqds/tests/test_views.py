@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from django.test import TestCase
 from django.urls import reverse
 
-from sqds.models import Player, Guild, Category, Unit
+from sqds.models import Player, Guild, Category, Unit, PlayerUnit
 from sqds.templatetags.sqds_filters import big_number
 from sqds.tests.utils import generate_game_data, generate_guild
 from sqds_seed.factories import CategoryFactory, UnitFactory, PlayerUnitFactory, \
@@ -197,6 +197,15 @@ class ViewTests(TestCase):
             PlayerUnitFactory(player=player, unit=sep_unit)
 
         print('setup completed')
+
+    def test_player_unit_view(self):
+        pu = PlayerUnit.objects.first()
+        url = reverse('sqds:unit', args=[pu.pk])
+        response = self.client.get(url)
+
+        self.assertContains(response, pu.unit.name)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'sqds/unit.html')
 
     def test_index_view(self):
         response = self.client.get(reverse('sqds:index'))
