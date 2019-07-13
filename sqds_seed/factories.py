@@ -115,7 +115,7 @@ class PlayerUnitFactory(factory.DjangoModelFactory):
     gp = factory.Faker('pyint', min=1, max=30000)
     rarity = factory.Faker('pyint', min=1, max=7)
     level = factory.Faker('pyint', min=1, max=85)
-    gear = factory.Faker('pyint', min=1, max=12)
+    gear = factory.Faker('pyint', min=1, max=13)
     equipped_count = factory.Faker('pyint', min=0, max=5)
 
     speed = factory.Faker('pyint', min=50, max=350)

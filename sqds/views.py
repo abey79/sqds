@@ -3,9 +3,10 @@ from textwrap import wrap
 import numpy as np
 import plotly.graph_objs as go
 import plotly.offline as opy
+from django.contrib import messages
 from django.db.models import Q, F
 from django.db.models.functions import Lower
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.html import format_html
 from django.views.generic import DetailView
 from django_filters import FilterSet, ChoiceFilter
@@ -55,11 +56,6 @@ class UnitView(MetadataMixin, DetailView):
             player_unit.level,
             player_unit.rarity,
             format_large_int(player_unit.gp))
-
-
-def player_refresh(request, ally_code):
-    Player.objects.update_or_create_from_swgoh(ally_code)
-    return redirect('sqds:player', ally_code=ally_code)
 
 
 # noinspection PyUnusedLocal,PyMethodMayBeStatic
@@ -222,6 +218,36 @@ class SinglePlayerPlayerUnitsFilter(FilterSet):
     class Meta:
         model = PlayerUnit
         fields = ['unit', 'category']
+
+
+def player_register_me(request, ally_code):
+    player = get_object_or_404(Player, ally_code=ally_code)
+    max_age = 365 * 24 * 60 * 60
+    response = redirect('sqds:player', ally_code=ally_code)
+    response.set_cookie('sqds_my_name', player.name, max_age=max_age)
+    response.set_cookie('sqds_my_ally_code', player.ally_code, max_age=max_age)
+    response.set_cookie('sqds_my_guild_name', player.guild.name, max_age=max_age)
+    response.set_cookie('sqds_my_guild_api_id', player.guild.api_id, max_age=max_age)
+    messages.info(request, f'Successfully registered as {player.name}.')
+    return response
+
+
+def player_unregister_me(request):
+    if 'sqds_my_ally_code' in request.COOKIES:
+        response = redirect('sqds:player', ally_code=request.COOKIES['sqds_my_ally_code'])
+    else:
+        response = redirect('sqds:index')
+    response.delete_cookie('sqds_my_name')
+    response.delete_cookie('sqds_my_ally_code')
+    response.delete_cookie('sqds_my_guild_name')
+    response.delete_cookie('sqds_my_guild_api_id')
+    messages.info(request, 'Successfully unregistered.')
+    return response
+
+
+def player_refresh(request, ally_code):
+    Player.objects.update_or_create_from_swgoh(ally_code)
+    return redirect('sqds:player', ally_code=ally_code)
 
 
 class SinglePlayerView(MetadataMixin, SingleTableMixin, FilterView):

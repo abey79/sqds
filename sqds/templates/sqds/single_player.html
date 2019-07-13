@@ -27,6 +27,16 @@ Player: {{ player.name }}
           </tr>
           <tr>
             <th>&nbsp;</th>
+            <td>
+              {% if request.path == player_url %}
+                <a href="{% url 'sqds:player_unregister' %}">I am not {{ player.name }}</a>
+              {% else %}
+                <a href="{% url 'sqds:player_register' player.ally_code %}">I am {{ player.name }}</a>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th>&nbsp;</th>
             <td><a href="https://swgoh.gg/p/{{ player.ally_code }}/">swgoh.gg profile</a></td>
           </tr>
           <tr>

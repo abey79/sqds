@@ -49,29 +49,47 @@
       <a class="navbar-brand" href="/">PREPARE FTW</a>
     </div>
 
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <!--div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-        <li><a href="#">Link</a></li>
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">One more separated link</a></li>
-          </ul>
-        </li>
+        {% if request.COOKIES.sqds_my_name %}
+          {% url 'sqds:player' request.COOKIES.sqds_my_ally_code as player_url %}
+          {% url 'sqds:guild' request.COOKIES.sqds_my_guild_api_id as guild_url %}
+          <li class="{% if request.path == player_url %}active{% endif %}">
+            <a href="{{ player_url }}">
+              {{ request.COOKIES.sqds_my_name }}
+            </a>
+          </li>
+          <li class="{% if request.path == guild_url %}active{% endif %}">
+            <a href="{{ guild_url }}">
+              {{ request.COOKIES.sqds_my_guild_name }}
+            </a>
+          </li>
+        {% endif %}
       </ul>
-    </div--><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
+    </div>
+  </div>
 </nav>
 
+{% comment %}
+<div class="alert alert-success">
+  <strong>Success!</strong> Indicates a successful or positive action.
+</div>
+{% endcomment %}
+
+
 <div class="container-fluid">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="row">
+        <div class="col-md-12">
+          <div class="alert {% if message.tags %} alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+
   {% block content %}
   {% endblock %}
 </div>
