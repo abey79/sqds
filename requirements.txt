@@ -17,6 +17,9 @@ requests
 mysqlclient
 psycopg2
 
+# Analytical stuff
+django-analytical
+
 # Plot stuff
 numpy
 plotly

@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_admin_listfilter_dropdown',
+    'analytical',
     'bootstrap3',
     'django_filters',
     'django_tables2',
@@ -158,6 +159,11 @@ DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap.html'
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 INTERNAL_IPS = ('51.154.2.60',)
+
+if 'GOOGLE_ANALYTICS_PROPERTY_ID' in os.environ:
+    GOOGLE_ANALYTICS_JS_PROPERTY_ID = os.environ['GOOGLE_ANALYTICS_PROPERTY_ID']
+else:
+    GOOGLE_ANALYTICS_JS_PROPERTY_ID = 'UA-012345-6'
 
 
 # noinspection PyUnusedLocal

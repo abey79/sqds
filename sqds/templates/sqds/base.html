@@ -1,6 +1,7 @@
 {% load static %}
 {% load bootstrap3 %}
 {% load meta %}
+{% load google_analytics_js %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -30,7 +31,7 @@
       {{ meta.title }}
     {% endblock %}
   </title>
-
+  {% google_analytics_js %}
 </head>
 
 <body>
