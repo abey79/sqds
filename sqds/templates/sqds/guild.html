@@ -18,11 +18,11 @@
           </tr>
           <tr>
             <th>GP</th>
-            <td>{{ guild.gp | big_number}}</td>
+            <td>{{ guild.gp | big_number }}</td>
           </tr>
           <tr>
             <th class='danger'>Sep GP</th>
-            <td class='danger'>{{ guild.sep_gp | big_number}}</td>
+            <td class='danger'>{{ guild.sep_gp | big_number }}</td>
           </tr>
         </table>
       </div>
@@ -47,6 +47,18 @@
             <td>Inspect <a
                 href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.GRANDMASTERYODA.id }}&sort=-special_damage">offensive
               GMYs</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">Officer tools</div>
+        <table class="table">
+          <tr>
+            <td><a href="{% url 'sqds_officers:geo_tb' guild.api_id %}">Geo TB player list</a></td>
+          </tr>
+          <tr>
+            <td><a href="{% url 'sqds_officers:sep_farm' guild.api_id %}">Separatists farm progress</a></td>
           </tr>
         </table>
       </div>

@@ -3,20 +3,15 @@ import plotly.graph_objs as go
 import plotly.offline as opy
 from django.db.models import Sum, Q, Case, When, BooleanField, OuterRef, Subquery
 from django.db.models.functions import TruncDay
-from django.shortcuts import render
 from django.views.generic import TemplateView
 from django_filters import FilterSet, ChoiceFilter
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 from meta.views import MetadataMixin
 
-from sqds.models import Player, Unit, PlayerUnit
+from sqds.models import Player, Unit, PlayerUnit, Guild
 from sqds_gphistory.models import GP
 from .tables import GeoTBPlayerTable
-
-
-def index(request):
-    return render(request, 'sqds_officers/index.html')
 
 
 ##########################################################################################
@@ -52,18 +47,20 @@ class GeoTBPlayerView(MetadataMixin, SingleTableMixin, FilterView):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
+        # noinspection PyAttributeOutsideInit
+        self.guild = Guild.objects.get(api_id=self.kwargs['api_id'])
 
     def get_queryset(self):
-        qs = self.model.objects.filter(guild__api_id='G2737841003')
+        qs = self.model.objects.filter(guild__api_id=self.guild.api_id)
 
         # ANNOTATE HAS DR/MALAK
         dr_player_ids = (PlayerUnit.objects
                          .filter(unit__api_id='DARTHREVAN',
-                                 player__guild__api_id='G2737841003')
+                                 player__guild__api_id=self.guild.api_id)
                          .values('player__pk'))
         malak_player_ids = (PlayerUnit.objects
                             .filter(unit__api_id='DARTHMALAK',
-                                    player__guild__api_id='G2737841003')
+                                    player__guild__api_id=self.guild.api_id)
                             .values('player__pk'))
 
         qs = qs.annotate(
@@ -105,8 +102,8 @@ class GeoTBPlayerView(MetadataMixin, SingleTableMixin, FilterView):
     def get_meta_title(self, **kwargs):
         return 'GeoTB player list'
 
-    def get_meta_description(self, **kwargs):
-        return "GeoTB analysis page for PREPARE's officers"
+    def get_meta_description(self, context=None):
+        return f"GeoTB analysis page for {self.guild.name}"
 
 
 ##########################################################################################
@@ -133,7 +130,7 @@ class SepFarmProgressView(MetadataMixin, TemplateView):
                     .values('gp'))
 
         qs = (Player.objects
-              .filter(guild__api_id='G2737841003')
+              .filter(guild__api_id=self.kwargs['api_id'])
               .annotate(start_gp=Subquery(subquery.order_by('created_date')[:1]))
               .annotate(end_gp=Subquery(subquery.order_by('-created_date')[:1]))
               .values('name', 'start_gp', 'end_gp'))
