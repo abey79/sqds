@@ -201,7 +201,7 @@ class ViewTests(TestCase):
 
     def test_player_unit_view(self):
         pu = PlayerUnit.objects.first()
-        url = reverse('sqds:unit', args=[pu.pk])
+        url = reverse('sqds:unit', args=[pu.player.ally_code, pu.unit.api_id])
         response = self.client.get(url)
 
         self.assertContains(response, pu.unit.name)

@@ -135,7 +135,8 @@ class PlayerUnitTable(RowCounterTable):
                            attrs={'td': {'nowrap': 'nowrap'}})
 
     gp = LargeIntColumn(initial_sort_descending=True)
-    unit = tables.LinkColumn('sqds:unit', args=[A('id')],
+    unit = tables.LinkColumn('sqds:unit', args=[A('player.ally_code'),
+                                                A('unit.api_id')],
                              attrs={'td': {'nowrap': 'nowrap'}})
 
     speed = LargeIntColumn(initial_sort_descending=True)

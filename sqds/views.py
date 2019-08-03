@@ -35,6 +35,16 @@ class UnitView(MetadataMixin, DetailView):
         qs = super().get_queryset()
         return qs.annotate_stats()
 
+    def get_object(self, queryset=None):
+        if queryset is None:
+            queryset = self.get_queryset()
+        try:
+            obj = queryset.get(player__ally_code=self.kwargs['ally_code'],
+                               unit__api_id=self.kwargs['unit_api_id'])
+        except (KeyError, queryset.model.DoesNotExist):
+            raise Http404("No unit found found matching the query")
+        return obj
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         player_unit = context['player_unit']
