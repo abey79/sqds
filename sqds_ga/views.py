@@ -6,7 +6,7 @@ from django.views.generic import DetailView
 from meta.views import MetadataMixin
 
 from sqds.models import Player
-from utils import extract_all_ally_codes
+from sqds.utils import extract_all_ally_codes
 from .models import GAPool, GAPoolPlayer
 
 
