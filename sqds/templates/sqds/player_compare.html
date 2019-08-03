@@ -5,6 +5,7 @@
 {% load crispy_forms_tags %}
 {% load sqds_filters %}
 {% load compare_tags %}
+{% load char_portrait %}
 
 {% block head %}
   <!--suppress JSUnresolvedLibraryURL -->
@@ -23,7 +24,7 @@
     <div class="col-md-4">
       <div class="panel panel-default">
         <div class="panel-heading">Statistics comparison</div>
-        {% player_comparison player1 player2 %}
+        {% player_comparison players %}
       </div>
     </div>
     <div class="col-md-8">
@@ -49,6 +50,37 @@
     </div>
   </div>
 
+  {% comment %}
+  <div class="row">
+    <div class="col-md-2">
+      {% char_portrait_with_stat player1_units.BOSSK %}
+    </div>
+  </div>
+  {% endcomment %}
+
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Key characters (click on portrait for full stat)</div>
+    <div class="container-fluid">
+
+      <div class="row">
+        {% for unit_name, unit in units.items %}
+        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+          <table style="margin-top: 15px; margin-bottom: 25px">
+            <tr><td colspan="2" style="text-align: center; font-weight: bold">{{ unit_name }}</td> </tr>
+            <tr>
+              <td>{% char_portrait_with_stat unit.player1 %}</td>
+              <td>{% char_portrait_with_stat unit.player2 %}</td>
+            </tr>
+          </table>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+
+  {% comment %}
   <div class="row">
     <div class="col-md-12">
       <div class="panel panel-default">
@@ -63,9 +95,12 @@
           </div>
         {% endif %}
 
-        {% render_table table %}
+        <div style="overflow-y: scroll">
+          {% render_table table %}
+        </div>
       </div>
     </div>
   </div>
+  {% endcomment %}
 
 {% endblock %}

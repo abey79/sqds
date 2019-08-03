@@ -1,10 +1,12 @@
-from multiprocessing.dummy import Pool
+from copy import copy
+from typing import Union, Collection, List
 
+import pandas
 from django.db import models, transaction
+from django.db.models import Q, Sum, Count, Subquery, OuterRef, F
 from django.db.models.functions import Coalesce
+from django.utils import timezone
 from django.utils.html import format_html
-from django.db.models import Q, Sum, Count, Subquery, OuterRef
-
 from django_enumfield import enum
 
 from . import swgoh
@@ -145,10 +147,10 @@ class GuildManager(models.Manager):
             it already exists. If all_player is True, all players are then
             fully imported. Otherwise, only ally_code is imported. """
 
-        # (A) Get guild data from server
+        # Get guild data from server
         guild_data = swgoh.api.get_guild_list(ally_code)
 
-        # (B) Create or update Guild instance
+        # Create or update Guild instance
         guild_id = guild_data['id']
         guild, _ = Guild.objects.update_or_create(api_id=guild_id, defaults={
             'name': guild_data['name'],
@@ -157,45 +159,17 @@ class GuildManager(models.Manager):
         if guild_only:
             return guild
 
-        # (C) For all of the guild players, download their info, roster, mods and skills.
+        # For all of the guild players, download their info, roster, mods and skills.
+
         ally_codes = [p['allyCode'] for p in guild_data['roster']]
-        all_player_data = []
+        all_player_data = swgoh.api.get_player_data_batch(ally_codes)
 
-        def download_player_data(the_ally_codes):
-            print(f'downloading for {the_ally_codes}')
-            data = swgoh.api.get_player_data(the_ally_codes)
-            all_player_data.extend(data)
-
-        batches = []
-        while len(ally_codes) > 5:
-            batches.append(ally_codes[:5])
-            del ally_codes[:5]
-        batches.append(ally_codes)
-
-        with Pool(processes=3) as pool:
-            pool.map(download_player_data, batches)
-
-        # (C) Create or update all Player instance, deleting players no longer
-        # present
+        # Create or update all Player instance, deleting players no longer present
         with transaction.atomic():
             player_id_array = []
 
             for player_data in all_player_data:
-                ally_code = player_data['allyCode']
-                player, _ = Player.objects.update_or_create(
-                    api_id=player_data['id'],
-                    defaults={
-                        'guild': guild,
-                        'name': player_data['name'],
-                        'level': player_data['level'],
-                        'ally_code': ally_code,
-                        'gp': player_data['stats'][0]['value'],
-                        'gp_char': player_data['stats'][1]['value'],
-                        'gp_ship': player_data['stats'][2]['value']})
-                player.save()  # force last updated change
-
-                # Create all the data related to this player
-                Player.objects.update_player_units(player, player_data['roster'])
+                player = Player.objects.update_or_create_from_data(player_data, guild)
                 player_id_array.append(player.id)
 
             guild.player_set.exclude(id__in=player_id_array).delete()
@@ -207,6 +181,10 @@ class GuildSet(models.QuerySet):
     def annotate_stats(self):
         player_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('player_set'))
+        gp_char = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Sum('player_set__gp_char'))
+        gp_ship = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Sum('player_set__gp_ship'))
         unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('player_set__unit_set'))
         seven_star_unit_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
@@ -265,6 +243,10 @@ class GuildSet(models.QuerySet):
         return self.annotate(
             player_count=Subquery(player_count.values('cnt'),
                                   output_field=models.IntegerField()),
+            gp_char=Subquery(gp_char.values('cnt'),
+                             output_field=models.IntegerField()),
+            gp_ship=Subquery(gp_ship.values('cnt'),
+                             output_field=models.IntegerField()),
             unit_count=Subquery(unit_count.values('cnt'),
                                 output_field=models.IntegerField()),
             seven_star_unit_count=Subquery(seven_star_unit_count.values('cnt'),
@@ -329,8 +311,60 @@ class Guild(models.Model):
 
 
 class PlayerManager(models.Manager):
-    def update_or_create_from_swgoh(self, ally_code):
-        # Get player data
+    def ensure_exist(
+            self, ally_codes: Union[int, Collection[int]],
+            max_days: int = -1) -> List['Player']:
+        """
+        Ensure players are loaded in the database.
+        :param ally_codes: ally code or ally code list of player to check
+        :param max_days: maximum acceptable number of days Player data may be outdated
+        (will be refreshed if more). If set to negative value, last updated will not be
+        checked
+        :return: list of Player object
+        """
+        # If a single ally code is passed, make it a list
+        if type(ally_codes) == int:
+            ally_codes = [ally_codes]
+        else:
+            # We make a copy because we modify the list
+            ally_codes = copy(ally_codes)
+
+        # Check which players we already have and remove them from ally code list. We
+        # check how old the data is
+        players = []
+        now = timezone.now()
+        for player in Player.objects.filter(ally_code__in=ally_codes):
+            time_diff = now - player.last_updated
+            if max_days < 0 or time_diff.days < max_days:
+                ally_codes.remove(player.ally_code)
+                players.append(player)
+
+        # Download data for all remaining players
+        if ally_codes:
+            players.extend(self.update_or_create_multiple_from_swgoh(ally_codes))
+
+        return players
+
+    def update_or_create_multiple_from_swgoh(
+            self, ally_codes: Collection[int]) -> List['Player']:
+        # Get data for all players
+        all_player_data = swgoh.api.get_player_data_batch(ally_codes)
+
+        with transaction.atomic():
+            players = []
+            for player_data in all_player_data:
+                # find player guilds
+                if player_data['guildRefId'] != '':
+                    guild = Guild.objects.update_or_create_from_swgoh(
+                        player_data['allyCode'], guild_only=True)
+                else:
+                    guild = None
+
+                players.append(self.update_or_create_from_data(player_data, guild))
+
+        return players
+
+    def update_or_create_from_swgoh(self, ally_code: int) -> 'Player':
         player_data = swgoh.api.get_player_data(ally_code)[0]
 
         if player_data['guildRefId'] != '':
@@ -340,18 +374,33 @@ class PlayerManager(models.Manager):
             guild = None
 
         with transaction.atomic():
-            player, _ = Player.objects.update_or_create(
-                api_id=player_data['id'],
-                defaults={
-                    'guild': guild,
-                    'name': player_data['name'],
-                    'level': player_data['level'],
-                    'ally_code': player_data['allyCode'],
-                    'gp': player_data['stats'][0]['value'],
-                    'gp_char': player_data['stats'][1]['value'],
-                    'gp_ship': player_data['stats'][2]['value']})
+            player = self.update_or_create_from_data(player_data, guild)
 
-            self.update_player_units(player, all_units_data=player_data['roster'])
+        return player
+
+    def update_or_create_from_data(self, player_data,
+                                   guild: Union[Guild, None]) -> 'Player':
+        """
+        Update or create a player based on data from swgoh.help.
+        Note: this function makes multiple calls to the database and is best wrapped in
+        an transaction.atomic() statement to ensure consistency.
+        :param player_data: the data from swgoh.help
+        :param guild: the guild object for the player or None
+        :return: the Player object created or updated
+        """
+        player, _ = Player.objects.update_or_create(
+            api_id=player_data['id'],
+            defaults={
+                'guild': guild,
+                'name': player_data['name'],
+                'level': player_data['level'],
+                'ally_code': player_data['allyCode'],
+                'gp': player_data['stats'][0]['value'],
+                'gp_char': player_data['stats'][1]['value'],
+                'gp_ship': player_data['stats'][2]['value']})
+        player.save()  # force last updated change
+        self.update_player_units(player, all_units_data=player_data['roster'])
+        return player
 
     @staticmethod
     def update_player_units(player, all_units_data):
@@ -573,6 +622,37 @@ class Player(models.Model):
         return self.name
 
 
+class PlayerUnitManager(models.Manager):
+    def dict_from_ally_code(self, ally_code: int, unit_ids=None):
+        """
+        Return a dictionary of Pandas' Series for each of the player's unit. Keys are
+        corresponding Unit's `api_id`. The returned series behaves like a `PlayerUnit`
+        instances but related models are only available through `unit_name`,
+        `unit_api_id`, `player_name` and `player_ally_code` attributes
+        :param ally_code: the player's ally code
+        :param unit_ids: (optional) list of Unit's API ID to restrict the scopes
+        :return: the dictionary
+        """
+        if unit_ids is None:
+            unit_ids = []
+        unit_filter = {'unit__api_id__in': unit_ids} if unit_ids else {}
+        qs = (self.model.objects
+              .filter(player__ally_code=ally_code, **unit_filter)
+              .select_related('unit', 'player')
+              .annotate(unit_name=F('unit__name'),
+                        unit_api_id=F('unit__api_id'),
+                        player_name=F('player__name'),
+                        player_ally_code=F('player__ally_code'))
+              .annotate_stats()
+              .values())
+        if qs.count() > 0:
+            df = pandas.DataFrame(qs)
+            df.set_index(df['unit_api_id'], inplace=True)
+            return {unit_key: df.loc[unit_key] for unit_key in df.index}
+        else:
+            return {}
+
+
 class PlayerUnitSet(models.QuerySet):
     def annotate_stats(self):
         mod_speed_no_set = PlayerUnit.objects.filter(pk=OuterRef('pk')).annotate(
@@ -635,7 +715,7 @@ class PlayerUnit(models.Model):
 
     last_updated = models.DateTimeField(auto_now=True)
 
-    objects = PlayerUnitSet.as_manager()
+    objects = PlayerUnitManager.from_queryset(PlayerUnitSet)()
 
     class Meta:
         ordering = ['player__name', 'unit__name']

@@ -1,0 +1,155 @@
+{% load sqds_filters %}
+
+
+{% if player_unit is not None %}
+  {# Modal stat display #}
+  <div class="modal fade" id="modal-{{ player_unit.player_ally_code }}-{{ player_unit.unit_api_id }}" tabindex="-1"
+       role="dialog"
+       aria-labelledby="modal-label-{{ player_unit.player_ally_code }}-{{ player_unit.unit_api_id }}">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"
+              id="modal-label-{{ player_unit.player_ally_code }}-{{ player_unit.unit_api_id }}">{{ player_unit.unit_name }}</h4>
+        </div>
+        <div class="modal-body">
+          <table class="portrait-stat-details">
+            <tbody>
+            <tr>
+              <th>Speed</th>
+              <td>{{ player_unit.speed }} (+{{ player_unit.mod_speed }})</td>
+            </tr>
+            <tr>
+              <th>Health</th>
+              <td>{{ player_unit.health | big_number }} (+{{ player_unit.mod_health | big_number }})</td>
+            </tr>
+            <tr>
+              <th>Protection</th>
+              <td>{{ player_unit.protection | big_number }} (+{{ player_unit.mod_protection | big_number }})</td>
+            </tr>
+            <tr>
+              <th>Physical Damage</th>
+              <td>{{ player_unit.physical_damage | big_number }} (+{{ player_unit.mod_physical_damage }})</td>
+            </tr>
+            <tr>
+              <th>Physical Crit. Chance</th>
+              <td>{{ player_unit.physical_crit_chance | percent }}
+                (+{{ player_unit.mod_physical_crit_chance | percent }})
+              </td>
+            </tr>
+            <tr>
+              <th>Special Damage</th>
+              <td>{{ player_unit.special_damage }} (+{{ player_unit.mod_special_damage }})</td>
+            </tr>
+            <tr>
+              <th>Special Crit. Chance</th>
+              <td>{{ player_unit.special_crit_chance | percent }} (+{{ player_unit.mod_special_crit_chance | percent }})
+              </td>
+            </tr>
+            <tr>
+              <th>Critical Damage</th>
+              <td>{{ player_unit.crit_damage | percent }} (+{{ player_unit.mod_crit_damage | percent }})</td>
+            </tr>
+            <tr>
+              <th>Potency</th>
+              <td>{{ player_unit.potency | percent }} (+{{ player_unit.mod_potency | percent }})</td>
+            </tr>
+            <tr>
+              <th>Tenacity</th>
+              <td>{{ player_unit.tenacity | percent }} (+{{ player_unit.mod_tenacity | percent }})</td>
+            </tr>
+            <tr>
+              <th>Armor</th>
+              <td>{{ player_unit.armor | percent }} (+{{ player_unit.mod_armor | percent }})</td>
+            </tr>
+            <tr>
+              <th>Resistance</th>
+              <td>{{ player_unit.resistance | percent }} (+{{ player_unit.mod_resistance | percent }})</td>
+            </tr>
+            <tr>
+              <th>Health Steal</th>
+              <td>{{ player_unit.health_steal | percent }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endif %}
+
+{# Portrait with basic stats #}
+<div>
+  <div style="text-align: center">
+    <div style="display: inline-block">
+
+      {% if player_unit is not None %}
+        <div data-target="#modal-{{ player_unit.player_ally_code }}-{{ player_unit.unit_api_id }}" data-toggle="modal"
+             style="cursor:pointer">
+      {% endif %}
+
+      {{ portrait_html|safe }}
+
+      {% if player_unit is not None %}
+        </div>
+      {% endif %}
+
+      <table class="portrait-stat">
+        <tr>
+          <th>
+            <div class="stat-sp-sm"></div>
+          </th>
+          <td>
+            {% if player_unit is not None %}
+              {{ player_unit.speed }} (+{{ player_unit.mod_speed }})
+            {% else %}
+              -
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <div class="stat-off-sm">&nbsp;</div>
+          </th>
+          <td>
+            {% if player_unit is not None %}
+              {{ player_unit.physical_crit_chance|percent }} / {{ player_unit.crit_damage|percent }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <div class="stat-hp-sm"></div>
+          </th>
+          <td>
+            {% if player_unit is not None %}
+              {{ player_unit.health|number_kilo }} / {{ player_unit.protection|number_kilo }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <div class="stat-pot-sm"></div>
+          </th>
+          <td>
+            {% if player_unit is not None %}
+              {{ player_unit.potency|percent }} / {{ player_unit.tenacity|percent }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>

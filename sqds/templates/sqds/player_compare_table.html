@@ -1,32 +1,65 @@
 {% load sqds_filters %}
 
-<table class="table">
-  <thead>
+<div style="overflow-y: scroll">
+  <table class="table">
+    <thead>
     <tr>
       <th></th>
-      <th class='info'><a href="{% url 'sqds:player' player1.ally_code %}">{{ player1.name }}</a></th>
-      <th><a href="{% url 'sqds:player' player2.ally_code %}">{{ player2.name }}</a></th>
+      {% for player in players %}
+        <th {% if forloop.counter0 == 0 %}class='info'{% endif %}>
+          <a href="{% url 'sqds:player' player.ally_code %}">{{ player.name }}</a>
+        </th>
+      {% endfor %}
     </tr>
-  </thead>
-  <tbody>
+    </thead>
+    <tbody>
     <tr>
       <th>Guild</th>
-      <td>{% if player1.guild %}<a href="{% url 'sqds:guild' player1.guild.api_id %}">{{ player1.guild.name }}</a>{% endif %}</td>
-      <td>{% if player2.guild %}<a href="{% url 'sqds:guild' player2.guild.api_id %}">{{ player2.guild.name }}</a>{% endif %}</td>
+      {% for player in players %}
+        <td>{% if player.guild %}
+          <a href="{% url 'sqds:guild' player.guild.api_id %}">{{ player.guild.name }}</a>{% endif %}</td>
+      {% endfor %}
     </tr>
     <tr>
       <th>Ally code</th>
-      <td>{{ player1.ally_code | ally_code }}</td>
-      <td>{{ player2.ally_code | ally_code }}</td>
+      {% for player in players %}
+        <td>{{ player.ally_code | ally_code }}</td>
+      {% endfor %}
     </tr>
+    {% if players|length > 2 %}
+      <tr>
+        <th></th>
+        {% for player in players %}
+          <td>
+            {% if forloop.counter0 > 0 %}
+              <a href="{% url 'sqds:player_compare' players.0.ally_code player.ally_code %}">compare stats</a><br/>
+              <a href="{% url 'sqds:player_compare_units' players.0.ally_code player.ally_code %}">unit list</a>
+            {% endif %}
+          </td>
+        {% endfor %}
+      </tr>
+    {% endif %}
 
     {% for line in lines %}
-    <tr>
-      <{{ line.label_type }}>{{ line.label|safe }}</{{ line.label_type }}>
-      <td class="{{ line.left_class }}">{{ line.left_data }}</td>
-      <td class="{{ line.right_class }}">{{ line.right_data }}</td>
-    </tr>
+      <tr>
+        {{ line.label|safe }}
+        {% for data in line.data %}
+          <td class="{{ data.class }}">{{ data.value }}</td>
+        {% endfor %}
+      </tr>
     {% endfor %}
 
-  </tbody>
-</table>
+    {% if players|length == 2 %}
+      <tr>
+        <td></td>
+        <td colspan="2">
+          <a class="btn btn-default"
+             href="{% url 'sqds:player_compare_units' players.0.ally_code players.1.ally_code %}">
+            compare units
+          </a>
+        </td>
+      </tr>
+    {% endif %}
+    </tbody>
+  </table>
+</div>

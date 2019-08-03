@@ -1,0 +1,14 @@
+{% extends 'sqds/base.html' %}
+
+{% load compare_tags %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Players</div>
+        {% player_comparison all_players %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

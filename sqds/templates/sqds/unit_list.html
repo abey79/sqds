@@ -1,9 +1,13 @@
 {% extends 'sqds/base_list_view.html' %}
 
 {% block title %}
-  Unit list
+  {% if meta.title %}
+    {{ meta.title }}
+  {% else %}
+    Unit <list></list>
+  {% endif %}
 {% endblock %}
 
 {% block panel_title %}
-  Unit list
+    Unit list
 {% endblock %}

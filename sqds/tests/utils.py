@@ -14,14 +14,39 @@ def random_sublist(lst, probability=0.5):
     return filter(lambda _: random.random() < probability, lst)
 
 
-def generate_game_data():
+def generate_game_data(unit_api_id=None):
     """
-    Generate random mock game data.
+    Generate random mock game data. Returns array of units
     """
     categories = CategoryFactory.create_batch(5)
     GearFactory.create_batch(30)
-    for _ in range(15):
-        UnitFactory(categories=random_sublist(categories, 0.1))
+    if unit_api_id:
+        return [UnitFactory(api_id=api_id, categories=random_sublist(categories, 0.1))
+                for api_id in unit_api_id]
+    else:
+        return [UnitFactory(categories=random_sublist(categories, 0.1))
+                for _ in range(15)]
+
+
+def generate_player_unit(unit, player, **kwargs):
+    player_unit = PlayerUnitFactory(unit=unit, player=player, **kwargs)
+
+    # Generate some gear
+    for _ in range(random.randint(0, 5)):
+        PlayerUnitGear(player_unit=player_unit,
+                       gear=random.choice(Gear.objects.all()))
+
+    # Zeta some abilities
+    for skill in Skill.objects.filter(unit=unit):
+        if skill.is_zeta and random.random() > 0.5:
+            ZetaFactory(player_unit=player_unit,
+                        skill=skill)
+
+    # Equip some mods
+    for slot in random_sublist(range(7)):
+        ModFactory(player_unit=player_unit, slot=slot)
+
+    return player_unit
 
 
 def generate_guild(player_count=45):
@@ -34,22 +59,6 @@ def generate_guild(player_count=45):
 
         # Generate some random player units
         for unit in random_sublist(Unit.objects.all(), 0.85):
-            player_unit = PlayerUnitFactory(
-                player=player, unit=unit)
-
-            # Generate some gear
-            for _ in range(random.randint(0, 5)):
-                PlayerUnitGear(player_unit=player_unit,
-                               gear=random.choice(Gear.objects.all()))
-
-            # Zeta some abilities
-            for skill in Skill.objects.filter(unit=unit):
-                if skill.is_zeta and random.random() > 0.5:
-                    ZetaFactory(player_unit=player_unit,
-                                skill=skill)
-
-            # Equip some mods
-            for slot in random_sublist(range(7)):
-                ModFactory(player_unit=player_unit, slot=slot)
+            generate_player_unit(unit, player)
 
     return guild

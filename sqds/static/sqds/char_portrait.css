@@ -1,5 +1,6 @@
 .char-portrait-full {
     position: relative;
+    display: block;
     margin: 18px;
     width: 80px;
     height: 80px;
@@ -198,4 +199,49 @@
 .star7 {
     -webkit-transform: translateX(-50%) rotate(60deg);
     transform: translateX(-50%) rotate(60deg)
+}
+
+
+/* stat icons */
+div.stat-hp { width: 32px; height: 32px; background: url(stat-icon-black-atlas.png) 0 0; }
+
+div.stat-off { width: 32px; height: 32px; background: url(stat-icon-black-atlas.png) -32px 0; }
+
+div.stat-def { width: 32px; height: 32px; background: url(stat-icon-black-atlas.png) -64px 0; }
+
+div.stat-sp { width: 32px; height: 32px; background: url(stat-icon-black-atlas.png) -96px 0; }
+
+div.stat-pot { width: 32px; height: 32px; background: url(stat-icon-black-atlas.png) -128px 0; }
+
+div.stat-ten { width: 32px; height: 32px; background: url(stat-icon-black-atlas.png) -160px 0; }
+
+div.stat-hp-sm { width: 32px; height: 32px; background: url(stat-icon-black-atlas.png) 0 0; zoom: 0.4; }
+
+div.stat-off-sm { width: 32px; height: 32px; background: url(stat-icon-black-atlas.png) -32px 0; zoom: 0.4; }
+
+div.stat-def-sm { width: 32px; height: 32px; background: url(stat-icon-black-atlas.png) -64px 0; zoom: 0.4; }
+
+div.stat-sp-sm { width: 32px; height: 32px; background: url(stat-icon-black-atlas.png) -96px 0; zoom: 0.4; }
+
+div.stat-pot-sm { width: 32px; height: 32px; background: url(stat-icon-black-atlas.png) -128px 0; zoom: 0.4; }
+
+div.stat-ten-sm { width: 32px; height: 32px; background: url(stat-icon-black-atlas.png) -160px 0; zoom: 0.4; }
+
+table.portrait-stat {
+    text-align: left;
+    border-spacing: 5px 0;
+    border-collapse: separate;
+    font-size: small;
+    font-weight: bold;
+}
+
+table.portrait-stat-details {
+    text-align: left;
+    border-spacing: 5px 0;
+    border-collapse: separate;
+}
+
+table.portrait-stat-details th {
+    font-weight: bold;
+    text-align: right;
 }

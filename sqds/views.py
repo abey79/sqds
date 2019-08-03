@@ -1,3 +1,4 @@
+import collections
 from textwrap import wrap
 
 import numpy as np
@@ -6,14 +7,16 @@ import plotly.offline as opy
 from django.contrib import messages
 from django.db.models import Q, F
 from django.db.models.functions import Lower
+from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.html import format_html
-from django.views.generic import DetailView
+from django.views.generic import DetailView, TemplateView
 from django_filters import FilterSet, ChoiceFilter
 from django_filters.views import FilterView
 from django_tables2.views import SingleTableMixin
 from meta.views import MetadataMixin
 
+from sqds_ga.models import GAPool
 from .models import Category, Guild, Player, PlayerUnit, Unit
 from .tables import PlayerTable, PlayerUnitTable
 from .utils import format_large_int
@@ -260,11 +263,16 @@ class SinglePlayerView(MetadataMixin, SingleTableMixin, FilterView):
     # noinspection PyAttributeOutsideInit
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        if not Player.objects.filter(ally_code=self.kwargs['ally_code']):
-            Player.objects.update_or_create_from_swgoh(self.kwargs['ally_code'])
-        self.player = (Player.objects
-                       .annotate_stats()
-                       .get(ally_code=self.kwargs['ally_code']))
+        ally_code = self.kwargs['ally_code']
+        if not Player.objects.filter(ally_code=ally_code):
+            Player.objects.update_or_create_from_swgoh(ally_code)
+
+        try:
+            self.player = (Player.objects
+                           .annotate_stats()
+                           .get(ally_code=ally_code))
+        except Player.DoesNotExist:
+            raise Http404(f'Player {ally_code} could not be loaded')
 
     def get_queryset(self):
         return (self.model.objects
@@ -275,6 +283,9 @@ class SinglePlayerView(MetadataMixin, SingleTableMixin, FilterView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['player'] = self.player
+        context['ga_pools'] = (GAPool.objects
+                               .filter(focus_player=self.player)
+                               .order_by('-created')[:10])
         return context
 
     def get_meta_title(self, **kwargs):
@@ -295,64 +306,77 @@ class SinglePlayerView(MetadataMixin, SingleTableMixin, FilterView):
 ## PLAYER COMPARE VIEW                                                                  ##
 ##########################################################################################
 
-class PlayerCompareView(MetadataMixin, SingleTableMixin, FilterView):
-    table_class = PlayerUnitTable
-    model = PlayerUnit
+PLAYER_COMPARE_KEY_TOONS = (
+    'DARTHREVAN',
+    'BASTILASHANDARK',
+    'DARTHMALAK',
+    'JEDIKNIGHTREVAN',
+    'GRANDADMIRALTHRAWN',
+    'COMMANDERLUKESKYWALKER',
+    'DARTHTRAYA',
+    'GRANDMASTERYODA',
+    'KYLORENUNMASKED',
+    'BOSSK',
+    'ENFYSNEST',
+    'GRIEVOUS',
+    'GEONOSIANBROODALPHA',
+    'SHAAKTI',
+    'NIGHTSISTERZOMBIE',
+)
+
+
+class PlayerCompareView(MetadataMixin, TemplateView):
     template_name = 'sqds/player_compare.html'
-    filterset_class = SinglePlayerPlayerUnitsFilter
-    table_pagination = {'per_page': 50}
 
     # noinspection PyAttributeOutsideInit
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        if not Player.objects.filter(ally_code=self.kwargs['ally_code1']):
-            Player.objects.update_or_create_from_swgoh(self.kwargs['ally_code1'])
-        if not Player.objects.filter(ally_code=self.kwargs['ally_code2']):
-            Player.objects.update_or_create_from_swgoh(
-                self.kwargs['ally_code2'])
-        self.player1 = (Player.objects
-                        .annotate_stats()
-                        .get(ally_code=self.kwargs['ally_code1']))
-        self.player2 = (Player.objects
-                        .annotate_stats()
-                        .get(ally_code=self.kwargs['ally_code2']))
+        Player.objects.ensure_exist([self.kwargs['ally_code1'],
+                                     self.kwargs['ally_code2']])
 
-    def get_table_kwargs(self):
-        return {
-            'row_attrs':
-                {
-                    'class': lambda record:
-                    ('info'
-                     if record.player.ally_code == self.kwargs['ally_code1']
-                     else '')
-                }}
+        qs = (Player.objects
+              .filter(ally_code__in=[self.kwargs['ally_code1'],
+                                     self.kwargs['ally_code2']])
+              .annotate_stats()
+              .select_related('guild'))
 
-    def get_queryset(self):
-        return (self.model.objects
-                .filter(Q(player__ally_code=self.kwargs['ally_code1'])
-                        | Q(player__ally_code=self.kwargs['ally_code2']))
-                .annotate_stats()
-                .select_related('unit', 'player'))
+        for p in qs:
+            if p.ally_code == self.kwargs['ally_code1']:
+                self.player1 = p
+            if p.ally_code == self.kwargs['ally_code2']:
+                self.player2 = p
+
+        p1_units = PlayerUnit.objects.dict_from_ally_code(
+            self.kwargs['ally_code1'], PLAYER_COMPARE_KEY_TOONS)
+        p2_units = PlayerUnit.objects.dict_from_ally_code(
+            self.kwargs['ally_code2'], PLAYER_COMPARE_KEY_TOONS)
+
+        id_to_name = {v['api_id']: v['name'] for v in
+                      Unit.objects.values('api_id', 'name')}
+
+        self.units = collections.OrderedDict()
+        for toon in PLAYER_COMPARE_KEY_TOONS:
+            self.units[id_to_name[toon]] = dict(
+                player1=p1_units[toon] if toon in p1_units else None,
+                player2=p2_units[toon] if toon in p2_units else None)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['player1'] = self.player1
         context['player2'] = self.player2
+        context['units'] = self.units
+        context['players'] = [self.player1, self.player2]
         context['mod_speed_graph'] = self.generate_mod_speed_graph()
         context['gp_analysis_graph'] = self.generate_gp_analysis_graph()
         return context
 
     def get_meta_title(self, **kwargs):
-        return "Player compare: {} vs. {}".format(self.player1.name,
-                                                  self.player2.name)
+        return "Player compare"
 
     def get_meta_description(self, context=None):
-        sort_string = str(context['table'].order_by)
-        format_string = "{} characters, ordered by {}, from {}'s {} (ally code: {}) " \
+        format_string = "Comparision between {}'s {} (ally code: {}) " \
                         "and {}'s {} (ally code: {})"
         return format_string.format(
-            context['object_list'].count(),
-            sort_string.replace('-', 'descending ').replace('_', ' '),
             self.player1.guild.name,
             self.player1.name,
             '-'.join(wrap(str(self.player1.ally_code), 3)),
@@ -407,6 +431,62 @@ class PlayerCompareView(MetadataMixin, SingleTableMixin, FilterView):
                            margin=go.layout.Margin(l=60, r=10, b=60, t=40, pad=4))
         figure = go.Figure(data=traces, layout=layout)
         return opy.plot(figure, auto_open=False, output_type='div')
+
+
+class PlayerCompareUnitsView(MetadataMixin, SingleTableMixin, FilterView):
+    table_class = PlayerUnitTable
+    model = PlayerUnit
+    template_name = 'sqds/player_compare_units.html'
+    filterset_class = SinglePlayerPlayerUnitsFilter
+    table_pagination = {'per_page': 50}
+
+    # noinspection PyAttributeOutsideInit
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        Player.objects.ensure_exist([self.kwargs['ally_code1'],
+                                     self.kwargs['ally_code2']])
+
+        self.player1 = get_object_or_404(Player, ally_code=self.kwargs['ally_code1'])
+        self.player2 = get_object_or_404(Player, ally_code=self.kwargs['ally_code2'])
+
+    def get_table_kwargs(self):
+        return {
+            'row_attrs':
+                {
+                    'class': lambda record:
+                    ('info'
+                     if record.player.ally_code == self.kwargs['ally_code1']
+                     else '')
+                }}
+
+    def get_queryset(self):
+        return (self.model.objects
+                .filter(Q(player__ally_code=self.kwargs['ally_code1'])
+                        | Q(player__ally_code=self.kwargs['ally_code2']))
+                .annotate_stats()
+                .select_related('unit', 'player'))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['player1'] = self.player1
+        context['player2'] = self.player2
+        return context
+
+    def get_meta_title(self, **kwargs):
+        return "Player unit comparison: {} vs. {}".format(self.player1.name,
+                                                          self.player2.name)
+
+    def get_meta_description(self, context=None):
+        sort_string = str(context['table'].order_by)
+        format_string = "{} characters, ordered by {}, from {} (ally code: {}) " \
+                        "and {} (ally code: {})"
+        return format_string.format(
+            0,  # context['object_list'].count(),
+            sort_string.replace('-', 'descending ').replace('_', ' '),
+            self.player1.name,
+            '-'.join(wrap(str(self.player1.ally_code), 3)),
+            self.player2.name,
+            '-'.join(wrap(str(self.player2.ally_code), 3)))
 
 
 #######################################################################

@@ -21,7 +21,15 @@
             <td>{{ guild.gp | big_number }}</td>
           </tr>
           <tr>
-            <th class='danger'>Sep GP</th>
+            <td>&nbsp;&nbsp;&nbsp;Character GP</td>
+            <td>{{ guild.gp_char | big_number }}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;Ship GP</td>
+            <td>{{ guild.gp_ship | big_number }}</td>
+          </tr>
+          <tr>
+            <td class='danger'>&nbsp;&nbsp;&nbsp;Sep GP</td>
             <td class='danger'>{{ guild.sep_gp | big_number }}</td>
           </tr>
         </table>

@@ -20,6 +20,8 @@ urlpatterns = [
     path('me/clear', views.player_unregister_me, name='player_unregister'),
     path('player/<int:ally_code1>/c/<int:ally_code2>/',
          views.PlayerCompareView.as_view(), name='player_compare'),
+    path('player/<int:ally_code1>/c/<int:ally_code2>/units/',
+         views.PlayerCompareUnitsView.as_view(), name='player_compare_units'),
     path('player/<int:ally_code>/refresh/',
          views.player_refresh, name='player_refresh')
 ]

@@ -4,9 +4,10 @@ from django.urls import reverse
 
 from sqds.models import Player, Guild, Category, Unit, PlayerUnit
 from sqds.templatetags.sqds_filters import big_number
-from sqds.tests.utils import generate_game_data, generate_guild
+from sqds.tests.utils import generate_game_data, generate_guild, random_sublist, \
+    generate_player_unit
 from sqds_seed.factories import CategoryFactory, UnitFactory, PlayerUnitFactory, \
-    PlayerFactory, ModFactory, SkillFactory, ZetaFactory
+    PlayerFactory, ModFactory, SkillFactory, ZetaFactory, GuildFactory
 
 
 def string_to_float(s):
@@ -60,7 +61,7 @@ class TableTests(TestCase):
 
         # Should have zero zeta
         unit_no_zeta = UnitFactory()
-        pu_no_zeta = PlayerUnitFactory(player=player, unit=unit_no_zeta, gp=1000)
+        PlayerUnitFactory(player=player, unit=unit_no_zeta, gp=1000)
         SkillFactory(unit=unit_no_zeta, is_zeta=True)
 
         # Should have one zetas
@@ -223,22 +224,6 @@ class ViewTests(TestCase):
         self.assertTrue(table_column_contains_int(table, 'Speed'))
         self.assertTemplateUsed(response, 'sqds/single_player.html')
 
-    def test_single_player_compare_view_valid(self):
-        qs = Player.objects.order_by('?')
-        player1 = qs.first()
-        player2 = qs.last()
-        url = reverse('sqds:player_compare', kwargs={'ally_code1': player1.ally_code,
-                                                     'ally_code2': player2.ally_code})
-        response = self.client.get(url)
-        soup = BeautifulSoup(response.content, 'lxml')
-        table = soup.find_all('div', class_='table-container')[0].table
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['player1'].ally_code, player1.ally_code)
-        self.assertEqual(response.context['player2'].ally_code, player2.ally_code)
-        self.assertTrue(table_column_contains_int(table, 'Speed'))
-        self.assertTemplateUsed(response, 'sqds/player_compare.html')
-
     def test_guild_view_valid(self):
         guild = Guild.objects.first()
         url = reverse('sqds:guild', args=[guild.api_id])
@@ -311,3 +296,45 @@ class ViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(table_column_contains_int(table, 'Speed'))
         self.assertTemplateUsed(response, 'sqds/unit_list.html')
+
+
+class PlayerCompareViewTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # We need to have specific units for these tests
+        from sqds.views import PLAYER_COMPARE_KEY_TOONS
+        key_units = generate_game_data(PLAYER_COMPARE_KEY_TOONS)
+
+        cls.guild = GuildFactory()
+        cls.player1 = PlayerFactory(guild=cls.guild)
+        cls.player2 = PlayerFactory(guild=cls.guild)
+
+        for unit in random_sublist(key_units, 1):
+            generate_player_unit(unit, cls.player1)
+        for unit in random_sublist(key_units, 1):
+            generate_player_unit(unit, cls.player2)
+
+    def test_single_player_compare_view_valid(self):
+        url = reverse('sqds:player_compare', kwargs={
+            'ally_code1': self.player1.ally_code,
+            'ally_code2': self.player2.ally_code})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['player1'].ally_code, self.player1.ally_code)
+        self.assertEqual(response.context['player2'].ally_code, self.player2.ally_code)
+        self.assertTemplateUsed(response, 'sqds/player_compare.html')
+
+    def test_single_player_compare_unit_list_view_valid(self):
+        url = reverse('sqds:player_compare_units', kwargs={
+            'ally_code1': self.player1.ally_code,
+            'ally_code2': self.player2.ally_code})
+        response = self.client.get(url)
+        soup = BeautifulSoup(response.content, 'lxml')
+        table = soup.find_all('div', class_='table-container')[0].table
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['player1'].ally_code, self.player1.ally_code)
+        self.assertEqual(response.context['player2'].ally_code, self.player2.ally_code)
+        self.assertTrue(table_column_contains_int(table, 'Speed'))
+        self.assertTemplateUsed(response, 'sqds/player_compare_units.html')

@@ -7,26 +7,29 @@
 
 {% block content %}
 
-<div class="row">
-  <div class="col-md-12">
-    <div class="panel panel-default">
-      <div class="panel-heading">{% block panel_title %}{{ meta.title }}{% endblock %}</div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">{% block panel_title %}{{ meta.title }}{% endblock panel_title %}</div>
 
-      {% if filter %}
-        <div class="panel-body">
-          <form action="" method="get" class="form form-inline">
-            {% bootstrap_form filter.form layout='inline' %}
-            {% bootstrap_button 'filter' %}
-          </form>
+        {% block panel_intro %}
+        {% endblock panel_intro %}
+
+        {% if filter %}
+          <div class="panel-body">
+            <form action="" method="get" class="form form-inline">
+              {% bootstrap_form filter.form layout='inline' %}
+              {% bootstrap_button 'filter' %}
+            </form>
+          </div>
+        {% endif %}
+
+        <div style="overflow-y: scroll">
+          {% render_table table %}
         </div>
-      {% endif %}
-
-      <div style="overflow-y: scroll">
-        {% render_table table %}
       </div>
     </div>
   </div>
-</div>
 
 {% endblock %}
 

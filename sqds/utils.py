@@ -1,13 +1,23 @@
+import re
 import time
 import json
+from typing import List
 
 from django.db import connection
 
-from .models import Guild, Player
+from sqds.models import Guild, Player
 
 
 def format_large_int(value):
     return '{0:n}'.format(value) if value != 0 else '-'
+
+
+ally_code_regex = re.compile(r'(?<!\d)([1-9]{3}-?[1-9]{3}-?[1-9]{3})(?!\d)')
+
+
+def extract_all_ally_codes(text: str) -> List[int]:
+    return [int(s.replace('-', '')) for s in
+            ally_code_regex.findall(text)]
 
 
 class QueryLogger:

@@ -1,0 +1,14 @@
+{% extends 'sqds/base_list_view.html' %}
+
+{% block panel_title %}
+  Units of <a href="{% url 'sqds:player' player1.ally_code %}">{{ player1.name }}</a> and
+  <a href="{% url 'sqds:player' player2.ally_code %}">{{ player2.name }}</a>
+{% endblock panel_title %}
+
+
+{% block panel_intro %}
+  <div class="panel-body">
+      <a class="btn btn-default" href="{% url 'sqds:player_compare' player1.ally_code player2.ally_code %}">Back to
+        comparison</a>
+  </div>
+{% endblock panel_intro %}

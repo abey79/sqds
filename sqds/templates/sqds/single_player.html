@@ -6,21 +6,21 @@
 {% load sqds_filters %}
 
 {% block title %}
-Player: {{ player.name }}
+  Player: {{ player.name }}
 {% endblock %}
 
 
 {% block content %}
 
-<div class="row">
+  <div class="row">
 
-  <!-- Info panel -->
-  <div class="col-md-6">
-    <div class="panel panel-default">
-      <div class="panel-heading">Info</div>
+    <!-- Info panel -->
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">Info</div>
 
-      <table class="table">
-        <tbody>
+        <table class="table">
+          <tbody>
           <tr>
             <th>Name</th>
             <td>{{ player.name }} (<a href="{% url 'sqds:player_refresh' player.ally_code %}">refresh</a>)</td>
@@ -29,9 +29,13 @@ Player: {{ player.name }}
             <th>&nbsp;</th>
             <td>
               {% if request.path == player_url %}
-                <a href="{% url 'sqds:player_unregister' %}">I am not {{ player.name }}</a>
+                <a class="btn btn-default" role="button" href="{% url 'sqds:player_unregister' %}">
+                  I am not {{ player.name }}
+                </a>
               {% else %}
-                <a href="{% url 'sqds:player_register' player.ally_code %}">I am {{ player.name }}</a>
+                <a class="btn btn-default" role="button" href="{% url 'sqds:player_register' player.ally_code %}">
+                  I am {{ player.name }}
+                </a>
               {% endif %}
             </td>
           </tr>
@@ -41,7 +45,8 @@ Player: {{ player.name }}
           </tr>
           <tr>
             <th>Guild</th>
-            <td>{% if player.guild %}<a href="{% url 'sqds:guild' player.guild.api_id %}">{{ player.guild.name }}</a>{% endif %}</td>
+            <td>{% if player.guild %}
+              <a href="{% url 'sqds:guild' player.guild.api_id %}">{{ player.guild.name }}</a>{% endif %}</td>
           </tr>
           <tr>
             <th>Ally code</th>
@@ -55,33 +60,63 @@ Player: {{ player.name }}
             <th>Compare with</th>
             <td>
               <script type="text/javascript">
-                function setCompareFormAction() {
-                    var my_form = document.getElementById('compare_form');
-                    var ally_code_1 = document.getElementById('ally_code1').value.replace(/\D/g, '');
-                    var ally_code_2 = document.getElementById('ally_code2').value.replace(/\D/g, '');
-                    my_form.action = "/player/" + ally_code_1 + "/c/" + ally_code_2 + "/"
-                }
+                  function setCompareFormAction() {
+                      var my_form = document.getElementById('compare_form');
+                      var ally_code_1 = document.getElementById('ally_code1').value.replace(/\D/g, '');
+                      var ally_code_2 = document.getElementById('ally_code2').value.replace(/\D/g, '');
+                      my_form.action = "/player/" + ally_code_1 + "/c/" + ally_code_2 + "/"
+                  }
               </script>
 
               <form id="compare_form" method="GET" class="form-inline" onsubmit="setCompareFormAction()">
                 <label class="sr-only" for="ally_code2">Ally code</label>
-                <input type="text" class="form-control" id="ally_code2" placeholder="XXX-XXX-XXX" />
-                <input type="hidden" class="form-control" id="ally_code1" value="{{ player.ally_code }}" />
+                <input type="text" class="form-control" id="ally_code2" placeholder="XXX-XXX-XXX"/>
+                <input type="hidden" class="form-control" id="ally_code1" value="{{ player.ally_code }}"/>
                 <button type="submit" class="btn btn-default">Compare</button>
               </form>
             </td>
           </tr>
-        </tbody>
-      </table>
+          <tr>
+            <th>GA pool</th>
+            <td>
+              <form id="ga_pool" action="{% url 'sqds_ga:create' player.ally_code %}" method="POST" class="form-inline">
+                {% csrf_token %}
+                <label class="sr-only" for="ally_codes">Ally codes</label>
+                <textarea rows="3" class="form-control" id="ally_codes" placeholder="Ally codes"
+                          name="ally_codes"></textarea>
+                <button type="submit" class="btn btn-default">Analyse</button>
+              </form>
+            </td>
+          </tr>
+          {% if ga_pools %}
+            <tr>
+              <th>
+                {% if ga_pools.count < 10 %}
+                  Last GA pools
+                {% else %}
+                  Last 10 GA pools
+                {% endif %}
+              </th>
+              <td>
+                <ul>
+                  {% for ga_pool in ga_pools %}
+                    <li><a href="{% url 'sqds_ga:view' ga_pool.pk %}">{{ ga_pool.created }}</a></li>
+                  {% endfor %}
+                </ul>
+              </td>
+            </tr>
+          {% endif %}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
 
-  <!-- Stat panel -->
-  <div class="col-md-6">
-    <div class="panel panel-default">
-      <div class="panel-heading">Statistics</div>
-      <table class="table">
-        <tbody>
+    <!-- Stat panel -->
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">Statistics</div>
+        <table class="table">
+          <tbody>
           <tr>
             <th>GP</th>
             <td>{{ player.gp | big_number }}</td>
@@ -158,32 +193,32 @@ Player: {{ player.name }}
             <td>&nbsp;&nbsp;&nbsp;∑15+</td>
             <td>{{ player.mod_total_speed_15plus }}</td>
           </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- Characters table -->
-<div class="row">
-  <div class="col-md-12">
-    <div class="panel panel-default">
-      <div class="panel-heading">Characters</div>
-
-      {% if filter %}
-      <div class="panel-body">
-        <form action="" method="get" class="form form-inline">
-          {% bootstrap_form filter.form layout='inline' %}
-          {% bootstrap_button 'filter' %}
-        </form>
-      </div>
-      {% endif %}
-
-      <div style="overflow-y: scroll">
-        {% render_table table %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
-</div>
+
+  <!-- Characters table -->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Characters</div>
+
+        {% if filter %}
+          <div class="panel-body">
+            <form action="" method="get" class="form form-inline">
+              {% bootstrap_form filter.form layout='inline' %}
+              {% bootstrap_button 'filter' %}
+            </form>
+          </div>
+        {% endif %}
+
+        <div style="overflow-y: scroll">
+          {% render_table table %}
+        </div>
+      </div>
+    </div>
+  </div>
 
 {% endblock %}

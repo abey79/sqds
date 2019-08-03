@@ -11,9 +11,92 @@
 {% block content %}
 
   <div class="row">
-    <div class="col-md-12">
+
+    {# QUICK NAVIGATION BAR #}
+    <div class="col-md-12 col-sm-12">
       <div class="panel panel-default">
-        <div class="panel-heading">Introduction</div>
+        <div class="panel-heading">
+          Quick actions
+        </div>
+        <div class="panel-body" style="padding-bottom: 0">
+          <div class="btn-toolbar" role="toolbar">
+            <div class="row">
+              <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="padding-bottom: 15px">
+                <div class="btn-group btn-group-justified" role="group">
+                  <a class="btn btn-default" role="button" href="{% url 'sqds:guild' 'G2737841003' %}">Go to PREPARE</a>
+                  <a class="btn btn-default" role="button" href="{% url 'sqds:guild' 'G3397624354' %}">
+                    Go to PREPAIRED
+                  </a>
+                </div>
+              </div>
+
+              <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="padding-bottom: 15px">
+                <div class="btn-group btn-group-justified" role="group">
+                  <script type="text/javascript">
+                      function setPlayerFormAction() {
+                          var my_form = document.getElementById('player_form');
+                          var ally_code = document.getElementById('ally_code').value.replace(/\D/g, '');
+                          my_form.action = "/player/" + ally_code + "/"
+                      }
+                  </script>
+                  <form id="player_form" method="GET" class="form-inline" style="display: inline"
+                        onsubmit="setPlayerFormAction()">
+                    <label class="sr-only" for="ally_code">Ally code</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="ally_code" placeholder="XXX-XXX-XXX"/>
+                      <span class="input-group-btn">
+                        <button type="submit" class="btn btn-default">Inspect player</button>
+                      </span>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="col-sm-12 col-md-12 col-lg-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">How to use</div>
+        <div class="panel-body">
+          <p><b>Where do I find stuff here?</b></p>
+          <p>
+            Start by navigating to one of our guilds with the buttons above. This will bring you to the guild page,
+            with a list of players and related stats. You can click on player names to go to the corresponding page,
+            or inspect all of the guild's unit by clicking on the related link. You got the idea -- if its blue,
+            click on it and see where it brings you.
+          </p>
+          <p><b>How can I register who I am?</b></p>
+          <p>Navigate to your page (e.g. go to PREPARE's page, then click on your name in the list) and click on the
+            "I am <em>player name</em>" button. Once done, the top toolbar will offer direct access to your and your
+            guild's pages.
+          </p>
+          <p><b>How can I compare myself with an opponent?</b></p>
+          <p>
+            Navigate to your page (if you registered a profile, you can access your page from the top toolbar),
+            enter the opponent's ally code in the "Compare with" text field, and click the "Compare" button.
+            The formatting is irrelevant: you may leave the dashes or not, you may surround the ally code with text
+            such as commas, you could even paste a swgoh.gg profile URL and it would work.
+          </p>
+          <p><b>How can I compare myself with the rest of my GA pool?</b></p>
+          <p>
+            Navigate to your page and enter all of your opponents' ally codes in the GA pool text field. Again, the
+            formatting is irrelevant. Click on the "Analyse" button. The page will take a few minutes to load while
+            the opponents' data is downloaded. From the GA pool comparison page, you can
+            compare with individual players, see their units, etc. by clicking on the corresponding links.
+            <b>Note:</b> once a GA pool is loaded, you can visit it again without entering the ally codes again. A
+            list of the past 10 GA pools is shown on your player page.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-12 col-md-12 col-lg-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">About this site</div>
         <div class="panel-body">
           <p><b>What is this site?</b></p>
           <p>This site exists because I (hhip) wanted to learn about things like web apps, Python, Django, DevOps,
@@ -45,54 +128,46 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="row">
-
-    <div class="col-md-6">
-      <div class="panel panel-default">
-        <div class="panel-heading">Quick action</div>
-        <div class="panel-body">
-          <p>Inspect <a href="{% url 'sqds:guild' 'G2737841003' %}">PREPARE</a>.</p>
-          <p>Inspect <a href="{% url 'sqds:guild' 'G3397624354' %}">PREPAIRED</a>.</p>
-          <div>
-            <script type="text/javascript">
-                function setPlayerFormAction() {
-                    var my_form = document.getElementById('player_form');
-                    var ally_code = document.getElementById('ally_code').value.replace(/\D/g, '');
-                    my_form.action = "/player/" + ally_code + "/"
-                }
-            </script>
-            Inspect new player:
-            <form id="player_form" method="GET" class="form-inline" onsubmit="setPlayerFormAction()">
-              <label class="sr-only" for="ally_code">Ally code</label>
-              <input type="text" class="form-control" id="ally_code" placeholder="XXX-XXX-XXX"/>
-              <button type="submit" class="btn btn-default">Go</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {% comment %}
-    <div class="col-md-3">
-      <div class="panel panel-default">
-        <div class="panel-heading">Guilds</div>
-        <div class="panel-body">
-          <ul>
-            {% for guild in guilds %}
-              <li><a href="{% url 'sqds:guild' guild.api_id %}">{{ guild.name }}</a></li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
-    </div>
-    {%  endcomment %}
-
-    <div class="col-md-6">
+    <div class="col-md-12 col-sm-12 col-lg-6">
       <div class="panel panel-default">
         <div class="panel-heading">Release notes</div>
         <div class="panel-body">
+          <p><b>3-Aug-2019</b></p>
+          <ul>
+            <li>
+              Better mobile support: everything has more or less the correct size now (proper mobile support is still
+              WIP). Note that top navigation links (your player and guild) are now in the top right menu (mobile only).
+            </li>
+            <li>
+              New GA pool analysis feature, accessible from the player page. Enter a bunch of ally codes to view
+              a big comparison table, from which you can explore specific player vs. player comparisons. Once a GA
+              pool is created, it remains accessible from your player's page (no need to enter ally codes again).
+              <b>Note:</b> upon initial creation, the page may take a few minutes to appear while the data is loaded.
+            </li>
+            <li>
+              Improved player vs. player comparison page: key toons are displayed with most important stats. Full
+              stats available by clicking on the toon's portrait. <b>Note:</b> I'm not super happy with this part yet
+              -- feedback for improvement is most welcome.
+            </li>
+            <li>
+              The list of units for player vs. player comparison is moved to a separate page, accessible either from the
+              base pvp page or directly from the GA pool table.
+            </li>
+            <li>
+              Revamped landing page. Navigation tools are now on top and 17% better looking. Added a new How To
+              section to explain not-so-obvious features (I'll happily take feedback to improve these as well).
+            </li>
+            <li>
+              Added toon/ship GP to the guild page.
+            </li>
+            <li>
+              Faster, more robust player data download (used for GA pool creation and regular guild updates).
+            </li>
+            <li>
+              Misc. smaller improvement here and there.
+            </li>
+          </ul>
           <p><b>13-July-2019</b></p>
           <ul>
             <li>Geo TB tools (farming graph and player list) have their URL changed. They are now accessible from the

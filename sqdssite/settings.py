@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'sqds.apps.SqdsConfig',
     'sqds_scoredunit.apps.SqdsScoredUnitConfig',
     'sqds_gphistory.apps.SqdsGPHistoryConfig',
+    'sqds_ga.apps.SqdsGAConfig',
     'sqds_seed.apps.SqdsSeedConfig',
     'sqds_officers.apps.SqdsOfficersConfig',
     'django.contrib.admin',

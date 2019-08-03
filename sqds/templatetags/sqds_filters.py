@@ -7,6 +7,7 @@ locale.setlocale(locale.LC_ALL, '')
 register = template.Library()
 
 
+@register.filter
 def big_number(num):
     try:
         num = float(num)
@@ -17,14 +18,24 @@ def big_number(num):
     return '{0:n}'.format(num)
 
 
+@register.filter
 def ally_code(num):
     return '-'.join(wrap(str(num), 3))
 
 
+@register.filter
 def percent(num):
     return '{:0.1f}%'.format(num * 100)
 
 
-register.filter('big_number', big_number)
-register.filter('ally_code', ally_code)
-register.filter('percent', percent)
+@register.filter
+def number_kilo(num):
+    try:
+        num = float(num)
+    except ValueError:
+        num = 0
+
+    if num < 100:
+        return '{:0.0f}'.format(num)
+    else:
+        return '{:0.1f}k'.format(num / 1000)

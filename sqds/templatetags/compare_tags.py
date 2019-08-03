@@ -5,122 +5,121 @@ from .sqds_filters import big_number
 register = template.Library()
 
 
-def compute_data_and_classes(data1, data2, data_filter=None):
-    if data1 > data2:
-        output_dict = {'left_class': 'success', 'right_class': 'danger'}
-    elif data2 > data1:
-        output_dict = {'left_class': 'danger', 'right_class': 'success'}
-    else:
-        output_dict = {'left_class': '', 'right_class': ''}
+def compute_data_and_classes(values, data_filter=None):
+    """
+    Returns a list of dict in the form [{'value': val, 'class': 'success']]
+    :param values: Values to process. Min and max are assigned corresponding classes.
+    :param data_filter: If not None, applied on all values before output
+    :return: processed array of dict
+    """
+    output_values = []
+    max_value = max(values)
+    min_value = min(values)
 
-    if data_filter is not None:
-        output_dict['left_data'] = data_filter(data1)
-        output_dict['right_data'] = data_filter(data2)
-    else:
-        output_dict['left_data'] = data1
-        output_dict['right_data'] = data2
+    for idx, value in enumerate(values):
+        val = {}
+        if value == min_value and value != max_value:
+            val['class'] = 'danger'
+        elif value == max_value and value != min_value:
+            val['class'] = 'success'
+        else:
+            val['class'] = ''
 
-    return output_dict
+        val['value'] = data_filter(value) if data_filter else value
+
+        output_values.append(val)
+
+    return output_values
 
 
 @register.inclusion_tag('sqds/player_compare_table.html')
-def player_comparison(player1, player2):
-    return {
-        'player1': player1,
-        'player2': player2,
+def player_comparison(players):
+    context = {
+        'players': players,
         'lines': [
             {
-                'label': 'GP', 'label_type': 'th',
-                **compute_data_and_classes(player1.gp, player2.gp, big_number)
+                'label': '<th>GP</th>',
+                'data': compute_data_and_classes([p.gp for p in players], big_number)
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;characters', 'label_type': 'td',
-                **compute_data_and_classes(player1.gp_char, player2.gp_char,
-                                           big_number)
+                'label': '<td>&nbsp;&nbsp;&nbsp;characters</td>',
+                'data': compute_data_and_classes([p.gp_char for p in players], big_number)
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;ship', 'label_type': 'td',
-                **compute_data_and_classes(player1.gp_ship, player2.gp_ship,
-                                           big_number)
+                'label': '<td>&nbsp;&nbsp;&nbsp;ship</td>',
+                'data': compute_data_and_classes([p.gp_ship for p in players], big_number)
             },
             {
-                'label': 'Zeta', 'label_type': 'th',
-                **compute_data_and_classes(player1.zeta_count,
-                                           player2.zeta_count)
+                'label': '<th>Zeta</th>',
+                'data': compute_data_and_classes([p.zeta_count for p in players])
             },
             {
-                'label': 'Unit count', 'label_type': 'th',
-                **compute_data_and_classes(player1.unit_count,
-                                           player2.unit_count)
+                'label': '<th>Unit count</th>',
+                'data': compute_data_and_classes([p.unit_count for p in players])
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;7*', 'label_type': 'td',
-                **compute_data_and_classes(player1.seven_star_unit_count,
-                                           player2.seven_star_unit_count)
+                'label': '<td>&nbsp;&nbsp;&nbsp;7*</td>',
+                'data': compute_data_and_classes(
+                    [p.seven_star_unit_count for p in players])
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;G13', 'label_type': 'td',
-                **compute_data_and_classes(player1.g13_unit_count,
-                                           player2.g13_unit_count)
+                'label': '<td>&nbsp;&nbsp;&nbsp;G13</td>',
+                'data': compute_data_and_classes([p.g13_unit_count for p in players])
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;G12', 'label_type': 'td',
-                **compute_data_and_classes(player1.g12_unit_count,
-                                           player2.g12_unit_count)
+                'label': '<td>&nbsp;&nbsp;&nbsp;G12</td>',
+
+                'data': compute_data_and_classes([p.g12_unit_count for p in players])
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;G11', 'label_type': 'td',
-                **compute_data_and_classes(player1.g11_unit_count,
-                                           player2.g11_unit_count)
+                'label': '<td>&nbsp;&nbsp;&nbsp;G11</td>',
+
+                'data': compute_data_and_classes([p.g11_unit_count for p in players])
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;G10', 'label_type': 'td',
-                **compute_data_and_classes(player1.g10_unit_count,
-                                           player2.g10_unit_count)
+                'label': '<td>&nbsp;&nbsp;&nbsp;G10</td>',
+                'data': compute_data_and_classes([p.g10_unit_count for p in players])
             },
             {
-                'label': 'G12 gear pieces', 'label_type': 'th',
-                **compute_data_and_classes(player1.g12_gear_count,
-                                           player2.g12_gear_count)
+                'label': '<th>G12 gear pieces</th>',
+                'data': compute_data_and_classes([p.g12_gear_count for p in players])
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;left', 'label_type': 'td',
-                **compute_data_and_classes(player1.left_hand_g12_gear_count,
-                                           player2.left_hand_g12_gear_count)
+                'label': '<td>&nbsp;&nbsp;&nbsp;left</td>',
+                'data': compute_data_and_classes(
+                    [p.left_hand_g12_gear_count for p in players])
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;right', 'label_type': 'td',
-                **compute_data_and_classes(player1.right_hand_g12_gear_count,
-                                           player2.right_hand_g12_gear_count)
+                'label': '<td>&nbsp;&nbsp;&nbsp;right</td>',
+                'data': compute_data_and_classes(
+                    [p.right_hand_g12_gear_count for p in players])
             },
             {
-                'label': 'Mod count', 'label_type': 'th',
-                'left_data': '', 'right_data': ''
+                'label': '<th>Mod count</th>',
+                'data': [''] * len(players)
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;+25', 'label_type': 'td',
-                **compute_data_and_classes(player1.mod_count_speed_25,
-                                           player2.mod_count_speed_25)
+                'label': '<td>&nbsp;&nbsp;&nbsp;+25</td>',
+                'data': compute_data_and_classes([p.mod_count_speed_25 for p in players])
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;+20', 'label_type': 'td',
-                **compute_data_and_classes(player1.mod_count_speed_20,
-                                           player2.mod_count_speed_20)
+                'label': '<td>&nbsp;&nbsp;&nbsp;+20</td>',
+                'data': compute_data_and_classes([p.mod_count_speed_20 for p in players])
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;+15', 'label_type': 'td',
-                **compute_data_and_classes(player1.mod_count_speed_15,
-                                           player2.mod_count_speed_15)
+                'label': '<td>&nbsp;&nbsp;&nbsp;+15</td>',
+                'data': compute_data_and_classes([p.mod_count_speed_15 for p in players])
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;+10', 'label_type': 'td',
-                **compute_data_and_classes(player1.mod_count_speed_10,
-                                           player2.mod_count_speed_10)
+                'label': '<td>&nbsp;&nbsp;&nbsp;+10</td>',
+                'data': compute_data_and_classes([p.mod_count_speed_10 for p in players])
             },
             {
-                'label': '&nbsp;&nbsp;&nbsp;∑15+', 'label_type': 'td',
-                **compute_data_and_classes(player1.mod_total_speed_15plus,
-                                           player2.mod_total_speed_15plus)
+                'label': '<td>&nbsp;&nbsp;&nbsp;∑15+</td>',
+                'data': compute_data_and_classes(
+                    [p.mod_total_speed_15plus for p in players])
             },
         ]
     }
+
+    return context
