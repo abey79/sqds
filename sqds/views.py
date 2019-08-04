@@ -110,14 +110,14 @@ class GuildView(MetadataMixin, SingleTableMixin, FilterView):
         # noinspection PyAttributeOutsideInit
         self.guild = (Guild.objects
                       .annotate_stats()
-                      .annotate_separatist_gp()
+                      .annotate_faction_gp()
                       .get(api_id=self.kwargs['api_id']))
 
     def get_queryset(self):
         qs = (self.model.objects
               .filter(guild__api_id=self.kwargs['api_id'])
               .annotate_stats()
-              .annotate_separatist_gp()
+              .annotate_faction_gp()
               .annotate(guild_name=F('guild__name'), guild_api_id=F('guild__api_id')))
         return qs
 
@@ -517,7 +517,7 @@ class FilteredPlayerListView(SingleTableMixin, FilterView):
     table_pagination = {'per_page': 50}
 
     def get_queryset(self):
-        return self.model.objects.annotate_stats().annotate_separatist_gp()
+        return self.model.objects.annotate_stats().annotate_faction_gp()
 
 
 class AllPlayerUnitsFilter(FilterSet):

@@ -11,7 +11,7 @@ register = template.Library()
 def big_number(num):
     try:
         num = float(num)
-    except ValueError:
+    except (ValueError, TypeError):
         num = 0
 
     num = int(round(float(num), 0))

@@ -118,11 +118,16 @@ class PlayerTable(RowCounterTable):
         attrs={'td': {'class': 'danger'},
                'th': {'data-toggle': 'tooltip',
                       'title': "Sum of the GP of all Separatists"}})
+    gr_gp = LargeIntColumn(
+        'GR GP', initial_sort_descending=True,
+        attrs={'td': {'class': 'info'},
+               'th': {'data-toggle': 'tooltip',
+                      'title': "Sum of the GP of all Galactic Republic"}})
 
     class Meta:
         model = Player
         fields = ('row_counter', 'name', 'guild_name',
-                  'level', 'gp', 'gp_char', 'gp_ship', 'sep_gp', 'unit_count',
+                  'level', 'gp', 'gp_char', 'gp_ship', 'sep_gp', 'gr_gp', 'unit_count',
                   'seven_star_unit_count', 'g13_unit_count', 'g12_unit_count',
                   'g11_unit_count', 'g10_unit_count', 'right_hand_g12_gear_count',
                   'zeta_count', 'mod_count_speed_25', 'mod_count_speed_20',

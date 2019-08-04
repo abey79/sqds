@@ -283,14 +283,22 @@ class GuildSet(models.QuerySet):
                                             output_field=models.IntegerField())
         )
 
-    def annotate_separatist_gp(self):
+    def annotate_faction_gp(self):
         unit_ids = Unit.objects.filter(
             categories__api_id='affiliation_separatist').values('id')
         sep_gp = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             sep_gp=Sum('player_set__unit_set__gp',
                        filter=Q(player_set__unit_set__unit__id__in=unit_ids)))
+
+        gr_unit_ids = Unit.objects.filter(
+            categories__api_id='affiliation_republic').values('id')
+        gr_gp = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            gr_gp=Sum('player_set__unit_set__gp',
+                      filter=Q(player_set__unit_set__unit__id__in=gr_unit_ids)))
+
         return self.annotate(
-            sep_gp=Subquery(sep_gp.values('sep_gp'), output_field=models.IntegerField()))
+            sep_gp=Subquery(sep_gp.values('sep_gp'), output_field=models.IntegerField()),
+            gr_gp=Subquery(gr_gp.values('gr_gp'), output_field=models.IntegerField()))
 
 
 class Guild(models.Model):
@@ -586,16 +594,22 @@ class PlayerSet(models.QuerySet):
             mod_total_speed_15plus=Subquery(mod_total_speed_15plus.values('sum15'),
                                             output_field=models.IntegerField()))
 
-    def annotate_separatist_gp(self):
+    def annotate_faction_gp(self):
         unit_ids = Unit.objects.filter(
             categories__api_id='affiliation_separatist').values('id')
-
         sep_gp = Player.objects.filter(pk=OuterRef('pk')).annotate(
             sep_gp=Sum('unit_set__gp',
                        filter=Q(unit_set__unit__id__in=unit_ids)))
 
+        gr_unit_ids = Unit.objects.filter(
+            categories__api_id='affiliation_republic').values('id')
+        gr_gp = Player.objects.filter(pk=OuterRef('pk')).annotate(
+            gr_gp=Sum('unit_set__gp',
+                      filter=Q(unit_set__unit__id__in=gr_unit_ids)))
+
         return self.annotate(
-            sep_gp=Subquery(sep_gp.values('sep_gp'), output_field=models.IntegerField()))
+            sep_gp=Subquery(sep_gp.values('sep_gp'), output_field=models.IntegerField()),
+            gr_gp=Subquery(gr_gp.values('gr_gp'), output_field=models.IntegerField()))
 
 
 class Player(models.Model):
