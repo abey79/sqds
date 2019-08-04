@@ -99,6 +99,10 @@ def player_comparison(players):
                 'data': [''] * len(players)
             },
             {
+                'label': '<td>&nbsp;&nbsp;&nbsp;6 pips</td>',
+                'data': compute_data_and_classes([p.mod_count_6dot for p in players])
+            },
+            {
                 'label': '<td>&nbsp;&nbsp;&nbsp;+25</td>',
                 'data': compute_data_and_classes([p.mod_count_speed_25 for p in players])
             },

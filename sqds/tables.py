@@ -83,6 +83,11 @@ class PlayerTable(RowCounterTable):
     g11_unit_count = LargeIntColumn('G11', initial_sort_descending=True)
     g10_unit_count = LargeIntColumn('G10', initial_sort_descending=True)
 
+    mod_count_6dot = LargeIntColumn(
+        '6 pips', initial_sort_descending=True,
+        attrs={
+            'th': {'data-toggle': 'tooltip',
+                   'title': "Total number of 6 pips mods"}})
     mod_count_speed_25 = LargeIntColumn(
         '+25', initial_sort_descending=True,
         attrs={
@@ -130,8 +135,8 @@ class PlayerTable(RowCounterTable):
                   'level', 'gp', 'gp_char', 'gp_ship', 'sep_gp', 'gr_gp', 'unit_count',
                   'seven_star_unit_count', 'g13_unit_count', 'g12_unit_count',
                   'g11_unit_count', 'g10_unit_count', 'right_hand_g12_gear_count',
-                  'zeta_count', 'mod_count_speed_25', 'mod_count_speed_20',
-                  'mod_count_speed_15', 'mod_count_speed_10',
+                  'zeta_count', 'mod_count_6dot', 'mod_count_speed_25',
+                  'mod_count_speed_20', 'mod_count_speed_15', 'mod_count_speed_10',
                   'mod_total_speed_15plus')
 
 

@@ -216,6 +216,9 @@ class GuildSet(models.QuerySet):
                           player_set__unit_set__pug_set__gear__is_left_hand_g12=True)))
         mod_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('player_set__unit_set__mod_set'))
+        mod_count_6dot = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set__mod_set',
+                      filter=Q(player_set__unit_set__mod_set__pips__gte=6)))
         mod_count_speed_25 = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('player_set__unit_set__mod_set',
                       filter=(Q(player_set__unit_set__mod_set__speed__gte=25) & ~Q(
@@ -270,6 +273,8 @@ class GuildSet(models.QuerySet):
                                               output_field=models.IntegerField()),
             mod_count=Subquery(mod_count.values('cnt'),
                                output_field=models.IntegerField()),
+            mod_count_6dot=Subquery(mod_count_6dot.values('cnt'),
+                                    output_field=models.IntegerField()),
             mod_count_speed_25=Subquery(mod_count_speed_25.values('cnt'),
                                         output_field=models.IntegerField()),
             mod_count_speed_20=Subquery(mod_count_speed_20.values('cnt'),
@@ -538,6 +543,9 @@ class PlayerSet(models.QuerySet):
         left_hand_g12_gear_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set__pug_set',
                       filter=Q(unit_set__pug_set__gear__is_left_hand_g12=True)))
+        mod_count_6dot = Player.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('unit_set__mod_set',
+                      filter=Q(unit_set__mod_set__pips__gte=6)))
         mod_count_speed_25 = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set__mod_set',
                       filter=(Q(unit_set__mod_set__speed__gte=25) & ~Q(
@@ -583,6 +591,8 @@ class PlayerSet(models.QuerySet):
                                                output_field=models.IntegerField()),
             left_hand_g12_gear_count=Subquery(left_hand_g12_gear_count.values('cnt'),
                                               output_field=models.IntegerField()),
+            mod_count_6dot=Subquery(mod_count_6dot.values('cnt'),
+                                    output_field=models.IntegerField()),
             mod_count_speed_25=Subquery(mod_count_speed_25.values('cnt'),
                                         output_field=models.IntegerField()),
             mod_count_speed_20=Subquery(mod_count_speed_20.values('cnt'),
