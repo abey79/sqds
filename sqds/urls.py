@@ -14,7 +14,9 @@ urlpatterns = [
     path('units/', views.AllPlayerUnitsListView.as_view(), name='units'),
     path('player/<int:ally_code>/',
          views.SinglePlayerView.as_view(), name='player'),
-    path('player/<int:ally_code>/<str:unit_api_id>/', views.UnitView.as_view(),
+    path('player/<int:ally_code>/refresh/',
+         views.player_refresh, name='player_refresh'),
+    path('player/<int:ally_code>/unit/<str:unit_api_id>/', views.UnitView.as_view(),
          name='unit'),
     path('player/<int:ally_code>/me',
          views.player_register_me, name='player_register'),
@@ -23,6 +25,4 @@ urlpatterns = [
          views.PlayerCompareView.as_view(), name='player_compare'),
     path('player/<int:ally_code1>/c/<int:ally_code2>/units/',
          views.PlayerCompareUnitsView.as_view(), name='player_compare_units'),
-    path('player/<int:ally_code>/refresh/',
-         views.player_refresh, name='player_refresh')
 ]
