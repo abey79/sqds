@@ -32,6 +32,10 @@ coverage
 pydotplus
 beautifulsoup4
 lxml
+pytest
+pytest-mock
+django-pytest
+
 
 # Deployment stuff
 python-dotenv
