@@ -12,52 +12,41 @@
 
   <div class="row">
 
-    {# QUICK NAVIGATION BAR #}
-    <div class="col-md-12 col-sm-12">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          Quick actions
+    {# QUICK TOOLBAR #}
+    <div class="col-lg-12">
+      <div class="btn-toolbar" role="toolbar">
+        {# GROUP: GUILDS #}
+        <div class="btn-group" role="group" style="margin-bottom: 15px">
+          <a class="btn btn-default" role="button" href="{% url 'sqds:guild' 'G2737841003' %}">Go to PREPARE</a>
+          <a class="btn btn-default" role="button" href="{% url 'sqds:guild' 'G3397624354' %}">
+            Go to PREPAIRED
+          </a>
         </div>
-        <div class="panel-body" style="padding-bottom: 0">
-          <div class="btn-toolbar" role="toolbar">
-            <div class="row">
-              <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="padding-bottom: 15px">
-                <div class="btn-group btn-group-justified" role="group">
-                  <a class="btn btn-default" role="button" href="{% url 'sqds:guild' 'G2737841003' %}">Go to PREPARE</a>
-                  <a class="btn btn-default" role="button" href="{% url 'sqds:guild' 'G3397624354' %}">
-                    Go to PREPAIRED
-                  </a>
-                </div>
-              </div>
 
-              <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="padding-bottom: 15px">
-                <div class="btn-group btn-group-justified" role="group">
-                  <script type="text/javascript">
-                      function setPlayerFormAction() {
-                          var my_form = document.getElementById('player_form');
-                          var ally_code = document.getElementById('ally_code').value.replace(/\D/g, '');
-                          my_form.action = "/player/" + ally_code + "/"
-                      }
-                  </script>
-                  <form id="player_form" method="GET" class="form-inline" style="display: inline"
-                        onsubmit="setPlayerFormAction()">
-                    <label class="sr-only" for="ally_code">Ally code</label>
-                    <div class="input-group">
-                      <input type="text" class="form-control" id="ally_code" placeholder="XXX-XXX-XXX"/>
-                      <span class="input-group-btn">
-                        <button type="submit" class="btn btn-default">Inspect player</button>
-                      </span>
-                    </div>
-                  </form>
-                </div>
-              </div>
+        {# GROUP: GO TO PLAYER #}
+        <div class="btn-group" role="group" style="margin-bottom: 15px">
+          <script type="text/javascript">
+              function setPlayerFormAction() {
+                  var my_form = document.getElementById('player_form');
+                  var ally_code = document.getElementById('ally_code').value.replace(/\D/g, '');
+                  my_form.action = "/player/" + ally_code + "/"
+              }
+          </script>
+          <form id="player_form" method="GET" class="form-inline" style="display: inline"
+                onsubmit="setPlayerFormAction()">
+            <label class="sr-only" for="ally_code">Ally code</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="ally_code" placeholder="XXX-XXX-XXX"/>
+              <span class="input-group-btn">
+                <button type="submit" class="btn btn-default">Inspect player</button>
+              </span>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
 
-
+    {# SECTION: HOWTO #}
     <div class="col-sm-12 col-md-12 col-lg-6">
       <div class="panel panel-default">
         <div class="panel-heading">How to use</div>
@@ -136,11 +125,18 @@
           <p><b>14-Aug-2019</b></p>
           <ul>
             <li>Added Sep/GR GP to player page, pvp page and GA pool.</li>
+            <li>Guild page: moved all action to the top as buttons, in a way that is consistent with the actions of
+              the front page.
+            </li>
+            <li>
+              Guild page: on guild other than yours, an action can now directly jump to the unit comparison page.
+            </li>
           </ul>
           <p><b>5-Aug-2019</b></p>
           <ul>
             <li>Fixed a bug where the player refresh link was broken. Slightly modified the individual unit links in
-              the process.</li>
+              the process.
+            </li>
           </ul>
           <p><b>4-Aug-2019</b></p>
           <ul>

@@ -8,6 +8,36 @@
 
 {% block content %}
   <div class="row">
+
+    {# TOOLBAR #}
+    <div class="col-lg-12">
+      <div class="btn-toolbar" role="toolbar">
+        {# GROUP: UNITS #}
+        <div class="btn-group" role="group" style="margin-bottom: 15px">
+          {# BUTTON: INSPECT UNITS #}
+          <a class="btn btn-default" role="button" href="{% url 'sqds:guild_units' guild.api_id %}">Inspect all
+            units</a>
+
+          {# BUTTON: COMPARE UNITS WITH MY GUILD'S #}
+          {% if request.COOKIES.sqds_my_guild_api_id and request.COOKIES.sqds_my_guild_api_id != guild.api_id %}
+            <a href="{% url 'sqds:guild_compare_units' request.COOKIES.sqds_my_guild_api_id guild.api_id %}"
+               class="btn btn-default" role="button">
+              Compare units with my guild
+            </a>
+          {% endif %}
+        </div>
+        {# GROUP: OFFICER TOOLS #}
+        <div class="btn-group" role="group" style="margin-bottom: 15px">
+          <a href="{% url 'sqds_officers:sep_farm' guild.api_id %}" class="btn btn-default" role="button">
+            Separatists farm
+          </a>
+          <a href="{% url 'sqds_officers:geo_tb' guild.api_id %}" class="btn btn-default" role="button">
+            Geo TB player list
+          </a>
+        </div>
+      </div>
+    </div>
+
     <div class="col-md-3">
       <div class="panel panel-default">
         <div class="panel-heading">Info</div>
@@ -18,7 +48,7 @@
           </tr>
           <tr>
             <th>Last updated</th>
-            <td>{{ guild.last_updated}}</td>
+            <td>{{ guild.last_updated }}</td>
           </tr>
           <tr>
             <th>GP</th>
@@ -39,42 +69,6 @@
           <tr>
             <td class='info'>&nbsp;&nbsp;&nbsp;GR GP</td>
             <td class='info'>{{ guild.gr_gp | big_number }}</td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="panel panel-default">
-        <div class="panel-heading">Units</div>
-        <table class="table">
-          <tr>
-            <td>Inspect <a href="{% url 'sqds:guild_units' guild.api_id %}">all units</a></td>
-          </tr>
-          <tr>
-            <td>Inspect <a
-                href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.DARTHREVAN.id }}&sort=-speed">fast
-              Darth Revans</a></td>
-          </tr>
-          <tr>
-            <td>Inspect <a
-                href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.ENFYSNEST.id }}&sort=-health">fat
-              Nests</a></td>
-          </tr>
-          <tr>
-            <td>Inspect <a
-                href="{% url 'sqds:guild_units' guild.api_id %}?unit={{ units_by_api_id.GRANDMASTERYODA.id }}&sort=-special_damage">offensive
-              GMYs</a></td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="panel panel-default">
-        <div class="panel-heading">Officer tools</div>
-        <table class="table">
-          <tr>
-            <td><a href="{% url 'sqds_officers:geo_tb' guild.api_id %}">Geo TB player list</a></td>
-          </tr>
-          <tr>
-            <td><a href="{% url 'sqds_officers:sep_farm' guild.api_id %}">Separatists farm progress</a></td>
           </tr>
         </table>
       </div>
@@ -159,10 +153,8 @@
         </table>
       </div>
     </div>
-  </div>
 
-  <div class="row">
-    <div class="col-md-12">
+    <div class="col-sm-12 col-md-12 col-lg-12">
       <div class="panel panel-default">
         <div class="panel-heading">Characters</div>
 
