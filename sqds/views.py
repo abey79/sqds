@@ -315,11 +315,10 @@ class SinglePlayerView(MetadataMixin, SingleTableMixin, FilterView):
 
     def get_meta_description(self, context=None):
         sort_string = str(context['table'].order_by)
-        format_string = "{} characters, ordered by {}, from {}'s {} (ally code: {})"
+        format_string = "{} characters, ordered by {}, from {} (ally code: {})"
         return format_string.format(
             context['object_list'].count(),
             sort_string.replace('-', 'descending ').replace('_', ' '),
-            self.player.guild.name,
             self.player.name,
             '-'.join(wrap(str(self.player.ally_code), 3)))
 
@@ -391,21 +390,27 @@ class PlayerCompareView(MetadataMixin, TemplateView):
         context['player2'] = self.player2
         context['units'] = self.units
         context['players'] = [self.player1, self.player2]
-        context['mod_speed_graph'] = self.generate_mod_speed_graph()
-        context['gp_analysis_graph'] = self.generate_gp_analysis_graph()
+        try:
+            context['mod_speed_graph'] = self.generate_mod_speed_graph()
+        except IndexError:
+            context['mod_speed_graph'] = "Mod speed graph could not be generated due " \
+                                         "to an error."
+        try:
+            context['gp_analysis_graph'] = self.generate_gp_analysis_graph()
+        except IndexError:
+            context['gp_analysis_graph'] = "GP analysis graph could not be generated " \
+                                           "due to an error."
         return context
 
     def get_meta_title(self, **kwargs):
         return "Player compare"
 
     def get_meta_description(self, context=None):
-        format_string = "Comparision between {}'s {} (ally code: {}) " \
-                        "and {}'s {} (ally code: {})"
+        format_string = "Comparision between {} (ally code: {}) " \
+                        "and {} (ally code: {})"
         return format_string.format(
-            self.player1.guild.name,
             self.player1.name,
             '-'.join(wrap(str(self.player1.ally_code), 3)),
-            self.player2.guild.name,
             self.player2.name,
             '-'.join(wrap(str(self.player2.ally_code), 3)))
 

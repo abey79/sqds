@@ -224,6 +224,13 @@ class ViewTests(TestCase):
         self.assertTrue(table_column_contains_int(table, 'Speed'))
         self.assertTemplateUsed(response, 'sqds/single_player.html')
 
+    def test_single_player_view_no_guild(self):
+        player = PlayerFactory()  # player without guild
+        url = reverse('sqds:player', args=[player.ally_code])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['player'].ally_code, player.ally_code)
+
     def test_guild_view_valid(self):
         guild = Guild.objects.first()
         url = reverse('sqds:guild', args=[guild.api_id])
@@ -298,6 +305,7 @@ class ViewTests(TestCase):
         self.assertTemplateUsed(response, 'sqds/unit_list.html')
 
 
+# noinspection DuplicatedCode
 class PlayerCompareViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -314,7 +322,7 @@ class PlayerCompareViewTests(TestCase):
         for unit in random_sublist(key_units, 1):
             generate_player_unit(unit, cls.player2)
 
-    def test_single_player_compare_view_valid(self):
+    def test_player_compare_view_valid(self):
         url = reverse('sqds:player_compare', kwargs={
             'ally_code1': self.player1.ally_code,
             'ally_code2': self.player2.ally_code})
@@ -325,7 +333,17 @@ class PlayerCompareViewTests(TestCase):
         self.assertEqual(response.context['player2'].ally_code, self.player2.ally_code)
         self.assertTemplateUsed(response, 'sqds/player_compare.html')
 
-    def test_single_player_compare_unit_list_view_valid(self):
+    def test_player_compare_no_guild(self):
+        # two guild-less players
+        player1 = PlayerFactory()
+        player2 = PlayerFactory()
+        url = reverse('sqds:player_compare', kwargs={
+            'ally_code1': player1.ally_code,
+            'ally_code2': player2.ally_code})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_player_compare_unit_list_view_valid(self):
         url = reverse('sqds:player_compare_units', kwargs={
             'ally_code1': self.player1.ally_code,
             'ally_code2': self.player2.ally_code})
@@ -338,3 +356,14 @@ class PlayerCompareViewTests(TestCase):
         self.assertEqual(response.context['player2'].ally_code, self.player2.ally_code)
         self.assertTrue(table_column_contains_int(table, 'Speed'))
         self.assertTemplateUsed(response, 'sqds/player_compare_units.html')
+
+    def test_player_compare_unit_list_no_guild(self):
+        # two guild-less players
+        player1 = PlayerFactory()
+        player2 = PlayerFactory()
+
+        url = reverse('sqds:player_compare_units', kwargs={
+            'ally_code1': player1.ally_code,
+            'ally_code2': player2.ally_code})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
