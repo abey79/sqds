@@ -114,10 +114,16 @@ class PlayerTable(RowCounterTable):
             'th': {'data-toggle': 'tooltip',
                    'title': "Sum of all the speed secondaries equal or greater than 15"}})
     zeta_count = LargeIntColumn(initial_sort_descending=True)
+    left_hand_g12_gear_count = LargeIntColumn(
+        'G12 pces', initial_sort_descending=True,
+        attrs={'th': {'data-toggle': 'tooltip',
+                      'title': "Total number of left-hand-side G12 pieces, including "
+                               "G13 toons"}})
     right_hand_g12_gear_count = LargeIntColumn(
         'G12+ pces', initial_sort_descending=True,
         attrs={'th': {'data-toggle': 'tooltip',
-                      'title': "Total number of right-hand-side G12 pieces"}})
+                      'title': "Total number of right-hand-side G12 pieces, including "
+                               "G13 toons"}})
     sep_gp = LargeIntColumn(
         'Sep GP', initial_sort_descending=True,
         attrs={'td': {'class': 'danger'},
@@ -132,10 +138,12 @@ class PlayerTable(RowCounterTable):
     class Meta:
         model = Player
         fields = ('row_counter', 'name', 'guild_name',
-                  'level', 'gp', 'gp_char', 'gp_ship', 'sep_gp', 'gr_gp', 'unit_count',
+                  'level', 'gp', 'gp_char', 'gp_ship', 'sep_gp', 'gr_gp',
+                  'zeta_count', 'unit_count',
                   'seven_star_unit_count', 'g13_unit_count', 'g12_unit_count',
-                  'g11_unit_count', 'g10_unit_count', 'right_hand_g12_gear_count',
-                  'zeta_count', 'mod_count_6dot', 'mod_count_speed_25',
+                  'g11_unit_count', 'g10_unit_count',
+                  'left_hand_g12_gear_count', 'right_hand_g12_gear_count',
+                  'mod_count_6dot', 'mod_count_speed_25',
                   'mod_count_speed_20', 'mod_count_speed_15', 'mod_count_speed_10',
                   'mod_total_speed_15plus')
 
