@@ -1,0 +1,6 @@
+{% extends 'sqds/base_list_view.html' %}
+
+{% block panel_title %}
+  Comparison between <a href="{% url 'sqds:guild' guild1.api_id %}">{{ guild1.name }}</a>'s and
+  <a href="{% url 'sqds:guild' guild2.api_id %}">{{ guild2.name }}</a>'s units
+{% endblock panel_title %}

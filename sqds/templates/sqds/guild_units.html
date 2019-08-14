@@ -1,1 +1,5 @@
 {% extends 'sqds/base_list_view.html' %}
+
+{% block panel_title %}
+   <a href="{% url 'sqds:guild' guild.api_id %}">{{ guild.name }}</a>'s units
+{% endblock panel_title %}

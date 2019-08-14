@@ -271,7 +271,7 @@ class ViewTests(TestCase):
         self.assertContains(response, guild1.name)
         self.assertContains(response, guild2.name)
         self.assertTrue(table_column_contains_int(soup.table, 'Speed'))
-        self.assertTemplateUsed(response, 'sqds/guild_units.html')
+        self.assertTemplateUsed(response, 'sqds/guild_compare_units.html')
 
     def test_players_view(self):
         url = reverse('sqds:players')

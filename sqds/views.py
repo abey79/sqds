@@ -168,6 +168,11 @@ class GuildUnitsView(MetadataMixin, SingleTableMixin, FilterView):
                 .annotate_stats()
                 .select_related('unit', 'player'))
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['guild'] = self.guild
+        return context
+
     def get_meta_title(self, **kwargs):
         return "Guild units: " + self.guild.name
 
@@ -184,7 +189,7 @@ class GuildComparisonUnitsView(MetadataMixin, SingleTableMixin, FilterView):
     """
     table_class = PlayerUnitTable
     model = PlayerUnit
-    template_name = 'sqds/guild_units.html'
+    template_name = 'sqds/guild_compare_units.html'
     filterset_class = GuildPlayerUnitsFilter
     table_pagination = {'per_page': 50}
 
@@ -212,8 +217,14 @@ class GuildComparisonUnitsView(MetadataMixin, SingleTableMixin, FilterView):
                 .annotate_stats()
                 .select_related('unit', 'player'))
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['guild1'] = self.guild1
+        context['guild2'] = self.guild2
+        return context
+
     def get_meta_title(self, **kwargs):
-        return format_html("Guild comparison units: <b>{}</b> vs. {}",
+        return format_html("Guild comparison units: {} vs. {}",
                            self.guild1.name, self.guild2.name)
 
     def get_meta_description(self, context=None):
@@ -295,8 +306,8 @@ class SinglePlayerView(MetadataMixin, SingleTableMixin, FilterView):
         context = super().get_context_data(**kwargs)
         context['player'] = self.player
         context['ga_pools'] = (GAPool.objects
-                                   .filter(focus_player=self.player)
-                                   .order_by('-created')[:10])
+                                     .filter(focus_player=self.player)
+                                     .order_by('-created')[:10])
         return context
 
     def get_meta_title(self, **kwargs):
