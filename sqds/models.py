@@ -267,10 +267,14 @@ class GuildSet(models.QuerySet):
                                 output_field=models.IntegerField()),
             g12_gear_count=Subquery(g12_gear_count.values('cnt'),
                                     output_field=models.IntegerField()),
-            right_hand_g12_gear_count=Subquery(right_hand_g12_gear_count.values('cnt'),
-                                               output_field=models.IntegerField()),
-            left_hand_g12_gear_count=Subquery(left_hand_g12_gear_count.values('cnt'),
-                                              output_field=models.IntegerField()),
+            right_hand_g12_gear_count_g12_only=Subquery(right_hand_g12_gear_count.values(
+                'cnt'), output_field=models.IntegerField()),
+            left_hand_g12_gear_count_g12_only=Subquery(left_hand_g12_gear_count.values(
+                'cnt'), output_field=models.IntegerField()),
+            right_hand_g12_gear_count=F('right_hand_g12_gear_count_g12_only') + 3 * F(
+                'g13_unit_count'),
+            left_hand_g12_gear_count=F('left_hand_g12_gear_count_g12_only') + 3 * F(
+                'g13_unit_count'),
             mod_count=Subquery(mod_count.values('cnt'),
                                output_field=models.IntegerField()),
             mod_count_6dot=Subquery(mod_count_6dot.values('cnt'),
@@ -587,10 +591,14 @@ class PlayerSet(models.QuerySet):
                                 output_field=models.IntegerField()),
             g12_gear_count=Subquery(g12_gear_count.values('cnt'),
                                     output_field=models.IntegerField()),
-            right_hand_g12_gear_count=Subquery(right_hand_g12_gear_count.values('cnt'),
-                                               output_field=models.IntegerField()),
-            left_hand_g12_gear_count=Subquery(left_hand_g12_gear_count.values('cnt'),
-                                              output_field=models.IntegerField()),
+            right_hand_g12_gear_count_g12_only=Subquery(right_hand_g12_gear_count.values(
+                'cnt'), output_field=models.IntegerField()),
+            left_hand_g12_gear_count_g12_only=Subquery(left_hand_g12_gear_count.values(
+                'cnt'), output_field=models.IntegerField()),
+            right_hand_g12_gear_count=F('right_hand_g12_gear_count_g12_only') + 3 * F(
+                'g13_unit_count'),
+            left_hand_g12_gear_count=F('left_hand_g12_gear_count_g12_only') + 3 * F(
+                'g13_unit_count'),
             mod_count_6dot=Subquery(mod_count_6dot.values('cnt'),
                                     output_field=models.IntegerField()),
             mod_count_speed_25=Subquery(mod_count_speed_25.values('cnt'),
