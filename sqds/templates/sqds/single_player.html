@@ -14,7 +14,71 @@
 
   <div class="row">
 
-    <!-- Info panel -->
+    {# TOOLBAR #}
+    <div class="col-lg-12">
+      <div class="btn-toolbar" role="toolbar">
+        {# GROUP: REGISTRATION #}
+        <div class="btn-group" role="group" style="margin-bottom: 15px">
+          {% if request.path == player_url %}
+            <a class="btn btn-default" role="button" href="{% url 'sqds:player_unregister' %}">
+              I am not {{ player.name }}
+            </a>
+          {% else %}
+            <a class="btn btn-default" role="button" href="{% url 'sqds:player_register' player.ally_code %}">
+              I am {{ player.name }}
+            </a>
+          {% endif %}
+        </div>
+
+        {# GROUP: SWGOH.GG #}
+        <div class="btn-group" role="group" style="margin-bottom: 15px">
+          <a href="https://swgoh.gg/p/{{ player.ally_code }}/" class="btn btn-default" role="button">
+            Go to .gg profile
+          </a>
+        </div>
+
+        {# GROUP: COMPARE WITH ME #}
+        {% if request.COOKIES.sqds_my_name and request.path != player_url %}
+          <div class="btn-group" role="group" style="margin-bottom: 15px">
+            <a href="{% url 'sqds:player_compare' request.COOKIES.sqds_my_ally_code player.ally_code %}"
+               class="btn btn-default" role="button">Compare with me</a>
+          </div>
+        {% endif %}
+
+        {# GROUP: COMPARE WITH PLAYER #}
+        <div class="btn-group" role="group" style="margin-bottom: 15px">
+          <script type="text/javascript">
+              function setCompareFormAction() {
+                  var my_form = document.getElementById('compare_form');
+                  var ally_code_1 = document.getElementById('ally_code1').value.replace(/\D/g, '');
+                  var ally_code_2 = document.getElementById('ally_code2').value.replace(/\D/g, '');
+                  my_form.action = "/player/" + ally_code_1 + "/c/" + ally_code_2 + "/"
+              }
+          </script>
+          <form id="compare_form" method="GET" class="form-inline" style="display: inline"
+                onsubmit="setCompareFormAction()">
+            <label class="sr-only" for="ally_code2">Ally code</label>
+            <div class="input-group">
+              <span class="input-group-btn">
+                  <button type="submit" class="btn btn-default">Compare with:</button>
+              </span>
+              <input type="text" class="form-control" id="ally_code2" placeholder="ally code, gg link,…"/>
+              <input type="hidden" class="form-control" id="ally_code1" value="{{ player.ally_code }}"/>
+            </div>
+          </form>
+        </div>
+
+        {# GROUP: REFRESH DATA #}
+        <div class="btn-group" role="group" style="margin-bottom: 15px">
+          <a href="{% url 'sqds:player_refresh' player.ally_code %}" class="btn btn-default" role="button">
+            Refresh data
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    {# INFO PANEL #}
     <div class="col-md-6">
       <div class="panel panel-default">
         <div class="panel-heading">Info</div>
@@ -23,25 +87,7 @@
           <tbody>
           <tr>
             <th>Name</th>
-            <td>{{ player.name }} (<a href="{% url 'sqds:player_refresh' player.ally_code %}">refresh</a>)</td>
-          </tr>
-          <tr>
-            <th>&nbsp;</th>
-            <td>
-              {% if request.path == player_url %}
-                <a class="btn btn-default" role="button" href="{% url 'sqds:player_unregister' %}">
-                  I am not {{ player.name }}
-                </a>
-              {% else %}
-                <a class="btn btn-default" role="button" href="{% url 'sqds:player_register' player.ally_code %}">
-                  I am {{ player.name }}
-                </a>
-              {% endif %}
-            </td>
-          </tr>
-          <tr>
-            <th>&nbsp;</th>
-            <td><a href="https://swgoh.gg/p/{{ player.ally_code }}/">swgoh.gg profile</a></td>
+            <td>{{ player.name }}</td>
           </tr>
           <tr>
             <th>Guild</th>
@@ -55,26 +101,6 @@
           <tr>
             <th>Last updated</th>
             <td>{{ player.last_updated }}</td>
-          </tr>
-          <tr>
-            <th>Compare with</th>
-            <td>
-              <script type="text/javascript">
-                  function setCompareFormAction() {
-                      var my_form = document.getElementById('compare_form');
-                      var ally_code_1 = document.getElementById('ally_code1').value.replace(/\D/g, '');
-                      var ally_code_2 = document.getElementById('ally_code2').value.replace(/\D/g, '');
-                      my_form.action = "/player/" + ally_code_1 + "/c/" + ally_code_2 + "/"
-                  }
-              </script>
-
-              <form id="compare_form" method="GET" class="form-inline" onsubmit="setCompareFormAction()">
-                <label class="sr-only" for="ally_code2">Ally code</label>
-                <input type="text" class="form-control" id="ally_code2" placeholder="XXX-XXX-XXX"/>
-                <input type="hidden" class="form-control" id="ally_code1" value="{{ player.ally_code }}"/>
-                <button type="submit" class="btn btn-default">Compare</button>
-              </form>
-            </td>
           </tr>
           <tr>
             <th>GA pool</th>
@@ -111,7 +137,7 @@
       </div>
     </div>
 
-    <!-- Stat panel -->
+    {# STAT PANEL #}
     <div class="col-md-6">
       <div class="panel panel-default">
         <div class="panel-heading">Statistics</div>
@@ -211,7 +237,7 @@
     </div>
   </div>
 
-  <!-- Characters table -->
+  {# TOONS #}
   <div class="row">
     <div class="col-md-12">
       <div class="panel panel-default">
