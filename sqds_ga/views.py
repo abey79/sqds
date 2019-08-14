@@ -36,16 +36,6 @@ def create_ga_pool(request, ally_code):
         return HttpResponseNotFound()
 
 
-def view_ga_pool(request, pk):
-    ga_pool = get_object_or_404(GAPool, pk=pk)
-
-    response_string = f"""
-    Focus player: {ga_pool.focus_player.name} <br/>
-    Players: {[p.player.name for p in GAPoolPlayer.objects.filter(ga_pool=ga_pool)]}
-    """
-    return HttpResponse(response_string)
-
-
 class GAPoolView(MetadataMixin, DetailView):
     model = GAPool
     template_name = 'sqds_ga/ga_pool_overview.html'
@@ -55,11 +45,13 @@ class GAPoolView(MetadataMixin, DetailView):
         context['focus_player'] = (Player.objects
                                    .filter(pk=self.object.focus_player.pk)
                                    .annotate_stats()
+                                   .annotate_faction_gp()
                                    .select_related('guild')
                                    .first())
         context['players'] = list(Player.objects
                                   .filter(ga_pool_player_set__ga_pool=self.object)
                                   .select_related('guild')
+                                  .annotate_faction_gp()
                                   .annotate_stats())
         context['all_players'] = [context['focus_player'], *context['players']]
         return context

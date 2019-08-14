@@ -13,6 +13,7 @@ def compute_data_and_classes(values, data_filter=None):
     :return: processed array of dict
     """
     output_values = []
+    values = [v if v is not None else 0 for v in values]
     max_value = max(values)
     min_value = min(values)
 
@@ -42,12 +43,20 @@ def player_comparison(players):
                 'data': compute_data_and_classes([p.gp for p in players], big_number)
             },
             {
-                'label': '<td>&nbsp;&nbsp;&nbsp;characters</td>',
+                'label': '<td>&nbsp;&nbsp;&nbsp;Character GP</td>',
                 'data': compute_data_and_classes([p.gp_char for p in players], big_number)
             },
             {
-                'label': '<td>&nbsp;&nbsp;&nbsp;ship</td>',
+                'label': '<td>&nbsp;&nbsp;&nbsp;Ship GP</td>',
                 'data': compute_data_and_classes([p.gp_ship for p in players], big_number)
+            },
+            {
+                'label': '<td>&nbsp;&nbsp;&nbsp;Sep GP</td>',
+                'data': compute_data_and_classes([p.sep_gp for p in players], big_number)
+            },
+            {
+                'label': '<td>&nbsp;&nbsp;&nbsp;GR GP</td>',
+                'data': compute_data_and_classes([p.gr_gp for p in players], big_number)
             },
             {
                 'label': '<th>Zeta</th>',

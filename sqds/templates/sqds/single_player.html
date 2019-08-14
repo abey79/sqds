@@ -122,12 +122,20 @@
             <td>{{ player.gp | big_number }}</td>
           </tr>
           <tr>
-            <td>&nbsp;&nbsp;&nbsp;characters</td>
+            <td>&nbsp;&nbsp;&nbsp;Character GP</td>
             <td>{{ player.gp_char | big_number }}</td>
           </tr>
           <tr>
-            <td>&nbsp;&nbsp;&nbsp;ships</td>
+            <td>&nbsp;&nbsp;&nbsp;Ship GP</td>
             <td>{{ player.gp_ship | big_number }}</td>
+          </tr>
+          <tr class='danger'>
+            <td>&nbsp;&nbsp;&nbsp;Sep GP</td>
+            <td>{{ player.sep_gp | big_number }}</td>
+          </tr>
+          <tr class='info'>
+            <td>&nbsp;&nbsp;&nbsp;GR GP</td>
+            <td>{{ player.gr_gp | big_number }}</td>
           </tr>
           <tr>
             <th>Zeta</th>

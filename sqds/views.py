@@ -280,6 +280,7 @@ class SinglePlayerView(MetadataMixin, SingleTableMixin, FilterView):
         try:
             self.player = (Player.objects
                            .annotate_stats()
+                           .annotate_faction_gp()
                            .get(ally_code=ally_code))
         except Player.DoesNotExist:
             raise Http404(f'Player {ally_code} could not be loaded')
@@ -294,8 +295,8 @@ class SinglePlayerView(MetadataMixin, SingleTableMixin, FilterView):
         context = super().get_context_data(**kwargs)
         context['player'] = self.player
         context['ga_pools'] = (GAPool.objects
-                               .filter(focus_player=self.player)
-                               .order_by('-created')[:10])
+                                   .filter(focus_player=self.player)
+                                   .order_by('-created')[:10])
         return context
 
     def get_meta_title(self, **kwargs):
@@ -350,6 +351,7 @@ class PlayerCompareView(MetadataMixin, TemplateView):
               .filter(ally_code__in=[self.kwargs['ally_code1'],
                                      self.kwargs['ally_code2']])
               .annotate_stats()
+              .annotate_faction_gp()
               .select_related('guild'))
 
         for p in qs:
