@@ -1,12 +1,14 @@
 {% load static %}
 {% load bootstrap3 %}
 {% load meta %}
-{% load google_analytics_js %}
+{% load analytical %}
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head {% meta_namespaces %}>
+  {% analytical_head_top %}
+
   <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -32,10 +34,12 @@
       {{ meta.title }}
     {% endblock %}
   </title>
-  {% google_analytics_js %}
+
+  {% analytical_head_bottom %}
 </head>
 
 <body>
+{% analytical_body_top %}
 
 <nav class="navbar navbar-default">
   <div class="container-fluid">
@@ -96,6 +100,7 @@
   {% endblock %}
 </div>
 
+{% analytical_body_bottom %}
 </body>
 
 {% block post_body %}

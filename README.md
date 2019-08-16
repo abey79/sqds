@@ -17,9 +17,6 @@ _WIP!_
 Example .env file:
  
 ```sh
-# For local dev, we want to use the .local setting file
-export DJANGO_SETTINGS_MODULE='sqdssite.settings.local'
-
 # Make up a long, random secret key
 export DJANGO_SECRET_KEY='..............'
 

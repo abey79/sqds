@@ -24,7 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 
-if settings.DEBUG:
+if settings.USE_DEBUG_TOOLBAR:
     import debug_toolbar
 
     urlpatterns = [

@@ -19,29 +19,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
-# No debug by default
+
 DEBUG = False
 ALLOWED_HOSTS = []
 
-# Import local settings if any.
-try:
-    from .local_settings import *
-except ImportError:
-    pass
-
-if 'DJANGO_SECRET_KEY' in os.environ:
-    SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
-
-if 'DJANGO_DEBUG' in os.environ:
-    DEBUG = True
-
-if DEBUG or 'test' in sys.argv:
-    ALLOWED_HOSTS = ['*']
-if 'DJANGO_ALLOWED_HOSTS' in os.environ:
-    ALLOWED_HOSTS = [os.environ['DJANGO_ALLOWED_HOSTS']]
+# Env-provided secret key is mandatory
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 # Application definition
-
 INSTALLED_APPS = [
     'sqds.apps.SqdsConfig',
     'sqds_scoredunit.apps.SqdsScoredUnitConfig',
@@ -61,8 +46,6 @@ INSTALLED_APPS = [
     'django_filters',
     'django_tables2',
     'crispy_forms',
-    'django_extensions',
-    'debug_toolbar',
     'meta'
 ]
 
@@ -74,7 +57,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'sqdssite.urls'
@@ -100,24 +82,7 @@ WSGI_APPLICATION = 'sqdssite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-if 'DJANGO_DB_ENGINE' in os.environ:
-    DATABASES = {
-        'default': {
-            'ENGINE': os.environ['DJANGO_DB_ENGINE'],
-            'NAME': os.environ['DJANGO_DB_NAME'],
-            'USER': os.environ['DJANGO_DB_USERNAME'],
-            'PASSWORD': os.environ['DJANGO_DB_PASSWORD'],
-            'HOST': os.environ['DJANGO_DB_HOST'],
-            'PORT': os.environ['DJANGO_DB_PORT']
-        }
-    }
-elif 'DATABASES' not in locals():
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3')
-        }
-    }
+# !!! No database is configured in the base settings
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -161,30 +126,15 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 INTERNAL_IPS = ('51.154.2.60',)
 
-if 'GOOGLE_ANALYTICS_PROPERTY_ID' in os.environ:
-    GOOGLE_ANALYTICS_JS_PROPERTY_ID = os.environ['GOOGLE_ANALYTICS_PROPERTY_ID']
-else:
-    GOOGLE_ANALYTICS_JS_PROPERTY_ID = 'UA-012345-6'
 
-
-# noinspection PyUnusedLocal
-def custom_show_toolbar(request):
-    return (DEBUG
-            and 'test' not in sys.argv)
-
-
-DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': 'sqdssite.settings.custom_show_toolbar'
-}
+# By default, we dont want to use debug toolbar
+USE_DEBUG_TOOLBAR = False
 
 # Meta configuration
 META_SITE_NAME = 'PREPARE-FTW'
 META_SITE_TYPE = 'website'
 META_USE_OG_PROPERTIES = True
-if DEBUG:
-    META_SITE_PROTOCOL = 'http'
-else:
-    META_SITE_PROTOCOL = 'https'
+META_SITE_PROTOCOL = 'https'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/

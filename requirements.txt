@@ -34,8 +34,8 @@ beautifulsoup4
 lxml
 pytest
 pytest-mock
-django-pytest
-
+pytest-django
+pytest-dotenv
 
 # Deployment stuff
 python-dotenv
