@@ -67,7 +67,6 @@ class Category(models.Model):
     name = models.CharField(max_length=200)
 
     class Meta:
-        ordering = ['name', ]
         verbose_name_plural = "Categories"
 
     def __str__(self):  # pragma: no cover
@@ -78,9 +77,6 @@ class Unit(models.Model):
     api_id = models.CharField(max_length=50, unique=True, db_index=True)
     name = models.CharField(max_length=200, default='')
     categories = models.ManyToManyField(Category, related_name='unit_set')
-
-    class Meta:
-        ordering = ['name', ]
 
     def __str__(self):  # pragma: no cover
         return self.name
@@ -319,9 +315,6 @@ class Guild(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
     objects = GuildManager.from_queryset(GuildSet)()
-
-    class Meta:
-        ordering = ['name', ]
 
     def __str__(self):  # pragma: no cover
         return self.name
@@ -647,9 +640,6 @@ class Player(models.Model):
 
     objects = PlayerManager.from_queryset(PlayerSet)()
 
-    class Meta:
-        ordering = ['-gp', ]
-
     def __str__(self):  # pragma: no cover
         return self.name
 
@@ -748,9 +738,6 @@ class PlayerUnit(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
     objects = PlayerUnitManager.from_queryset(PlayerUnitSet)()
-
-    class Meta:
-        ordering = ['player__name', 'unit__name']
 
     def __str__(self):  # pragma: no cover
         return "%s's %s" % (self.player.name, self.unit.name)
