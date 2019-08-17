@@ -103,6 +103,9 @@ class GearManager(models.Manager):
             for gear_data in gear_data_list:
                 gid = int(gear_data['id']) if str.isdigit(gear_data['id']) \
                     else 0
+                is_left = gid in LEFT_HAND_G12_GEAR_ID
+                is_right = gid in RIGHT_HAND_G12_GEAR_ID or gear_data['id'].startswith(
+                    'G12Finisher')
                 gear, _ = Gear.objects.update_or_create(
                     api_id=gear_data['id'],
                     defaults={
@@ -110,8 +113,8 @@ class GearManager(models.Manager):
                         'tier': gear_data['tier'],
                         'required_rarity': gear_data['requiredRarity'],
                         'required_level': gear_data['requiredLevel'],
-                        'is_left_hand_g12': gid in LEFT_HAND_G12_GEAR_ID,
-                        'is_right_hand_g12': gid in RIGHT_HAND_G12_GEAR_ID
+                        'is_left_hand_g12': is_left,
+                        'is_right_hand_g12': is_right,
                     })
                 gear_id_list.append(gear.id)
             Gear.objects.exclude(id__in=gear_id_list).delete()
