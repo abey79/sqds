@@ -2,9 +2,13 @@
   <dictionary name="hhip">
     <words>
       <w>allycodes</w>
+      <w>amidala</w>
+      <w>barrissoffee</w>
       <w>bastilashandark</w>
       <w>bossk</w>
       <w>bountyhunter</w>
+      <w>canderousordo</w>
+      <w>chirrutimwe</w>
       <w>commanderlukeskywalker</w>
       <w>crinolo</w>
       <w>crit</w>
@@ -24,6 +28,7 @@
       <w>grandadmiralthrawn</w>
       <w>grandmasteryoda</w>
       <w>hhip</w>
+      <w>imperialtrooper</w>
       <w>jediknightrevan</w>
       <w>kylorenunmasked</w>
       <w>lconf</w>
@@ -35,6 +40,9 @@
       <w>nightsisters</w>
       <w>nightsisterzombie</w>
       <w>notranslate</w>
+      <w>oldrepublic</w>
+      <w>padmeamidala</w>
+      <w>padmé</w>
       <w>pces</w>
       <w>plotly</w>
       <w>postgre</w>
@@ -49,12 +57,14 @@
       <w>sepfarm</w>
       <w>shaakti</w>
       <w>signin</w>
+      <w>sithempire</w>
       <w>sithmarauder</w>
       <w>sqds</w>
       <w>sqdssite</w>
       <w>swgoh</w>
       <w>toon</w>
       <w>toons</w>
+      <w>tusken</w>
     </words>
   </dictionary>
 </component>
