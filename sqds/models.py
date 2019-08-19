@@ -221,26 +221,26 @@ class GuildSet(models.QuerySet):
         mod_count_speed_25 = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('player_set__unit_set__mod_set',
                       filter=(Q(player_set__unit_set__mod_set__speed__gte=25) & ~Q(
-                          player_set__unit_set__mod_set__slot=1))))
+                          player_set__unit_set__mod_set__primary_stat='SP'))))
         mod_count_speed_20 = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('player_set__unit_set__mod_set',
                       filter=(Q(player_set__unit_set__mod_set__speed__gte=20) & Q(
                           player_set__unit_set__mod_set__speed__lt=25) & ~Q(
-                          player_set__unit_set__mod_set__slot=1))))
+                          player_set__unit_set__mod_set__primary_stat='SP'))))
         mod_count_speed_15 = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('player_set__unit_set__mod_set',
                       filter=(Q(player_set__unit_set__mod_set__speed__gte=15) & Q(
                           player_set__unit_set__mod_set__speed__lt=20) & ~Q(
-                          player_set__unit_set__mod_set__slot=1))))
+                          player_set__unit_set__mod_set__primary_stat='SP'))))
         mod_count_speed_10 = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('player_set__unit_set__mod_set',
                       filter=(Q(player_set__unit_set__mod_set__speed__gte=10) & Q(
                           player_set__unit_set__mod_set__speed__lt=15) & ~Q(
-                          player_set__unit_set__mod_set__slot=1))))
+                          player_set__unit_set__mod_set__primary_stat='SP'))))
         mod_total_speed_15plus = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             sum15=Sum('player_set__unit_set__mod_set__speed',
                       filter=(Q(player_set__unit_set__mod_set__speed__gte=15) & ~Q(
-                          player_set__unit_set__mod_set__slot=1))))
+                          player_set__unit_set__mod_set__primary_stat='SP'))))
 
         return self.annotate(
             player_count=Subquery(player_count.values('cnt'),
@@ -261,7 +261,6 @@ class GuildSet(models.QuerySet):
                                     output_field=models.IntegerField()),
             g10_unit_count=Subquery(g10_unit_count.values('cnt'),
                                     output_field=models.IntegerField()),
-
             zeta_count=Subquery(zeta_count.values('cnt'),
                                 output_field=models.IntegerField()),
             g12_gear_count=Subquery(g12_gear_count.values('cnt'),
@@ -551,26 +550,26 @@ class PlayerSet(models.QuerySet):
         mod_count_speed_25 = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set__mod_set',
                       filter=(Q(unit_set__mod_set__speed__gte=25) & ~Q(
-                          unit_set__mod_set__slot=1))))
+                          unit_set__mod_set__primary_stat='SP'))))
         mod_count_speed_20 = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set__mod_set',
                       filter=(Q(unit_set__mod_set__speed__gte=20) & Q(
                           unit_set__mod_set__speed__lt=25) & ~Q(
-                          unit_set__mod_set__slot=1))))
+                          unit_set__mod_set__primary_stat='SP'))))
         mod_count_speed_15 = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set__mod_set',
                       filter=(Q(unit_set__mod_set__speed__gte=15) & Q(
                           unit_set__mod_set__speed__lt=20) & ~Q(
-                          unit_set__mod_set__slot=1))))
+                          unit_set__mod_set__primary_stat='SP'))))
         mod_count_speed_10 = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set__mod_set',
                       filter=(Q(unit_set__mod_set__speed__gte=10) & Q(
                           unit_set__mod_set__speed__lt=15) & ~Q(
-                          unit_set__mod_set__slot=1))))
+                          unit_set__mod_set__primary_stat='SP'))))
         mod_total_speed_15plus = Player.objects.filter(pk=OuterRef('pk')).annotate(
             sum15=Sum('unit_set__mod_set__speed',
                       filter=(Q(unit_set__mod_set__speed__gte=15) & ~Q(
-                          unit_set__mod_set__slot=1))))
+                          unit_set__mod_set__primary_stat='SP'))))
 
         return self.annotate(
             unit_count=Subquery(unit_count.values('cnt'),

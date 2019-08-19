@@ -132,11 +132,12 @@ def test_guild_annotate_stats_gear_count_consistency(guild_data):
 
 def test_player_mod_stats(db):
     """
-    We create a bunch of player units with defined speed
+    We create a bunch of player units equipped with mod of defined speed. We avoid
+    speed primaries for arrows in this test.
     """
     # 2nd mod is always the array
     toon_mod_speeds = [
-        (5, 30, 4, 5, 1, 0),
+        (5, 17, 4, 5, 1, 0),
         (6, 15, 15, 2, 5, 1),
         (None, 30, None, 14, 0, 1),
         (None, None, None, None, None, None),
@@ -147,24 +148,25 @@ def test_player_mod_stats(db):
 
     mod_count = sum(x is not None for x in itertools.chain(*toon_mod_speeds))
     mod_count_6dot = 0
-    mod_count_speed_25 = sum(x is not None and 25 <= x and i % 6 != 1
+    mod_count_speed_25 = sum(x is not None and 25 <= x
                              for i, x in enumerate(itertools.chain(*toon_mod_speeds)))
-    mod_count_speed_20 = sum(x is not None and 20 <= x < 25 and i % 6 != 1
+    mod_count_speed_20 = sum(x is not None and 20 <= x < 25
                              for i, x in enumerate(itertools.chain(*toon_mod_speeds)))
-    mod_count_speed_15 = sum(x is not None and 15 <= x < 20 and i % 6 != 1
+    mod_count_speed_15 = sum(x is not None and 15 <= x < 20
                              for i, x in enumerate(itertools.chain(*toon_mod_speeds)))
-    mod_count_speed_10 = sum(x is not None and 10 <= x < 15 and i % 6 != 1
+    mod_count_speed_10 = sum(x is not None and 10 <= x < 15
                              for i, x in enumerate(itertools.chain(*toon_mod_speeds)))
     mod_total_speed_15plus = sum(
         x for i, x in enumerate(itertools.chain(*toon_mod_speeds))
-        if x is not None and x >= 15 and i % 6 != 1)
+        if x is not None and x >= 15)
 
     player = PlayerFactory()
     for mod_speeds in toon_mod_speeds:
         pu = PlayerUnitFactory(unit=UnitFactory(), player=player)
         for slot, speed in enumerate(mod_speeds):
             if speed is not None:
-                ModFactory(player_unit=pu, slot=slot, speed=speed, pips=5)
+                ModFactory(player_unit=pu, slot=slot, speed=speed, pips=5,
+                           primary_stat='DE')
 
     qs = Player.objects.filter(pk=player.pk).annotate_stats()
 
@@ -176,6 +178,25 @@ def test_player_mod_stats(db):
     assert qs[0].mod_count_speed_15 == mod_count_speed_15
     assert qs[0].mod_count_speed_10 == mod_count_speed_10
     assert qs[0].mod_total_speed_15plus == mod_total_speed_15plus
+
+
+def test_player_mod_stats_arrows(db):
+    player = PlayerFactory()
+    ModFactory(player_unit=PlayerUnitFactory(unit=UnitFactory(), player=player),
+               slot=1, speed=30, primary_stat='SP')
+    ModFactory(player_unit=PlayerUnitFactory(unit=UnitFactory(), player=player),
+               slot=1, speed=25, primary_stat='OF')
+    ModFactory(player_unit=PlayerUnitFactory(unit=UnitFactory(), player=player),
+               slot=1, speed=12, primary_stat='OF')
+
+    qs = Player.objects.filter(pk=player.pk).annotate_stats()
+
+    assert qs.count() == 1
+    assert qs[0].mod_count_speed_25 == 1
+    assert qs[0].mod_count_speed_20 == 0
+    assert qs[0].mod_count_speed_15 == 0
+    assert qs[0].mod_count_speed_10 == 1
+    assert qs[0].mod_total_speed_15plus == 25
 
 
 def test_player_mod_stats_6pips(db):
