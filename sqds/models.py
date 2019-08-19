@@ -544,7 +544,7 @@ class PlayerSet(models.QuerySet):
             cnt=Count('unit_set__pug_set',
                       filter=Q(unit_set__pug_set__gear__is_left_hand_g12=True)))
         mod_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
-             cnt=Count('unit_set__mod_set'))
+            cnt=Count('unit_set__mod_set'))
         mod_count_6dot = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set__mod_set',
                       filter=Q(unit_set__mod_set__pips__gte=6)))
@@ -800,20 +800,20 @@ class PlayerUnitGear(models.Model):
 
 MOD_STAT_MAP = {
     1: {'name': 'health', 'mult': 1},
-    5: {'name': 'speed', 'mult': 1},
-    16: {'name': 'critical_damage', 'mult': .01},
-    17: {'name': 'potency', 'mult': .01},
-    18: {'name': 'tenacity', 'mult': .01},
+    5: {'name': 'speed', 'mult': 1, 'abbrev': 'SP'},
+    16: {'name': 'critical_damage', 'mult': .01, 'abbrev': 'CD'},
+    17: {'name': 'potency', 'mult': .01, 'abbrev': 'PO'},
+    18: {'name': 'tenacity', 'mult': .01, 'abbrev': 'TE'},
     28: {'name': 'protection', 'mult': 1},
     41: {'name': 'offense', 'mult': 1},
     42: {'name': 'defense', 'mult': 1},
-    48: {'name': 'offense_percent', 'mult': .01},
-    49: {'name': 'defense_percent', 'mult': .01},
-    52: {'name': 'accuracy', 'mult': .01},
-    53: {'name': 'critical_chance', 'mult': .01},
-    54: {'name': 'critical_avoidance', 'mult': .01},
-    55: {'name': 'health_percent', 'mult': .01},
-    56: {'name': 'protection_percent', 'mult': .01},
+    48: {'name': 'offense_percent', 'mult': .01, 'abbrev': 'OF'},
+    49: {'name': 'defense_percent', 'mult': .01, 'abbrev': 'DE'},
+    52: {'name': 'accuracy', 'mult': .01, 'abbrev': 'AC'},
+    53: {'name': 'critical_chance', 'mult': .01, 'abbrev': 'CC'},
+    54: {'name': 'critical_avoidance', 'mult': .01, 'abbrev': 'CA'},
+    55: {'name': 'health_percent', 'mult': .01, 'abbrev': 'HP'},
+    56: {'name': 'protection_percent', 'mult': .01, 'abbrev': 'PR'},
 }
 
 
@@ -839,6 +839,21 @@ class ModSet(enum.Enum):
     }
 
 
+PRIMARY_STAT_CHOICES = [
+    ('OF', 'offense_percent'),
+    ('DE', 'defense_percent'),
+    ('PR', 'protection_percent'),
+    ('HP', 'health_percent'),
+    ('SP', 'speed'),
+    ('AC', 'accuracy'),
+    ('CA', 'critical_avoidance'),
+    ('CC', 'critical_chance'),
+    ('CD', 'critical_damage'),
+    ('PO', 'potency'),
+    ('TE', 'tenacity'),
+]
+
+
 class Mod(models.Model):
     api_id = models.CharField(max_length=50, unique=True, db_index=True)
     player_unit = models.ForeignKey(PlayerUnit, on_delete=models.CASCADE,
@@ -849,6 +864,9 @@ class Mod(models.Model):
     level = models.IntegerField()
     pips = models.IntegerField()
     tier = models.IntegerField()
+
+    primary_stat = models.CharField(max_length=50, db_index=True,
+                                    choices=PRIMARY_STAT_CHOICES, default='OF')
 
     speed = models.IntegerField(default=0)
     health = models.IntegerField(default=0)
@@ -866,8 +884,27 @@ class Mod(models.Model):
     critical_avoidance = models.FloatField(default=0.)
     accuracy = models.FloatField(default=0.)
 
+    speed_roll = models.SmallIntegerField(default=0)
+    health_roll = models.SmallIntegerField(default=0)
+    health_percent_roll = models.SmallIntegerField(default=0)
+    protection_roll = models.SmallIntegerField(default=0)
+    protection_percent_roll = models.SmallIntegerField(default=0)
+    offense_roll = models.SmallIntegerField(default=0)
+    offense_percent_roll = models.SmallIntegerField(default=0)
+    defense_roll = models.SmallIntegerField(default=0)
+    defense_percent_roll = models.SmallIntegerField(default=0)
+    critical_chance_roll = models.SmallIntegerField(default=0)
+    critical_damage_roll = models.SmallIntegerField(default=0)
+    potency_roll = models.SmallIntegerField(default=0)
+    tenacity_roll = models.SmallIntegerField(default=0)
+    critical_avoidance_roll = models.SmallIntegerField(default=0)
+    accuracy_roll = models.SmallIntegerField(default=0)
+
     def update_stats(self, mod_data):
+        self.primary_stat = MOD_STAT_MAP[mod_data['primaryStat']['unitStat']]['abbrev']
         for stat in [mod_data['primaryStat'], *mod_data['secondaryStat']]:
             modified_stat_info = MOD_STAT_MAP[stat['unitStat']]
             setattr(self, modified_stat_info['name'],
                     stat['value'] * modified_stat_info['mult'])
+            if self.get_primary_stat_display() != modified_stat_info['name']:
+                setattr(self, modified_stat_info['name'] + '_roll', stat['roll'])
