@@ -1,54 +1,31 @@
-import json
-import os
-
-import pytest
-
-import swgoh
-from sqds.models import update_game_data, Unit, Skill, Category, Gear
+from sqds.models import Unit, Skill, Category, Gear
+from sqds_seed.factories import UnitFactory, CategoryFactory, SkillFactory
 
 
-def save_game_data():
-    """
-    Save the game data returned by swgoh.help in game_data.json, for use by the
-    game_data() fixture.
-    """
-    data = {
-        'ability_data_list': swgoh.api.get_ability_list(),
-        'skill_data_list': swgoh.api.get_skill_list(),
-        'unit_data_list': swgoh.api.get_unit_list(),
-        'category_data_list': swgoh.api.get_category_list(),
-    }
+def test_units_and_categories(db):
+    categories = CategoryFactory.create_batch(4)
+    unit1 = UnitFactory(categories=categories[:3])
+    unit2 = UnitFactory(categories=[categories[0]])
+    unit3 = UnitFactory(categories=[categories[1]])
 
-    # noinspection PyUnresolvedReferences
-    with open(os.path.join(os.path.dirname(__file__), 'game_data.json'), 'w') as fp:
-        json.dump(data, fp)
+    assert set(Unit.objects.filter(categories=categories[0])) == {unit1, unit2}
+    assert set(Unit.objects.filter(categories=categories[1])) == {unit1, unit3}
+    assert set(Unit.objects.filter(categories=categories[2])) == {unit1}
+    assert Unit.objects.filter(categories=categories[3]).count() == 0
+    assert set(Unit.objects.filter(categories__in=categories[0:2])) == {unit1, unit2,
+                                                                        unit3}
+    assert set(Category.objects.filter(unit_set=unit1)) == set(categories[:3])
 
 
-@pytest.fixture()
-def game_data(db):
-    with open(os.path.join(os.path.dirname(__file__), 'game_data.json')) as fp:
-        data = json.load(fp)
-    update_game_data(data['ability_data_list'], data['skill_data_list'],
-                     data['unit_data_list'], data['category_data_list'])
+def test_units_and_skills(db):
+    unit1 = UnitFactory(skill=[])
+    unit2 = UnitFactory(skill=[])
+    skill1 = SkillFactory(unit=unit1, is_zeta=True)
+    skill2 = SkillFactory(unit=unit1, is_zeta=False)
 
-
-def save_gear_data():
-    """
-    Save the gear data returned by swgoh.help in gear_data.json.
-    """
-    data = swgoh.api.get_gear_list()
-
-    # noinspection PyUnresolvedReferences
-    with open(os.path.join(os.path.dirname(__file__), 'gear_data.json'), 'w') as fp:
-        json.dump(data, fp)
-
-
-@pytest.fixture()
-def gear_data(db, mocker):
-    with open(os.path.join(os.path.dirname(__file__), 'gear_data.json')) as fp:
-        data = json.load(fp)
-    mocker.patch('sqds.swgoh.Swgoh.get_gear_list', return_value=data)
-    Gear.objects.update_or_create_from_swgoh()
+    assert set(Skill.objects.filter(unit=unit1)) == {skill1, skill2}
+    assert set(Skill.objects.filter(unit=unit1, is_zeta=True)) == {skill1}
+    assert Skill.objects.filter(unit=unit2).count() == 0
 
 
 def test_game_data_has_toons(game_data):
