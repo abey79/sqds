@@ -72,7 +72,7 @@ class Swgoh:
 
     def authenticate(self):
         try:
-            from .swgoh_local import SWGOH_USERNAME, SWGOH_PASSWORD
+            from sqds.swgoh_local import SWGOH_USERNAME, SWGOH_PASSWORD
         except ImportError:
             raise AuthenticationError() from ImportError
 

@@ -2,17 +2,26 @@
   <dictionary name="hhip">
     <words>
       <w>allycodes</w>
+      <w>amidala</w>
+      <w>arma</w>
+      <w>barrissoffee</w>
       <w>bastilashandark</w>
       <w>bossk</w>
       <w>bountyhunter</w>
+      <w>canderousordo</w>
+      <w>chirrutimwe</w>
       <w>commanderlukeskywalker</w>
       <w>crinolo</w>
       <w>crit</w>
       <w>cumul</w>
+      <w>czerka</w>
       <w>daka</w>
       <w>darthmalak</w>
       <w>darthrevan</w>
       <w>darthtraya</w>
+      <w>dotenv</w>
+      <w>droideka</w>
+      <w>electrobinoculars</w>
       <w>enfysnest</w>
       <w>filterset</w>
       <w>firstorder</w>
@@ -23,34 +32,47 @@
       <w>grandadmiralthrawn</w>
       <w>grandmasteryoda</w>
       <w>hhip</w>
+      <w>imperialtrooper</w>
       <w>jediknightrevan</w>
       <w>kylorenunmasked</w>
+      <w>kyrotech</w>
       <w>lconf</w>
       <w>listfilter</w>
       <w>lxml</w>
       <w>malak</w>
+      <w>medpac</w>
       <w>mult</w>
       <w>navbar</w>
+      <w>neuro</w>
       <w>nightsisters</w>
       <w>nightsisterzombie</w>
       <w>notranslate</w>
+      <w>oldrepublic</w>
+      <w>padmeamidala</w>
+      <w>padmé</w>
       <w>pces</w>
       <w>plotly</w>
+      <w>postgre</w>
+      <w>postgresql</w>
       <w>prepaired</w>
       <w>prot</w>
       <w>pylint</w>
+      <w>pytest</w>
       <w>revan</w>
       <w>revans</w>
+      <w>saav</w>
       <w>scoredunit</w>
       <w>sepfarm</w>
       <w>shaakti</w>
       <w>signin</w>
+      <w>sithempire</w>
       <w>sithmarauder</w>
       <w>sqds</w>
       <w>sqdssite</w>
       <w>swgoh</w>
       <w>toon</w>
       <w>toons</w>
+      <w>tusken</w>
     </words>
   </dictionary>
 </component>

@@ -67,7 +67,6 @@ class Category(models.Model):
     name = models.CharField(max_length=200)
 
     class Meta:
-        ordering = ['name', ]
         verbose_name_plural = "Categories"
 
     def __str__(self):  # pragma: no cover
@@ -78,9 +77,6 @@ class Unit(models.Model):
     api_id = models.CharField(max_length=50, unique=True, db_index=True)
     name = models.CharField(max_length=200, default='')
     categories = models.ManyToManyField(Category, related_name='unit_set')
-
-    class Meta:
-        ordering = ['name', ]
 
     def __str__(self):  # pragma: no cover
         return self.name
@@ -107,6 +103,9 @@ class GearManager(models.Manager):
             for gear_data in gear_data_list:
                 gid = int(gear_data['id']) if str.isdigit(gear_data['id']) \
                     else 0
+                is_left = gid in LEFT_HAND_G12_GEAR_ID
+                is_right = gid in RIGHT_HAND_G12_GEAR_ID or gear_data['id'].startswith(
+                    'G12Finisher')
                 gear, _ = Gear.objects.update_or_create(
                     api_id=gear_data['id'],
                     defaults={
@@ -114,8 +113,8 @@ class GearManager(models.Manager):
                         'tier': gear_data['tier'],
                         'required_rarity': gear_data['requiredRarity'],
                         'required_level': gear_data['requiredLevel'],
-                        'is_left_hand_g12': gid in LEFT_HAND_G12_GEAR_ID,
-                        'is_right_hand_g12': gid in RIGHT_HAND_G12_GEAR_ID
+                        'is_left_hand_g12': is_left,
+                        'is_right_hand_g12': is_right,
                     })
                 gear_id_list.append(gear.id)
             Gear.objects.exclude(id__in=gear_id_list).delete()
@@ -319,9 +318,6 @@ class Guild(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
     objects = GuildManager.from_queryset(GuildSet)()
-
-    class Meta:
-        ordering = ['name', ]
 
     def __str__(self):  # pragma: no cover
         return self.name
@@ -547,6 +543,8 @@ class PlayerSet(models.QuerySet):
         left_hand_g12_gear_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set__pug_set',
                       filter=Q(unit_set__pug_set__gear__is_left_hand_g12=True)))
+        mod_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
+             cnt=Count('unit_set__mod_set'))
         mod_count_6dot = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set__mod_set',
                       filter=Q(unit_set__mod_set__pips__gte=6)))
@@ -599,6 +597,8 @@ class PlayerSet(models.QuerySet):
                 'g13_unit_count'),
             left_hand_g12_gear_count=F('left_hand_g12_gear_count_g12_only') + 3 * F(
                 'g13_unit_count'),
+            mod_count=Subquery(mod_count.values('cnt'),
+                               output_field=models.IntegerField()),
             mod_count_6dot=Subquery(mod_count_6dot.values('cnt'),
                                     output_field=models.IntegerField()),
             mod_count_speed_25=Subquery(mod_count_speed_25.values('cnt'),
@@ -646,9 +646,6 @@ class Player(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
     objects = PlayerManager.from_queryset(PlayerSet)()
-
-    class Meta:
-        ordering = ['-gp', ]
 
     def __str__(self):  # pragma: no cover
         return self.name
@@ -748,9 +745,6 @@ class PlayerUnit(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
     objects = PlayerUnitManager.from_queryset(PlayerUnitSet)()
-
-    class Meta:
-        ordering = ['player__name', 'unit__name']
 
     def __str__(self):  # pragma: no cover
         return "%s's %s" % (self.player.name, self.unit.name)

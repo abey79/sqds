@@ -137,6 +137,7 @@ class PlayerTable(RowCounterTable):
 
     class Meta:
         model = Player
+        order_by = '-gp'
         fields = ('row_counter', 'name', 'guild_name',
                   'level', 'gp', 'gp_char', 'gp_ship', 'sep_gp', 'gr_gp',
                   'zeta_count', 'unit_count',

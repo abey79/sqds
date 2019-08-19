@@ -124,8 +124,6 @@ class GuildView(MetadataMixin, SingleTableMixin, FilterView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['guild'] = self.guild
-        context['units_by_api_id'] = Unit.objects.in_bulk(
-            field_name='api_id')
         return context
 
     def get_meta_title(self, **kwargs):
