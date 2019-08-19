@@ -112,6 +112,8 @@ class PlayerUnitFactory(factory.DjangoModelFactory):
     class Meta:
         model = PlayerUnit
 
+    unit = factory.SubFactory(UnitFactory)
+
     gp = factory.Faker('pyint', min=1, max=30000)
     rarity = factory.Faker('pyint', min=1, max=7)
     level = factory.Faker('pyint', min=1, max=85)
