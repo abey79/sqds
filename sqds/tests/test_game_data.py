@@ -73,7 +73,7 @@ def test_game_data_unit_categories(game_data):
             categories__api_id=cat_api_id))
 
 
-def test_gear_data(game_data, gear_data):
+def test_gear_data(game_data):
     gears = [('161Salvage', 'Mk 10 Neuro-Saav Electrobinoculars', False, False),
              ('173', 'Mk 9 Kyrotech Battle Computer', False, False),
              ('171', 'Mk 12 ArmaTek Stun Gun', False, True),

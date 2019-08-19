@@ -1,5 +1,8 @@
+import datetime
 import itertools
 import random
+
+from django.utils import timezone
 
 from sqds.models import Player, Guild, Unit, PlayerUnitGear, PlayerUnit
 from sqds_seed.factories import PlayerFactory, PlayerUnitFactory, GuildFactory, \
@@ -18,6 +21,49 @@ def test_guild_import_with_guild_only(guild_data_no_player):
     assert Guild.objects.all()[0].name == 'PREPARE'
     assert Player.objects.count() == 0
     assert Guild.objects.annotate_stats()[0].player_count == 0
+
+
+def test_player_import_multiple(game_data, patched_swgoh):
+    ally_codes = [168562452, 278732538, 772324267]
+    imported_players = Player.objects.update_or_create_multiple_from_swgoh(ally_codes)
+
+    assert len(imported_players) == 3
+
+    players = Player.objects.all()
+
+    assert set(players) == set(imported_players)
+    assert set(ally_codes) == {p.ally_code for p in players}
+
+
+def test_player_import_single(game_data, patched_swgoh):
+    ally_code = 168562452
+    imported_player = Player.objects.update_or_create_from_swgoh(ally_code)
+    players = Player.objects.all()
+
+    assert players.count() == 1
+    assert players[0] == imported_player
+    assert players[0].ally_code == ally_code
+
+
+def test_player_set_ensure_exists_single(game_data, patched_swgoh, mocker):
+    ally_code = 868797936
+    player, = Player.objects.ensure_exist(ally_code)
+    assert patched_swgoh['get_player_data_batch'].call_count == 1
+
+    new_name = 'Stoopid name'
+    old_name = player.name
+    player.name = new_name
+    player.save()
+    player, = Player.objects.ensure_exist(ally_code, max_days=1)
+    assert patched_swgoh['get_player_data_batch'].call_count == 1
+    assert player.name == new_name
+
+    now = timezone.now()
+    mocker.patch('django.utils.timezone.now',
+                 return_value=now + datetime.timedelta(days=2))
+    player, = Player.objects.ensure_exist(ally_code, max_days=1)
+    assert patched_swgoh['get_player_data_batch'].call_count == 2
+    assert player.name == old_name
 
 
 def test_guild_annotate_faction_gp(game_data):
@@ -198,3 +244,55 @@ def test_annotate_stats_consistency(guild_data):
     for stat in stats:
         assert getattr(guild, stat) != 0  # We want actual data
         assert getattr(guild, stat) == sum(getattr(p, stat) for p in players)
+
+
+def test_player_unit_annotate_stats(db):
+    pass
+
+
+def test_player_dict_from_ally_code_all_units(db):
+    player = PlayerFactory()
+    units = UnitFactory.create_batch(3)
+    for u in units:
+        PlayerUnitFactory(player=player, unit=u)
+
+    dct = PlayerUnit.objects.dict_from_ally_code(player.ally_code)
+
+    assert dct.keys() == set(u.api_id for u in units)
+
+    attr_list = [
+        # PlayerUnit fields
+        'gp', 'rarity', 'level', 'gear', 'equipped_count', 'speed', 'health',
+        'protection', 'physical_damage', 'physical_crit_chance', 'special_damage',
+        'special_crit_chance', 'crit_damage', 'potency', 'tenacity', 'armor',
+        'resistance', 'armor_penetration', 'resistance_penetration', 'health_steal',
+        'accuracy', 'mod_speed', 'mod_health', 'mod_protection', 'mod_physical_damage',
+        'mod_special_damage', 'mod_physical_crit_chance', 'mod_special_crit_chance',
+        'mod_crit_damage', 'mod_potency', 'mod_tenacity', 'mod_armor', 'mod_resistance',
+        'mod_critical_avoidance', 'mod_accuracy', 'last_updated',
+
+        # annotate_stats
+        'mod_speed_no_set', 'zeta_count',
+    ]
+
+    for api_id in dct:
+        pu = PlayerUnit.objects.annotate_stats().get(unit__api_id=api_id)
+        for attr in attr_list:
+            assert getattr(dct[api_id], attr) == getattr(pu, attr)
+
+        # dict_from_ally_code
+        assert dct[api_id].unit_name == pu.unit.name
+        assert dct[api_id].unit_api_id == pu.unit.api_id == api_id
+        assert dct[api_id].player_name == pu.player.name == player.name
+        assert dct[api_id].player_ally_code == pu.player.ally_code == player.ally_code
+
+
+def test_player_dict_from_ally_code_some_units(db):
+    player = PlayerFactory()
+    units = UnitFactory.create_batch(3)
+    for u in units:
+        PlayerUnitFactory(player=player, unit=u)
+
+    unit_ids = [units[0].api_id, units[2].api_id]
+    dct = PlayerUnit.objects.dict_from_ally_code(player.ally_code, unit_ids)
+    assert dct.keys() == set(unit_ids)
