@@ -42,8 +42,10 @@ SET_TO_CSS = {
     ModSet.TENACITY: 'ten',
 }
 
+
 def mod_percent(f):
     return f'{f:0.2%}'
+
 
 STATS = {
     'speed': {'label': 'Speed', 'filter': None},
