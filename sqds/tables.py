@@ -175,7 +175,7 @@ class PlayerUnitTable(RowCounterTable):
 
     summary = tables.Column('Summary', initial_sort_descending=True,
                             order_by=['rarity', 'level', 'gear',
-                                      'equipped_count'])
+                                      'equipped_count', 'gp'])
     zeta_count = tables.Column('Zetas', initial_sort_descending=True)
 
     mod_speed = LargeIntColumn(
