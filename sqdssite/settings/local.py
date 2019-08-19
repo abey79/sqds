@@ -5,7 +5,6 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS.extend([
-    'django_extensions',
     'debug_toolbar',
 ])
 
