@@ -20,9 +20,9 @@
       <div style="display: inline-block">
         <table style="text-align: left; border-spacing: 10px 0; border-collapse: separate;">
           {% for stat in stat_list %}
-            <tr>
-              <th>{{ stat.label }}</th>
-              <td>{{ stat.value }}</td>
+            <tr {% if forloop.counter0 == 0 %}style="font-weight: bold"{% endif %}>
+              <td style="text-align: right">{{ stat.value }}</td>
+              <td>{{ stat.label }}</td>
             </tr>
           {% endfor %}
         </table>

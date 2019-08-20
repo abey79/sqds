@@ -1,8 +1,7 @@
 from django import template
 from django.utils.html import format_html
 
-from ..models import ModSet
-from .sqds_filters import percent
+from sqds.models import ModSet
 
 register = template.Library()
 
@@ -43,22 +42,27 @@ SET_TO_CSS = {
     ModSet.TENACITY: 'ten',
 }
 
+
+def mod_percent(f):
+    return f'{f:0.2%}'
+
+
 STATS = {
     'speed': {'label': 'Speed', 'filter': None},
     'health': {'label': 'Health', 'filter': None},
-    'health_percent': {'label': 'Health', 'filter': percent},
+    'health_percent': {'label': 'Health', 'filter': mod_percent},
     'protection': {'label': 'Protection', 'filter': None},
-    'protection_percent': {'label': 'Protection', 'filter': percent},
+    'protection_percent': {'label': 'Protection', 'filter': mod_percent},
     'offense': {'label': 'Offense', 'filter': None},
-    'offense_percent': {'label': 'Offense', 'filter': percent},
+    'offense_percent': {'label': 'Offense', 'filter': mod_percent},
     'defense': {'label': 'Defense', 'filter': None},
-    'defense_percent': {'label': 'Defense', 'filter': percent},
-    'critical_chance': {'label': 'Critical Chance', 'filter': percent},
-    'critical_damage': {'label': 'Critical Damage', 'filter': percent},
-    'potency': {'label': 'Potency', 'filter': percent},
-    'tenacity': {'label': 'Tenacity', 'filter': percent},
-    'critical_avoidance': {'label': 'Critical avoidance', 'filter': percent},
-    'accuracy': {'label': 'Accuracy', 'filter': percent}
+    'defense_percent': {'label': 'Defense', 'filter': mod_percent},
+    'critical_chance': {'label': 'Critical Chance', 'filter': mod_percent},
+    'critical_damage': {'label': 'Critical Damage', 'filter': mod_percent},
+    'potency': {'label': 'Potency', 'filter': mod_percent},
+    'tenacity': {'label': 'Tenacity', 'filter': mod_percent},
+    'critical_avoidance': {'label': 'Critical avoidance', 'filter': mod_percent},
+    'accuracy': {'label': 'Accuracy', 'filter': mod_percent}
 }
 
 
@@ -81,6 +85,7 @@ def mod_widget(mod, show_unit_info=False):
     stat_list = []
     for stat in STATS:
         value = getattr(mod, stat)
+        rolls = getattr(mod, stat + '_roll')
 
         if value == 0:
             continue
@@ -90,9 +95,15 @@ def mod_widget(mod, show_unit_info=False):
         else:
             value_string = str(value)
 
-        stat_list.append({
+        item = {
             'label': STATS[stat]['label'],
-            'value': value_string})
+            'value': value_string
+        }
+        if stat == mod.get_primary_stat_display():
+            stat_list.insert(0, item)
+        else:
+            item['label'] += f' ({rolls})'
+            stat_list.append(item)
 
     return {
         'mod': mod,

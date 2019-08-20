@@ -197,17 +197,6 @@ class ViewTests(TestCase):
         for player in Player.objects.all():
             PlayerUnitFactory(player=player, unit=sep_unit)
 
-        print('setup completed')
-
-    def test_player_unit_view(self):
-        pu = PlayerUnit.objects.first()
-        url = reverse('sqds:unit', args=[pu.player.ally_code, pu.unit.api_id])
-        response = self.client.get(url)
-
-        self.assertContains(response, pu.unit.name)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'sqds/unit.html')
-
     def test_index_view(self):
         response = self.client.get(reverse('sqds:index'))
         self.assertEqual(response.status_code, 200)
@@ -367,3 +356,33 @@ class PlayerCompareViewTests(TestCase):
             'ally_code2': player2.ally_code})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+
+class PlayerUnitTests(TestCase):
+    def test_base_view(self):
+        player = PlayerFactory()
+        pu = PlayerUnitFactory(player=player)
+        url = reverse('sqds:unit', args=[pu.player.ally_code, pu.unit.api_id])
+        response = self.client.get(url)
+
+        self.assertContains(response, pu.unit.name)
+        self.assertContains(response, str(pu.speed))
+        self.assertContains(response, 'G' + str(pu.gear))
+        self.assertContains(response, str(pu.level))
+        self.assertTemplateUsed(response, 'sqds/unit.html')
+
+    def test_mod_view(self):
+        player = PlayerFactory()
+        pu = PlayerUnitFactory(player=player)
+        ModFactory(player_unit=pu, slot=0, primary_stat='OF', offense_percent=0.0588,
+                   speed=17)
+        ModFactory(player_unit=pu, slot=1, primary_stat='DE', speed=13, speed_roll=3)
+        ModFactory(player_unit=pu, slot=2, primary_stat='PR', offense=120)
+
+        url = reverse('sqds:unit', args=[pu.player.ally_code, pu.unit.api_id])
+        response = self.client.get(url)
+
+        self.assertContains(response, str(14))
+        self.assertContains(response, 'Speed (3)')
+        self.assertContains(response, '5.88%')
+        self.assertContains(response, str(120))
