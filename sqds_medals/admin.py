@@ -3,16 +3,16 @@ from django.utils.html import format_html
 from django_admin_listfilter_dropdown.filters import DropdownFilter
 
 from sqds.models import Unit, Skill
-from sqds_scoredunit.models import ScoreStatRule, ScoreZetaRule, ScoredUnit
+from sqds_medals.models import StatMedalRule, ZetaMedalRule, MedaledUnit
 
 
-class ScoreStatRuleInline(admin.TabularInline):
-    model = ScoreStatRule
+class StatMedalRuleInline(admin.TabularInline):
+    model = StatMedalRule
     extra = 0
 
 
-class ScoreZetaRuleInline(admin.TabularInline):
-    model = ScoreZetaRule
+class ZetaMedalRuleInline(admin.TabularInline):
+    model = ZetaMedalRule
     extra = 0
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -23,7 +23,7 @@ class ScoreZetaRuleInline(admin.TabularInline):
 
 
 def unit_rule_count(obj):
-    cnt = obj.score_stat_rule_set.count() + obj.score_zeta_rule_set.count()
+    cnt = obj.stat_medal_rule_set.count() + obj.zeta_medal_rule_set.count()
 
     if cnt == 0:
         s = '<span style="color: #ddd">undefined</span>'
@@ -44,17 +44,19 @@ def custom_titled_filter(filter_cls, title):
     return Wrapper
 
 
-@admin.register(ScoredUnit)
-class ScoredUnitAdmin(admin.ModelAdmin):
+@admin.register(MedaledUnit)
+class MedaledUnitAdmin(admin.ModelAdmin):
     list_display = ['name', unit_rule_count]
     list_filter = (('categories__name', DropdownFilter),)
 
     fields = ['name']
     readonly_fields = ['name']
     inlines = [
-        ScoreStatRuleInline,
-        ScoreZetaRuleInline
+        StatMedalRuleInline,
+        ZetaMedalRuleInline
     ]
+
+    ordering = ('name',)
 
     def has_add_permission(self, request, obj=None):
         return False

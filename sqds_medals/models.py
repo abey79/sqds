@@ -3,7 +3,7 @@ from django.db import models
 from sqds.models import Unit, Skill
 
 
-class ScoredUnit(Unit):
+class MedaledUnit(Unit):
     """
     Add score to unit, medal symbol: ⊛
     """
@@ -12,10 +12,11 @@ class ScoredUnit(Unit):
         proxy = True
 
 
-class ScoreStatRule(models.Model):
+class StatMedalRule(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE,
-                             related_name='score_stat_rule_set')
+                             related_name='stat_medal_rule_set')
 
+    # noinspection DuplicatedCode
     stat = models.CharField(max_length=200, choices=[
         ('level', 'Level'),
         ('gear', 'Gear tier'),
@@ -37,15 +38,24 @@ class ScoreStatRule(models.Model):
     value = models.FloatField(null=True)
 
     def __str__(self):
-        return "ScoreStatRule: " + self.get_stat_display() + " ≥ " + str(
-            self.value)
+        return "StatMedalRule: " + self.get_stat_display() + " ≥ " + str(self.value)
 
 
-class ScoreZetaRule(models.Model):
+class ZetaMedalRule(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE,
-                             related_name='score_zeta_rule_set')
+                             related_name='zeta_medal_rule_set')
 
     zeta = models.ForeignKey(Skill, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "ScoreZetaRule: " + self.zeta.name
+        return "ZetaMedalRule: " + self.zeta.name
+
+
+class Medal(models.Model):
+    player_unit = models.ForeignKey(Unit, on_delete=models.CASCADE,
+                                    related_name='medal_set')
+
+    stat_medal_rule = models.ForeignKey(StatMedalRule, on_delete=models.CASCADE,
+                                        null=True, related_name='medal_set')
+    zeta_medal_rule = models.ForeignKey(ZetaMedalRule, on_delete=models.CASCADE,
+                                        null=True, related_name='medal_set')
