@@ -241,8 +241,8 @@ class Swgoh:
             return guild_data[0]
 
     def get_player_data(self, ally_codes, calc_stats=True):
-        player_json = self._call_swgoh_help_api(
-            endpoint='/swgoh/guild',
+        player_data = self._call_swgoh_help_api(
+            endpoint='/swgoh/players',
             json={
                 "allycodes": ally_codes,
                 "language": "eng_us",
@@ -261,7 +261,7 @@ class Swgoh:
             },
             accept_404=True)
 
-        if player_json is None:
+        if player_data is None:
             return None
 
         if calc_stats:
@@ -277,7 +277,7 @@ class Swgoh:
                     headers={
                         "Content-Type": "application/json",
                     },
-                    json=player_json)
+                    json=player_data)
             except requests.exceptions.RequestException as exc:
                 raise ApiError(f'Unexpected {type(exc).__name__} while accessing {url}')
 
@@ -290,7 +290,7 @@ class Swgoh:
 
             return response.json()
         else:
-            return player_json
+            return player_data
 
     def _download_players(self, ally_codes: Collection[int]):
         print(f"Downloading {ally_codes}")
