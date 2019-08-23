@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -78,6 +77,13 @@ TEMPLATES = [
     },
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
+    }
+}
+
 WSGI_APPLICATION = 'sqdssite.wsgi.application'
 
 # Database
@@ -126,7 +132,6 @@ DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap.html'
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 INTERNAL_IPS = ('51.154.2.60',)
-
 
 # By default, we dont want to use debug toolbar
 USE_DEBUG_TOOLBAR = False

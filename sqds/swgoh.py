@@ -1,25 +1,26 @@
-import datetime
 import math
 import queue
+import time
 from concurrent import futures
 from typing import Collection
 
 import requests
 
+from django.core.cache import cache
 
-class SwgohError(BaseException):
+
+class SwgohError(Exception):
     """Base class for swgoh module exceptions."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, message, request=None, response=None):
         """Initialize SwgohError with `request` and `response` objects."""
-        response = kwargs.pop('response', None)
-        self.response = response
-        self.request = kwargs.pop('request', None)
-        if (response is not None and not self.request
-                and hasattr(response, 'request')):
-            self.request = self.response.request
+        super().__init__(message)
 
-        super().__init__(*args)
+        self.response = response
+        self.request = request
+        if (self.response is not None and self.request is None
+                and hasattr(self.response, 'request')):
+            self.request = self.response.request
 
 
 class AuthenticationError(SwgohError):
@@ -60,21 +61,22 @@ class Swgoh:
     MAX_ERROR_COUNT = 5
 
     def __init__(self):
-        self.auth_expiry_time = datetime.datetime.now()
-        self.access_token = ''
         self.base_url = "https://api.swgoh.help"
 
-    def get_auth_header(self):
-        if datetime.datetime.now() > self.auth_expiry_time:
-            self.authenticate()
+    def get_access_token(self):
+        access_token = cache.get('access_token')
 
-        return {'Authorization': 'Bearer %s' % self.access_token}
+        # If an access_token has been cached, we can return it directly.
+        if access_token is not None:
+            return access_token
 
-    def authenticate(self):
+        # We don't have a cached access token, so we must authenticate.
         try:
-            from sqds.swgoh_local import SWGOH_USERNAME, SWGOH_PASSWORD
+            from .swgoh_local import SWGOH_USERNAME, SWGOH_PASSWORD
         except ImportError:
-            raise AuthenticationError() from ImportError
+            raise AuthenticationError(
+                'Missing credentials. Credentials must be '
+                'defined in a file named swgoh_local.py') from ImportError
 
         auth_payload = {
             "username": SWGOH_USERNAME,
@@ -84,185 +86,199 @@ class Swgoh:
             "client_secret": "123"
         }
 
-        now = datetime.datetime.now()
-
+        start_time = time.time()
+        url = "%s/auth/signin" % self.base_url
         response = requests.post(
-            "%s/auth/signin" % self.base_url, data=auth_payload)
+            url, data=auth_payload)
 
         if response.status_code != 200:
-            raise AuthenticationError(response=response)
+            raise AuthenticationError(
+                f'Unexpected status code returned by {url}: {response.status_code}',
+                response=response)
         try:
             data = response.json()
-            self.access_token = data['access_token']
-            self.auth_expiry_time = now + datetime.timedelta(seconds=data['expires_in'])
+            access_token = data['access_token']
+
+            # Cache the access token and set a conservative timeout before it expires
+            stop_time = time.time()
+            cache.set('access_token', access_token,
+                      data['expires_in'] - math.ceil(stop_time - start_time))
         except KeyError:
-            raise AuthenticationError(response=response)
+            raise AuthenticationError(
+                f'Unexpected content returned by {url}', response=response)
+
+        return access_token
+
+    def get_auth_header(self):
+        return {'Authorization': 'Bearer %s' % self.get_access_token()}
+
+    def _call_swgoh_help_api(self, endpoint, json, accept_404=False):
+        """
+        Call a swgoh.help end-point with json payload and return the response,
+        interpreted as json.
+        :param endpoint: end-point to call, e.g. /swgoh/data
+        :param json: json POSTed to end-point
+        :param accept_404: if True, return None upon 404, otherwise an exception will
+        be raised
+        :return: objects returned by the end-point, interpreted as json
+        """
+        url = f'{self.base_url}{endpoint}'
+        try:
+            response = requests.post(
+                url=url,
+                headers=self.get_auth_header(),
+                json=json)
+        except requests.exceptions.RequestException as exc:
+            raise ApiError(f'Unexpected {type(exc).__name__} while accessing {url}')
+
+        ok = (accept_404 and response.status_code == 404) or response.status_code == 200
+        if not ok:
+            raise ApiError(
+                f'Unexpected {response.status_code} status code returned by {url}',
+                response=response)
+
+        if response.status_code == 404:
+            return None
+        else:
+            return response.json()
 
     def get_unit_list(self):
-        try:
-            response = requests.post(
-                url="%s/swgoh/data" % self.base_url,
-                headers=self.get_auth_header(),
-                json={
-                    "collection": "unitsList",
-                    "language": "ENG_US",
-                    "match": {
-                        "rarity": 7,
-                        "obtainable": True,
-                        "obtainableTime": 0,
-                        "combatType": 1
-                    },
-                    "enums": True
-                })
-            return response.json()
-        except requests.exceptions.RequestException:
-            raise ApiError()
+        return self._call_swgoh_help_api(
+            endpoint='/swgoh/data',
+            json={
+                "collection": "unitsList",
+                "language": "ENG_US",
+                "match": {
+                    "rarity": 7,
+                    "obtainable": True,
+                    "obtainableTime": 0,
+                    "combatType": 1
+                },
+                "enums": True
+            })
 
     def get_skill_list(self):
-        try:
-            response = requests.post(
-                url="%s/swgoh/data" % self.base_url,
-                headers=self.get_auth_header(),
-                json={
-                    "collection": "skillList",
-                    "language": "eng_us",
-                    # "enums": True,
-                    "project": {
-                        "id": True,
-                        "abilityReference": True,
-                        "skillType": True,
-                        "isZeta": True
-                    }
-                })
-            return response.json()
-        except requests.exceptions.RequestException:
-            raise ApiError()
+        return self._call_swgoh_help_api(
+            endpoint='/swgoh/data',
+            json={
+                "collection": "skillList",
+                "language": "eng_us",
+                # "enums": True,
+                "project": {
+                    "id": True,
+                    "abilityReference": True,
+                    "skillType": True,
+                    "isZeta": True
+                }
+            })
 
     def get_ability_list(self):
-        try:
-            response = requests.post(
-                url="%s/swgoh/data" % self.base_url,
-                headers=self.get_auth_header(),
-                json={
-                    "collection": "abilityList",
-                    "language": "eng_us",
-                    "enums": "true",
-                    "project": {
-                        "id": True,
-                        "nameKey": True,
-                        "abilityType": True
-                    }
-                })
-            return response.json()
-        except requests.exceptions.RequestException:
-            raise ApiError()
+        return self._call_swgoh_help_api(
+            endpoint='/swgoh/data',
+            json={
+                "collection": "abilityList",
+                "language": "eng_us",
+                "enums": "true",
+                "project": {
+                    "id": True,
+                    "nameKey": True,
+                    "abilityType": True
+                }
+            })
 
     def get_gear_list(self):
-        try:
-            response = requests.post(
-                url="%s/swgoh/data" % self.base_url,
-                headers=self.get_auth_header(),
-                json={
-                    "collection": "equipmentList",
-                    "language": "eng_us",
-                    "enums": "true",
-                    "project": {
-                        "nameKey": True,
-                        "id": True,
-                        "equipmentStat": True,
-                        "tier": True,
-                        "type": True,
-                        "requiredRarity": True,
-                        "requiredLevel": True
-                    }
-                })
-            return response.json()
-        except requests.exceptions.RequestException:
-            raise ApiError()
+        return self._call_swgoh_help_api(
+            endpoint='/swgoh/data',
+            json={
+                "collection": "equipmentList",
+                "language": "eng_us",
+                "enums": "true",
+                "project": {
+                    "nameKey": True,
+                    "id": True,
+                    "equipmentStat": True,
+                    "tier": True,
+                    "type": True,
+                    "requiredRarity": True,
+                    "requiredLevel": True
+                }
+            })
 
     def get_category_list(self):
-        try:
-            response = requests.post(
-                url="%s/swgoh/data" % self.base_url,
-                headers=self.get_auth_header(),
-                json={
-                    "collection": "categoryList",
-                    "language": "eng_us",
-                    "match": {
-                        "visible": True
-                    },
-                    "project": {
-                        "id": True,
-                        "descKey": True
-                    },
-                    "enums": "true"
-                })
-            return response.json()
-        except requests.exceptions.RequestException:
-            raise ApiError()
+        return self._call_swgoh_help_api(
+            endpoint='/swgoh/data',
+            json={
+                "collection": "categoryList",
+                "language": "eng_us",
+                "match": {
+                    "visible": True
+                },
+                "project": {
+                    "id": True,
+                    "descKey": True
+                },
+                "enums": "true"
+            })
 
     def get_guild_list(self, ally_code):
-        try:
-            response = requests.post(
-                url="%s/swgoh/guild" % self.base_url,
-                headers=self.get_auth_header(),
-                json={
-                    "allycodes": [ally_code],
-                    "language": "eng_us",
-                    "project": {
-                        "roster": {
-                            "gpChar": True,
-                            "gpShip": True,
-                            "gp": True,
-                            "id": True,
-                            "level": True,
-                            "allyCode": True,
-                            "name": True
-                        },
+        guild_data = self._call_swgoh_help_api(
+            endpoint='/swgoh/guild',
+            json={
+                "allycodes": [ally_code],
+                "language": "eng_us",
+                "project": {
+                    "roster": {
+                        "gpChar": True,
+                        "gpShip": True,
+                        "gp": True,
                         "id": True,
-                        "name": True,
-                        "gp": True
+                        "level": True,
+                        "allyCode": True,
+                        "name": True
                     },
-                    "enums": True
-                })
+                    "id": True,
+                    "name": True,
+                    "gp": True
+                },
+                "enums": True
+            },
+            accept_404=True)
 
-            if response.status_code == 404:
-                return None
-            if response.status_code != 200:
-                raise ApiError(response=response)
-            return response.json()[0]
-        except requests.exceptions.RequestException:
-            raise ApiError()
+        if guild_data is None:
+            return None
+        else:
+            return guild_data[0]
 
     def get_player_data(self, ally_codes, calc_stats=True):
-        try:
-            response = requests.post(
-                url="%s/swgoh/player" % self.base_url,
-                headers=self.get_auth_header(),
-                json={
-                    "allycodes": ally_codes,
-                    "language": "eng_us",
-                    "enums": False,
-                    "project": {
-                        "roster": True,
-                        "updated": True,
-                        "id": True,
-                        "guildRefId": True,
-                        "allyCode": True,
-                        "level": True,
-                        "stats": True,
-                        "lastActivity": True,
-                        "name": True
-                    }
-                })
-            if response.status_code == 404:
-                return None
-            if response.status_code != 200:
-                raise ApiError(response=response)
+        player_data = self._call_swgoh_help_api(
+            endpoint='/swgoh/players',
+            json={
+                "allycodes": ally_codes,
+                "language": "eng_us",
+                "enums": False,
+                "project": {
+                    "roster": True,
+                    "updated": True,
+                    "id": True,
+                    "guildRefId": True,
+                    "allyCode": True,
+                    "level": True,
+                    "stats": True,
+                    "lastActivity": True,
+                    "name": True
+                }
+            },
+            accept_404=True)
 
-            if calc_stats:
-                response2 = requests.post(
-                    url="https://crinolo-swgoh.glitch.me/testCalc/api/characters",
+        if player_data is None:
+            return None
+
+        if calc_stats:
+            # url = "https://crinolo-swgoh.glitch.me/statCalc/api/characters"
+            url = "https://swgoh-stat-calc.glitch.me/api/characters"
+            try:
+                response = requests.post(
+                    url=url,
                     params={
                         "flags": "gameStyle",
                         "language": "eng_us",
@@ -270,24 +286,24 @@ class Swgoh:
                     headers={
                         "Content-Type": "application/json",
                     },
-                    json=response.json()
-                )
+                    json=player_data)
+            except requests.exceptions.RequestException as exc:
+                raise ApiError(f'Unexpected {type(exc).__name__} while accessing {url}')
 
-                if response2.status_code == 404:
-                    return None
-                if response2.status_code != 200:
-                    raise ApiError(response=response2)
+            if response.status_code == 404:
+                return None
+            if response.status_code != 200:
+                raise ApiError(
+                    f'Unexpected {response.status_code} status code return by {url}',
+                    response=response)
 
-                return response2.json()
-            else:
-                return response.json()
-        except requests.exceptions.RequestException:
-            raise ApiError()
+            return response.json()
+        else:
+            return player_data
 
     def _download_players(self, ally_codes: Collection[int]):
         print(f"Downloading {ally_codes}")
-        data = self.get_player_data(ally_codes)
-        return data
+        return self.get_player_data(ally_codes)
 
     def get_player_data_batch(self, ally_code_list: Collection[int]):
         """
@@ -345,13 +361,10 @@ class Swgoh:
 
                 for done in done_list:
                     try:
-                        # print(f"Checking results for things {futures_to_ally_codes[
-                        # done]}")
-
                         # This will raise an ApiError if the corresponding futures
                         # failed to download the player data
                         res = done.result()
-                    except ApiError:
+                    except ApiError as exc:
                         # We put back the things we needed to get do in the queue
                         _ = list(map(ally_codes_queue.put, futures_to_ally_codes[done]))
 
@@ -359,18 +372,14 @@ class Swgoh:
                         if batch_size > 1:
                             batch_size = math.ceil(batch_size / 2)
                         error_count += 1
-                        print(f"Error caught, batch size reduced to {batch_size}")
+                        print(f"Error caught ({str(exc)}), batch size reduced to"
+                              f" {batch_size}")
                     else:
                         # Download was successful, keep the results
                         results.extend(res)
 
                     # The future is complete and must be deleted from our maps
                     del futures_to_ally_codes[done]
-
-                    # print(
-                    #    f"Loop status: batch size {batch_size}, error count {
-                    #    error_count}, "
-                    #    f"result length {len(results)}")
 
                     # Since we have freed a worker, we can schedule more download.
                     # Unless we have too many errors, in which case we throw a BatchError
@@ -381,10 +390,9 @@ class Swgoh:
                                 executor.submit(self._download_players,
                                                 ally_code_batch)] = ally_code_batch
                         else:
-                            # print(
-                            #    f"BATCH ERROR: too many errors, error count {
-                            #    error_count}")
-                            raise BatchError
+                            raise BatchError(
+                                f'Unexpected number of errors ({error_count}) during '
+                                f'batch player download')
         return results
 
 
