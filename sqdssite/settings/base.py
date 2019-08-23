@@ -78,6 +78,13 @@ TEMPLATES = [
     },
 ]
 
+CACHES = {
+    'swgoh': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/swgoh_cache',
+    }
+}
+
 WSGI_APPLICATION = 'sqdssite.wsgi.application'
 
 # Database

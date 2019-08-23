@@ -1,10 +1,12 @@
-import datetime
 import math
 import queue
+import time
 from concurrent import futures
 from typing import Collection
 
 import requests
+
+from django.core.cache import caches
 
 
 class SwgohError(Exception):
@@ -59,17 +61,17 @@ class Swgoh:
     MAX_ERROR_COUNT = 5
 
     def __init__(self):
-        self.auth_expiry_time = datetime.datetime.now()
-        self.access_token = ''
         self.base_url = "https://api.swgoh.help"
 
-    def get_auth_header(self):
-        if datetime.datetime.now() > self.auth_expiry_time:
-            self.authenticate()
+    def get_access_token(self):
+        cache = caches['swgoh']
+        access_token = cache.get('access_token')
 
-        return {'Authorization': 'Bearer %s' % self.access_token}
+        # If an access_token has been cached, we can return it directly.
+        if access_token is not None:
+            return access_token
 
-    def authenticate(self):
+        # We don't have a cached access token, so we must authenticate.
         try:
             from .swgoh_local import SWGOH_USERNAME, SWGOH_PASSWORD
         except ImportError:
@@ -85,8 +87,7 @@ class Swgoh:
             "client_secret": "123"
         }
 
-        now = datetime.datetime.now()
-
+        start_time = time.time()
         url = "%s/auth/signin" % self.base_url
         response = requests.post(
             url, data=auth_payload)
@@ -97,11 +98,20 @@ class Swgoh:
                 response=response)
         try:
             data = response.json()
-            self.access_token = data['access_token']
-            self.auth_expiry_time = now + datetime.timedelta(seconds=data['expires_in'])
+            access_token = data['access_token']
+
+            # Cache the access token and set a conservative timeout before it expires
+            stop_time = time.time()
+            cache.set('access_token', access_token,
+                      data['expires_in'] - math.ceil(stop_time - start_time))
         except KeyError:
             raise AuthenticationError(
                 f'Unexpected content returned by {url}', response=response)
+
+        return access_token
+
+    def get_auth_header(self):
+        return {'Authorization': 'Bearer %s' % self.get_access_token()}
 
     def _call_swgoh_help_api(self, endpoint, json, accept_404=False):
         """
@@ -125,7 +135,7 @@ class Swgoh:
         ok = (accept_404 and response.status_code == 404) or response.status_code == 200
         if not ok:
             raise ApiError(
-                f'Unexpected {response.status_code} status code return by {url}',
+                f'Unexpected {response.status_code} status code returned by {url}',
                 response=response)
 
         if response.status_code == 404:
