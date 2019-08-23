@@ -6,7 +6,7 @@ from typing import Collection
 
 import requests
 
-from django.core.cache import caches
+from django.core.cache import cache
 
 
 class SwgohError(Exception):
@@ -64,7 +64,6 @@ class Swgoh:
         self.base_url = "https://api.swgoh.help"
 
     def get_access_token(self):
-        cache = caches['swgoh']
         access_token = cache.get('access_token')
 
         # If an access_token has been cached, we can return it directly.
