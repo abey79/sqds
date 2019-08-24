@@ -382,7 +382,7 @@ class PlayerUnitTests(TestCase):
         url = reverse('sqds:unit', args=[pu.player.ally_code, pu.unit.api_id])
         response = self.client.get(url)
 
-        self.assertContains(response, str(14))
+        self.assertContains(response, str(13))
         self.assertContains(response, 'Speed (3)')
         self.assertContains(response, '5.88%')
         self.assertContains(response, str(120))
