@@ -37,8 +37,11 @@ class StatMedalRule(models.Model):
         ('mod_tenacity', 'Mod Tenacity')])
     value = models.FloatField(null=True)
 
+    def rule_str(self):
+        return self.get_stat_display() + " ≥ " + str(self.value)
+
     def __str__(self):
-        return "StatMedalRule: " + self.get_stat_display() + " ≥ " + str(self.value)
+        return "StatMedalRule: " + self.rule_str()
 
 
 class ZetaMedalRule(models.Model):

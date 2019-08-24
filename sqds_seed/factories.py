@@ -5,6 +5,7 @@ from faker.providers import BaseProvider
 
 from sqds.models import Category, Unit, Skill, Gear, Guild, Player, PlayerUnit, Zeta, \
     PlayerUnitGear, Mod, ModSet
+from sqds_medals.models import StatMedalRule, ZetaMedalRule
 
 
 # noinspection PyMethodMayBeStatic
@@ -192,3 +193,21 @@ class ModFactory(factory.DjangoModelFactory):
     tenacity = factory.Faker('gaussian_percent', mean=.03, sigma=.01)
     critical_avoidance = factory.Faker('gaussian_percent', mean=.03, sigma=.01)
     accuracy = factory.Faker('gaussian_percent', mean=.03, sigma=.01)
+
+
+##########################################################################################
+##  MEDALS                                                                              ##
+##########################################################################################
+
+class StatMedalRuleFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = StatMedalRule
+
+    stat = factory.fuzzy.FuzzyChoice(
+        StatMedalRule._meta.get_field('stat').flatchoices)
+    value = factory.Faker('pyfloat', positive=True)
+
+
+class ZetaMedalRuleFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = ZetaMedalRule
