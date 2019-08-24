@@ -136,6 +136,9 @@ class GuildView(MetadataMixin, SingleTableMixin, FilterView):
 
 
 class GuildPlayerUnitsFilter(FilterSet):
+    unit = ChoiceFilter(field_name='unit',
+                        choices=Unit.objects.values_list(
+                            'id', 'name').order_by(Lower('name')))
     category = ChoiceFilter(field_name='unit__categories',
                             choices=Category.objects.values_list(
                                 'id', 'name').order_by(Lower('name')))
