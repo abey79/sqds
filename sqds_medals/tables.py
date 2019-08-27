@@ -16,7 +16,7 @@ class MedaledUnitTable(RowCounterTable):
                                             record.stat_medal_rule_set.all()) + '</ul>')
 
     def render_zeta_rules(self, record):
-        return format_html('<ul>' + ''.join('<li>' + r.zeta.name + '</li>' for r in
+        return format_html('<ul>' + ''.join('<li>' + r.skill.name + '</li>' for r in
                                             record.zeta_medal_rule_set.all()) + '</ul>')
 
     class Meta:

@@ -63,6 +63,10 @@ def player_comparison(players):
                 'data': compute_data_and_classes([p.zeta_count for p in players])
             },
             {
+                'label': '<th>Medals</th>',
+                'data': compute_data_and_classes([p.medal_count for p in players])
+            },
+            {
                 'label': '<th>Unit count</th>',
                 'data': compute_data_and_classes([p.unit_count for p in players])
             },

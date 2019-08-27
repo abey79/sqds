@@ -26,9 +26,9 @@ class MedalViewTest(TestCase):
 
     def test_wrong_medals(self):
         unit_ok, unit_under, unit_over = UnitFactory.create_batch(3)
-        ZetaMedalRuleFactory(unit=unit_ok, zeta=SkillFactory(unit=unit_ok, is_zeta=True))
-        ZetaMedalRuleFactory(unit=unit_under, zeta=SkillFactory(unit=unit_under,
-                                                                is_zeta=True))
+        ZetaMedalRuleFactory(unit=unit_ok, skill=SkillFactory(unit=unit_ok, is_zeta=True))
+        ZetaMedalRuleFactory(unit=unit_under, skill=SkillFactory(unit=unit_under,
+                                                                 is_zeta=True))
         StatMedalRuleFactory.create_batch(6, unit=unit_ok)
         StatMedalRuleFactory.create_batch(8, unit=unit_over)
         StatMedalRuleFactory.create_batch(5, unit=unit_under)
@@ -65,7 +65,7 @@ class MedalViewTest(TestCase):
     def test_zeta_display(self):
         unit = UnitFactory()
         skill = SkillFactory(unit=unit, is_zeta=True)
-        ZetaMedalRuleFactory(unit=unit, zeta=skill)
+        ZetaMedalRuleFactory(unit=unit, skill=skill)
         StatMedalRuleFactory.create_batch(6, unit=unit)
 
         url = reverse('sqds_medals:list')

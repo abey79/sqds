@@ -1,6 +1,7 @@
-from django.db import models
+from django.db import models, transaction
+from django.db.models import Count
 
-from sqds.models import Unit, Skill
+from sqds.models import Unit, Skill, PlayerUnit, Zeta
 
 
 class MedaledUnit(Unit):
@@ -41,24 +42,57 @@ class StatMedalRule(models.Model):
         return self.get_stat_display() + " ≥ " + str(self.value)
 
     def __str__(self):
-        return "StatMedalRule: " + self.rule_str()
+        return self.__class__.__name__ + ": " + self.rule_str()
 
 
 class ZetaMedalRule(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE,
                              related_name='zeta_medal_rule_set')
 
-    zeta = models.ForeignKey(Skill, on_delete=models.CASCADE)
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "ZetaMedalRule: " + self.zeta.name
+        return self.__class__.__name__ + ": " + self.skill.name
+
+
+class MedalManager(models.Manager):
+    def update_all(self):
+        subquery = (Unit.objects
+                    .annotate(tot=Count('stat_medal_rule_set',
+                                        distinct=True) + Count('zeta_medal_rule_set',
+                                                               distinct=True))
+                    .filter(tot=7))
+
+        stat_rules = StatMedalRule.objects.filter(unit__in=subquery)
+        zeta_rules = ZetaMedalRule.objects.filter(unit__in=subquery)
+
+        with transaction.atomic():
+            self.model.objects.all().delete()
+            medals = []
+
+            for rule in stat_rules:
+                filter_args = {
+                    rule.stat + '__gte': rule.value,
+                    'unit': rule.unit
+                }
+                medals.extend(self.model(player_unit=pu, stat_medal_rule=rule)
+                              for pu in PlayerUnit.objects.filter(**filter_args))
+
+            for rule in zeta_rules:
+                medals.extend(self.model(player_unit=z.player_unit, zeta_medal_rule=rule)
+                              for z in Zeta.objects.filter(skill=rule.skill,
+                                                           player_unit__unit=rule.unit))
+
+            self.model.objects.bulk_create(medals)
 
 
 class Medal(models.Model):
-    player_unit = models.ForeignKey(Unit, on_delete=models.CASCADE,
+    player_unit = models.ForeignKey(PlayerUnit, on_delete=models.CASCADE,
                                     related_name='medal_set')
 
     stat_medal_rule = models.ForeignKey(StatMedalRule, on_delete=models.CASCADE,
                                         null=True, related_name='medal_set')
     zeta_medal_rule = models.ForeignKey(ZetaMedalRule, on_delete=models.CASCADE,
                                         null=True, related_name='medal_set')
+
+    objects = MedalManager()

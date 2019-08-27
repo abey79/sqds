@@ -20,7 +20,7 @@ class MedalList(MetadataMixin, SingleTableView):
                 .filter(tot_rule_count=7)
                 .prefetch_related('stat_medal_rule_set',
                                   'zeta_medal_rule_set',
-                                  'zeta_medal_rule_set__zeta'))
+                                  'zeta_medal_rule_set__skill'))
 
     def get_meta_title(self, **kwargs):
         # TODO: implement this

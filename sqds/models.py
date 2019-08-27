@@ -241,6 +241,8 @@ class GuildSet(models.QuerySet):
             sum15=Sum('player_set__unit_set__mod_set__speed',
                       filter=(Q(player_set__unit_set__mod_set__speed__gte=15) & ~Q(
                           player_set__unit_set__mod_set__primary_stat='SP'))))
+        medal_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set__medal_set'))
 
         return self.annotate(
             player_count=Subquery(player_count.values('cnt'),
@@ -287,8 +289,9 @@ class GuildSet(models.QuerySet):
                                         output_field=models.IntegerField()),
 
             mod_total_speed_15plus=Subquery(mod_total_speed_15plus.values('sum15'),
-                                            output_field=models.IntegerField())
-        )
+                                            output_field=models.IntegerField()),
+            medal_count=Subquery(medal_count.values('cnt'),
+                                 output_field=models.IntegerField()))
 
     def annotate_faction_gp(self):
         unit_ids = Unit.objects.filter(
@@ -570,6 +573,8 @@ class PlayerSet(models.QuerySet):
             sum15=Sum('unit_set__mod_set__speed',
                       filter=(Q(unit_set__mod_set__speed__gte=15) & ~Q(
                           unit_set__mod_set__primary_stat='SP'))))
+        medal_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('unit_set__medal_set'))
 
         return self.annotate(
             unit_count=Subquery(unit_count.values('cnt'),
@@ -609,7 +614,9 @@ class PlayerSet(models.QuerySet):
             mod_count_speed_10=Subquery(mod_count_speed_10.values('cnt'),
                                         output_field=models.IntegerField()),
             mod_total_speed_15plus=Subquery(mod_total_speed_15plus.values('sum15'),
-                                            output_field=models.IntegerField()))
+                                            output_field=models.IntegerField()),
+            medal_count=Subquery(medal_count.values('cnt'),
+                                 output_field=models.IntegerField()))
 
     def annotate_faction_gp(self):
         unit_ids = Unit.objects.filter(
@@ -687,11 +694,15 @@ class PlayerUnitSet(models.QuerySet):
             mod_speed_no_set=Coalesce(Sum('mod_set__speed'), 0))
         zeta_count = PlayerUnit.objects.filter(pk=OuterRef('pk')).annotate(
             zeta_count=Count('zeta_set'))
+        medal_count = PlayerUnit.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('medal_set'))
         return self.annotate(
             mod_speed_no_set=Subquery(mod_speed_no_set.values('mod_speed_no_set'),
                                       output_field=models.IntegerField()),
             zeta_count=Subquery(zeta_count.values('zeta_count'),
-                                output_field=models.IntegerField()))
+                                output_field=models.IntegerField()),
+            medal_count=Subquery(medal_count.values('cnt'),
+                                 output_field=models.IntegerField()))
 
 
 class PlayerUnit(models.Model):

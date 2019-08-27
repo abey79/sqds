@@ -37,6 +37,7 @@ pytest-mock
 pytest-django
 pytest-dotenv
 pytest-xdist
+django-coverage-plugin
 
 # Deployment stuff
 python-dotenv
