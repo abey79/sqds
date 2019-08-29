@@ -39,6 +39,9 @@ pytest-dotenv
 pytest-xdist
 django-coverage-plugin
 
+# Dev stuff
+black
+
 # Deployment stuff
 python-dotenv
 

@@ -8,18 +8,24 @@ from sqds.tables import RowCounterTable
 # noinspection PyMethodMayBeStatic
 class MedaledUnitTable(RowCounterTable):
     name = tables.Column()
-    stat_rules = tables.Column('Stat Rules', empty_values=(), orderable=False)
-    zeta_rules = tables.Column('Zeta Rules', empty_values=(), orderable=False)
+    stat_rules = tables.Column("Stat Rules", empty_values=(), orderable=False)
+    zeta_rules = tables.Column("Zeta Rules", empty_values=(), orderable=False)
 
     def render_stat_rules(self, record):
-        return format_html('<ul>' + ''.join('<li>' + r.rule_str() + '</li>' for r in
-                                            record.stat_medal_rule_set.all()) + '</ul>')
+        return format_html(
+            "<ul>{}</ul>",
+            "".join(f"<li>{str(r)}</li>" for r in record.stat_medal_rule_set.all()),
+        )
 
     def render_zeta_rules(self, record):
-        return format_html('<ul>' + ''.join('<li>' + r.skill.name + '</li>' for r in
-                                            record.zeta_medal_rule_set.all()) + '</ul>')
+        return format_html(
+            "<ul>{}</ul>",
+            "".join(
+                f"<li>{r.skill.name}</li>" for r in record.zeta_medal_rule_set.all()
+            ),
+        )
 
     class Meta:
         model = Unit
-        order_by = 'name'
-        fields = ('row_counter', 'name', 'stat_rules', 'zeta_rules')
+        order_by = "name"
+        fields = ("row_counter", "name", "stat_rules", "zeta_rules")

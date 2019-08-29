@@ -78,6 +78,9 @@ class Unit(models.Model):
     name = models.CharField(max_length=200, default='')
     categories = models.ManyToManyField(Category, related_name='unit_set')
 
+    def is_medaled(self):
+        return self.stat_medal_rule_set.count() + self.zeta_medal_rule_set.count() == 7
+
     def __str__(self):  # pragma: no cover
         return self.name
 
@@ -793,6 +796,20 @@ class PlayerUnit(models.Model):
             '+' + str(self.equipped_count) if self.equipped_count > 0 else '')
 
     summary.admin_order_field = ['rarity', 'level', 'gear', 'equipped_count']
+
+    def medals(self):
+        """Returns an array of ([Stat|Zeta]MedalRule, Medal) tuple for the player unit.
+        If the corresponding unit is not medaled, returns None. If the Medal
+        corresponding to a rule is missing, the tuple contains None.
+        """
+        if self.unit.is_medaled():
+            medals = [(r, self.medal_set.filter(stat_medal_rule=r).first())
+                      for r in self.unit.stat_medal_rule_set.all()]
+            medals += [(r, self.medal_set.filter(zeta_medal_rule=r).first())
+                       for r in self.unit.zeta_medal_rule_set.all()]
+            return medals
+        else:
+            return None
 
 
 class Zeta(models.Model):
