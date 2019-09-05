@@ -13,16 +13,18 @@ class MedaledUnitTable(RowCounterTable):
 
     def render_stat_rules(self, record):
         return format_html(
-            "<ul>{}</ul>",
-            "".join(f"<li>{str(r)}</li>" for r in record.stat_medal_rule_set.all()),
+            "<ul>"
+            + "".join(f"<li>{str(r)}</li>" for r in record.stat_medal_rule_set.all())
+            + "<ul>"
         )
 
     def render_zeta_rules(self, record):
         return format_html(
-            "<ul>{}</ul>",
-            "".join(
+            "<ul>"
+            + "".join(
                 f"<li>{r.skill.name}</li>" for r in record.zeta_medal_rule_set.all()
-            ),
+            )
+            + "</ul>"
         )
 
     class Meta:

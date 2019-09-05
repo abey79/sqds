@@ -2,8 +2,8 @@
 
 {% block title %}
   Medal list
-{% endblock %}
+{% endblock title %}
 
 {% block panel_title %}
-  Medal list
-{% endblock %}
+  Medal list (<a href="{% url 'admin:medals_medaledunit_changelist' %}">edit</a>)
+{% endblock panel_title %}
