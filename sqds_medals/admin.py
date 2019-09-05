@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django_admin_listfilter_dropdown.filters import DropdownFilter
 
 from sqds.models import Unit, Skill
-from sqds_medals.models import StatMedalRule, ZetaMedalRule, MedaledUnit
+from sqds_medals.models import StatMedalRule, ZetaMedalRule, MedaledUnit, Medal
 
 
 class StatMedalRuleInline(admin.TabularInline):
@@ -16,7 +16,7 @@ class ZetaMedalRuleInline(admin.TabularInline):
     extra = 0
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "zeta":
+        if db_field.name == "skill":
             unit = Unit.objects.get(pk=request.resolver_match.kwargs['object_id'])
             kwargs["queryset"] = Skill.objects.filter(unit=unit, is_zeta=True)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -57,6 +57,10 @@ class MedaledUnitAdmin(admin.ModelAdmin):
     ]
 
     ordering = ('name',)
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        Medal.objects.update_for_unit(unit=form.instance)
 
     def has_add_permission(self, request, obj=None):
         return False

@@ -176,6 +176,8 @@ class GuildManager(models.Manager):
 
             guild.player_set.exclude(id__in=player_id_array).delete()
 
+            Medal.objects.update_all(ally_codes)
+
         return guild
 
 
@@ -380,21 +382,15 @@ class PlayerManager(models.Manager):
 
                 players.append(self.update_or_create_from_data(player_data, guild))
 
+            Medal.objects.update_all(ally_codes)
+
         return players
 
     def update_or_create_from_swgoh(self, ally_code: int) -> 'Player':
-        player_data = swgoh.api.get_player_data(ally_code)[0]
-
-        if player_data['guildRefId'] != '':
-            guild = Guild.objects.update_or_create_from_swgoh(
-                ally_code, guild_only=True)
-        else:
-            guild = None
-
-        with transaction.atomic():
-            player = self.update_or_create_from_data(player_data, guild)
-
-        return player
+        """
+        Update or create a single player. TODO: is this function still used?
+        """
+        return self.update_or_create_multiple_from_swgoh([ally_code])[0]
 
     def update_or_create_from_data(self, player_data,
                                    guild: Union[Guild, None]) -> 'Player':
@@ -935,3 +931,8 @@ class Mod(models.Model):
                     stat['value'] * modified_stat_info['mult'])
             if self.get_primary_stat_display() != modified_stat_info['name']:
                 setattr(self, modified_stat_info['name'] + '_roll', stat['roll'])
+
+
+# This import needs to be at the end in order to avoid circular import between sqds and
+# sqds_medal's models.
+from sqds_medals.models import Medal
