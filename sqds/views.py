@@ -135,7 +135,7 @@ class GuildView(MetadataMixin, SingleTableMixin, FilterView):
             format_large_int(self.guild.gp))
 
 
-class GuildPlayerUnitsFilter(FilterSet):
+class UnitsFilter(FilterSet):
     unit = ChoiceFilter(field_name='unit',
                         choices=Unit.objects.values_list(
                             'id', 'name').order_by(Lower('name')))
@@ -155,7 +155,7 @@ class GuildUnitsView(MetadataMixin, SingleTableMixin, FilterView):
     table_class = PlayerUnitTable
     model = PlayerUnit
     template_name = 'sqds/guild_units.html'
-    filterset_class = GuildPlayerUnitsFilter
+    filterset_class = UnitsFilter
     table_pagination = {'per_page': 50}
 
     # noinspection PyAttributeOutsideInit
@@ -191,7 +191,7 @@ class GuildComparisonUnitsView(MetadataMixin, SingleTableMixin, FilterView):
     table_class = PlayerUnitTable
     model = PlayerUnit
     template_name = 'sqds/guild_compare_units.html'
-    filterset_class = GuildPlayerUnitsFilter
+    filterset_class = UnitsFilter
     table_pagination = {'per_page': 50}
 
     # noinspection PyAttributeOutsideInit
@@ -235,16 +235,6 @@ class GuildComparisonUnitsView(MetadataMixin, SingleTableMixin, FilterView):
             sort_string.replace('-', 'descending ').replace('_', ' '))
 
 
-class SinglePlayerPlayerUnitsFilter(FilterSet):
-    category = ChoiceFilter(field_name='unit__categories',
-                            choices=Category.objects.values_list(
-                                'id', 'name').order_by(Lower('name')))
-
-    class Meta:
-        model = PlayerUnit
-        fields = ['unit', 'category']
-
-
 def player_register_me(request, ally_code):
     player = get_object_or_404(Player, ally_code=ally_code)
     max_age = 365 * 24 * 60 * 60
@@ -279,7 +269,7 @@ class SinglePlayerView(MetadataMixin, SingleTableMixin, FilterView):
     table_class = PlayerUnitTable
     model = PlayerUnit
     template_name = 'sqds/single_player.html'
-    filterset_class = SinglePlayerPlayerUnitsFilter
+    filterset_class = UnitsFilter
     table_pagination = {'per_page': 50}
 
     # noinspection PyAttributeOutsideInit
@@ -468,7 +458,7 @@ class PlayerCompareUnitsView(MetadataMixin, SingleTableMixin, FilterView):
     table_class = PlayerUnitTable
     model = PlayerUnit
     template_name = 'sqds/player_compare_units.html'
-    filterset_class = SinglePlayerPlayerUnitsFilter
+    filterset_class = UnitsFilter
     table_pagination = {'per_page': 50}
 
     # noinspection PyAttributeOutsideInit
