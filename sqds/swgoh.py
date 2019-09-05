@@ -56,8 +56,8 @@ class MultipleGetQueue(queue.Queue):
 
 class Swgoh:
     # Configuration variable for player batch download
-    INITIAL_BATCH_SIZE = 5
-    MAX_WORKER_COUNT = 5
+    INITIAL_BATCH_SIZE = 12
+    MAX_WORKER_COUNT = 2
     MAX_ERROR_COUNT = 5
 
     def __init__(self):
