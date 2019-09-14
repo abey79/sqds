@@ -89,9 +89,9 @@ class GearFactory(factory.DjangoModelFactory):
 
     api_id = factory.Sequence(lambda n: f"GR_APIID_{n}")
     name = factory.Faker("name")
-    tier = factory.Faker("pyint", min=1, max=12)
-    required_rarity = factory.Faker("pyint", min=1, max=12)
-    required_level = factory.Faker("pyint", min=1, max=85)
+    tier = factory.Faker("pyint", min_value=1, max_value=12)
+    required_rarity = factory.Faker("pyint", min_value=1, max_value=12)
+    required_level = factory.Faker("pyint", min_value=1, max_value=85)
 
     is_left_hand_g12 = factory.Sequence(lambda n: n % 10 == 0)
     is_right_hand_g12 = factory.Sequence(lambda n: n % 10 == 1)
@@ -108,10 +108,10 @@ class PlayerFactory(factory.DjangoModelFactory):
 
     api_id = factory.Sequence(lambda n: f"P_APIID_{n}")
     name = factory.Faker("first_name")
-    level = factory.Faker("pyint", min=1, max=85)
+    level = factory.Faker("pyint", min_value=1, max_value=85)
     ally_code = factory.Faker("ally_code")
-    gp_char = factory.Faker("pyint", min=1, max=3000000)
-    gp_ship = factory.Faker("pyint", min=1, max=3000000)
+    gp_char = factory.Faker("pyint", min_value=1, max_value=3000000)
+    gp_ship = factory.Faker("pyint", min_value=1, max_value=3000000)
     gp = factory.LazyAttribute(lambda o: o.gp_char + o.gp_ship)
 
 
@@ -121,7 +121,7 @@ class GuildFactory(factory.DjangoModelFactory):
 
     api_id = factory.Sequence(lambda n: f"G_APIID_{n}")
     name = factory.Faker("name")
-    gp = factory.Faker("pyint", min=50000000, max=300000000)
+    gp = factory.Faker("pyint", min_value=50000000, max_value=300000000)
 
 
 class PlayerUnitFactory(factory.DjangoModelFactory):
@@ -130,19 +130,19 @@ class PlayerUnitFactory(factory.DjangoModelFactory):
 
     unit = factory.SubFactory(UnitFactory)
 
-    gp = factory.Faker("pyint", min=1, max=30000)
-    rarity = factory.Faker("pyint", min=1, max=7)
-    level = factory.Faker("pyint", min=1, max=85)
-    gear = factory.Faker("pyint", min=1, max=13)
-    equipped_count = factory.Faker("pyint", min=0, max=5)
+    gp = factory.Faker("pyint", min_value=1, max_value=30000)
+    rarity = factory.Faker("pyint", min_value=1, max_value=7)
+    level = factory.Faker("pyint", min_value=1, max_value=85)
+    gear = factory.Faker("pyint", min_value=1, max_value=13)
+    equipped_count = factory.Faker("pyint", min_value=0, max_value=5)
 
-    speed = factory.Faker("pyint", min=50, max=350)
-    health = factory.Faker("pyint", min=1000, max=60000)
-    protection = factory.Faker("pyint", min=1000, max=60000)
+    speed = factory.Faker("pyint", min_value=50, max_value=350)
+    health = factory.Faker("pyint", min_value=1000, max_value=60000)
+    protection = factory.Faker("pyint", min_value=1000, max_value=60000)
 
-    physical_damage = factory.Faker("pyint", min=100, max=4000)
+    physical_damage = factory.Faker("pyint", min_value=100, max_value=4000)
     physical_crit_chance = factory.Faker("gaussian_percent")
-    special_damage = factory.Faker("pyint", min=100, max=4000)
+    special_damage = factory.Faker("pyint", min_value=100, max_value=4000)
     special_crit_chance = factory.Faker("gaussian_percent")
     crit_damage = factory.Faker("gaussian_percent", mean=2, sigma=0.3)
 
@@ -150,16 +150,16 @@ class PlayerUnitFactory(factory.DjangoModelFactory):
     tenacity = factory.Faker("gaussian_percent")
     armor = factory.Faker("gaussian_percent")
     resistance = factory.Faker("gaussian_percent")
-    armor_penetration = factory.Faker("pyint", min=0, max=200)
-    resistance_penetration = factory.Faker("pyint", min=0, max=200)
+    armor_penetration = factory.Faker("pyint", min_value=0, max_value=200)
+    resistance_penetration = factory.Faker("pyint", min_value=0, max_value=200)
     health_steal = factory.Faker("gaussian_percent")
     accuracy = factory.Faker("gaussian_percent")
 
-    mod_speed = factory.Faker("pyint", min=0, max=150)
-    mod_health = factory.Faker("pyint", min=50, max=1500)
-    mod_protection = factory.Faker("pyint", min=100, max=10000)
-    mod_physical_damage = factory.Faker("pyint", min=50, max=2000)
-    mod_special_damage = factory.Faker("pyint", min=50, max=2000)
+    mod_speed = factory.Faker("pyint", min_value=0, max_value=150)
+    mod_health = factory.Faker("pyint", min_value=50, max_value=1500)
+    mod_protection = factory.Faker("pyint", min_value=100, max_value=10000)
+    mod_physical_damage = factory.Faker("pyint", min_value=50, max_value=2000)
+    mod_special_damage = factory.Faker("pyint", min_value=50, max_value=2000)
     mod_physical_crit_chance = factory.Faker("gaussian_percent")
     mod_special_crit_chance = factory.Faker("gaussian_percent")
     mod_crit_damage = factory.Faker("gaussian_percent")
@@ -189,18 +189,18 @@ class ModFactory(factory.DjangoModelFactory):
 
     mod_set = factory.fuzzy.FuzzyChoice(ModSet.values)
 
-    level = factory.Faker("pyint", min=1, max=15)
-    pips = factory.Faker("pyint", min=1, max=6)
-    tier = factory.Faker("pyint", min=1, max=5)
+    level = factory.Faker("pyint", min_value=1, max_value=15)
+    pips = factory.Faker("pyint", min_value=1, max_value=6)
+    tier = factory.Faker("pyint", min_value=1, max_value=5)
 
-    speed = factory.Faker("pyint", min=1, max=25)
-    health = factory.Faker("pyint", min=100, max=1000)
+    speed = factory.Faker("pyint", min_value=1, max_value=25)
+    health = factory.Faker("pyint", min_value=100, max_value=1000)
     health_percent = factory.Faker("gaussian_percent", mean=0.01, sigma=0.005)
-    protection = factory.Faker("pyint", min=100, max=1000)
+    protection = factory.Faker("pyint", min_value=100, max_value=1000)
     protection_percent = factory.Faker("gaussian_percent", mean=0.01, sigma=0.005)
-    offense = factory.Faker("pyint", min=1, max=250)
+    offense = factory.Faker("pyint", min_value=1, max_value=250)
     offense_percent = factory.Faker("gaussian_percent", mean=0.01, sigma=0.005)
-    defense = factory.Faker("pyint", min=1, max=30)
+    defense = factory.Faker("pyint", min_value=1, max_value=30)
     defense_percent = factory.Faker("gaussian_percent", mean=0.01, sigma=0.005)
     critical_chance = factory.Faker("gaussian_percent", mean=0.03, sigma=0.01)
     critical_damage = factory.Faker("gaussian_percent", mean=0.03, sigma=0.01)
