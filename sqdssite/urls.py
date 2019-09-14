@@ -21,6 +21,7 @@ urlpatterns = [
     path('', include('sqds.urls')),
     path('ga/', include('sqds_ga.urls')),
     path('officers/', include('sqds_officers.urls')),
+    path('medals/', include('sqds_medals.urls')),
     path('admin/', admin.site.urls),
 ]
 

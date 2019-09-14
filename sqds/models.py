@@ -78,6 +78,9 @@ class Unit(models.Model):
     name = models.CharField(max_length=200, default='')
     categories = models.ManyToManyField(Category, related_name='unit_set')
 
+    def is_medaled(self):
+        return self.stat_medal_rule_set.count() + self.zeta_medal_rule_set.count() == 7
+
     def __str__(self):  # pragma: no cover
         return self.name
 
@@ -173,6 +176,8 @@ class GuildManager(models.Manager):
 
             guild.player_set.exclude(id__in=player_id_array).delete()
 
+            Medal.objects.update_all(ally_codes)
+
         return guild
 
 
@@ -241,6 +246,8 @@ class GuildSet(models.QuerySet):
             sum15=Sum('player_set__unit_set__mod_set__speed',
                       filter=(Q(player_set__unit_set__mod_set__speed__gte=15) & ~Q(
                           player_set__unit_set__mod_set__primary_stat='SP'))))
+        medal_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('player_set__unit_set__medal_set'))
 
         return self.annotate(
             player_count=Subquery(player_count.values('cnt'),
@@ -287,8 +294,9 @@ class GuildSet(models.QuerySet):
                                         output_field=models.IntegerField()),
 
             mod_total_speed_15plus=Subquery(mod_total_speed_15plus.values('sum15'),
-                                            output_field=models.IntegerField())
-        )
+                                            output_field=models.IntegerField()),
+            medal_count=Subquery(medal_count.values('cnt'),
+                                 output_field=models.IntegerField()))
 
     def annotate_faction_gp(self):
         unit_ids = Unit.objects.filter(
@@ -374,21 +382,15 @@ class PlayerManager(models.Manager):
 
                 players.append(self.update_or_create_from_data(player_data, guild))
 
+            Medal.objects.update_all(ally_codes)
+
         return players
 
     def update_or_create_from_swgoh(self, ally_code: int) -> 'Player':
-        player_data = swgoh.api.get_player_data(ally_code)[0]
-
-        if player_data['guildRefId'] != '':
-            guild = Guild.objects.update_or_create_from_swgoh(
-                ally_code, guild_only=True)
-        else:
-            guild = None
-
-        with transaction.atomic():
-            player = self.update_or_create_from_data(player_data, guild)
-
-        return player
+        """
+        Update or create a single player. TODO: is this function still used?
+        """
+        return self.update_or_create_multiple_from_swgoh([ally_code])[0]
 
     def update_or_create_from_data(self, player_data,
                                    guild: Union[Guild, None]) -> 'Player':
@@ -570,6 +572,8 @@ class PlayerSet(models.QuerySet):
             sum15=Sum('unit_set__mod_set__speed',
                       filter=(Q(unit_set__mod_set__speed__gte=15) & ~Q(
                           unit_set__mod_set__primary_stat='SP'))))
+        medal_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('unit_set__medal_set'))
 
         return self.annotate(
             unit_count=Subquery(unit_count.values('cnt'),
@@ -609,7 +613,9 @@ class PlayerSet(models.QuerySet):
             mod_count_speed_10=Subquery(mod_count_speed_10.values('cnt'),
                                         output_field=models.IntegerField()),
             mod_total_speed_15plus=Subquery(mod_total_speed_15plus.values('sum15'),
-                                            output_field=models.IntegerField()))
+                                            output_field=models.IntegerField()),
+            medal_count=Subquery(medal_count.values('cnt'),
+                                 output_field=models.IntegerField()))
 
     def annotate_faction_gp(self):
         unit_ids = Unit.objects.filter(
@@ -687,11 +693,15 @@ class PlayerUnitSet(models.QuerySet):
             mod_speed_no_set=Coalesce(Sum('mod_set__speed'), 0))
         zeta_count = PlayerUnit.objects.filter(pk=OuterRef('pk')).annotate(
             zeta_count=Count('zeta_set'))
+        medal_count = PlayerUnit.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Count('medal_set'))
         return self.annotate(
             mod_speed_no_set=Subquery(mod_speed_no_set.values('mod_speed_no_set'),
                                       output_field=models.IntegerField()),
             zeta_count=Subquery(zeta_count.values('zeta_count'),
-                                output_field=models.IntegerField()))
+                                output_field=models.IntegerField()),
+            medal_count=Subquery(medal_count.values('cnt'),
+                                 output_field=models.IntegerField()))
 
 
 class PlayerUnit(models.Model):
@@ -782,6 +792,20 @@ class PlayerUnit(models.Model):
             '+' + str(self.equipped_count) if self.equipped_count > 0 else '')
 
     summary.admin_order_field = ['rarity', 'level', 'gear', 'equipped_count']
+
+    def medals(self):
+        """Returns an array of ([Stat|Zeta]MedalRule, Medal) tuple for the player unit.
+        If the corresponding unit is not medaled, returns None. If the Medal
+        corresponding to a rule is missing, the tuple contains None.
+        """
+        if self.unit.is_medaled():
+            medals = [(r, self.medal_set.filter(stat_medal_rule=r).first())
+                      for r in self.unit.stat_medal_rule_set.all()]
+            medals += [(r, self.medal_set.filter(zeta_medal_rule=r).first())
+                       for r in self.unit.zeta_medal_rule_set.all()]
+            return medals
+        else:
+            return None
 
 
 class Zeta(models.Model):
@@ -907,3 +931,8 @@ class Mod(models.Model):
                     stat['value'] * modified_stat_info['mult'])
             if self.get_primary_stat_display() != modified_stat_info['name']:
                 setattr(self, modified_stat_info['name'] + '_roll', stat['roll'])
+
+
+# This import needs to be at the end in order to avoid circular import between sqds and
+# sqds_medal's models.
+from sqds_medals.models import Medal

@@ -10,7 +10,7 @@
 {% block content %}
 
   <div class="row">
-    <div class="col-md-3">
+    <div class="col-lg-4 col-med-4 col-sm-6 col-xs-12">
       <div class="panel panel-default">
         <div class="panel-heading">Info</div>
         <div style="text-align: center; padding-top: 10px">
@@ -43,15 +43,54 @@
             {% endif %}</td>
           </tr>
           <tr>
+            <th>Medals</th>
+            <td>
+              {% if medals %}
+                {{ player_unit.medal_count }}
+              {% else %}
+                <span style="color: #CCC">n/a</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
             <th>Last updated</th>
             <td>{{ player_unit.last_updated }}
           </tr>
+          <tr><td>&nbsp;</td><td></td></tr>
           </tbody>
+        </table>
+
+        {# MOD TABLE #}
+        <table style="margin-left: auto; margin-right: auto; border-collapse: separate;">
+          <tr>
+            <td>
+              {% mod_widget square_mod %}
+            </td>
+            <td>
+              {% mod_widget arrow_mod %}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              {% mod_widget diamond_mod %}
+            </td>
+            <td>
+              {% mod_widget triangle_mod %}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              {% mod_widget circle_mod %}
+            </td>
+            <td>
+              {% mod_widget cross_mod %}
+            </td>
+          </tr>
         </table>
       </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col-lg-4 col-med-4 col-sm-6 col-xs-12">
       <div class="panel panel-default">
         <div class="panel-heading">Statistics</div>
         <table class="table">
@@ -123,37 +162,32 @@
       </div>
     </div>
 
-    <div class="col-md-3">
-      <div class="panel panel-default" style="width: max-content">
-        <div class="panel-heading">Mods</div>
-        <table style="border-spacing: 10px 20px; border-collapse: separate;">
-          <tr>
-            <td>
-              {% mod_widget square_mod %}
-            </td>
-            <td>
-              {% mod_widget arrow_mod %}
-            </td>
-          </tr>
-          <tr>
-            <td>
-              {% mod_widget diamond_mod %}
-            </td>
-            <td>
-              {% mod_widget triangle_mod %}
-            </td>
-          </tr>
-          <tr>
-            <td>
-              {% mod_widget circle_mod %}
-            </td>
-            <td>
-              {% mod_widget cross_mod %}
-            </td>
-          </tr>
-        </table>
+    {% if medals %}
+      <div class="col-lg-4 col-med-4 col-sm-6 col-xs-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">Medals</div>
+          <table class="table">
+            <tbody>
+            {% for medal in medals %}
+              <tr>
+                <th>
+                  {{ medal.0 }}
+                </th>
+                <td>
+                  {% if medal.1 %}
+                    Yes
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    {% endif %}
+
   </div>
 
 {% endblock %}

@@ -19,7 +19,7 @@
       <sourceFolder url="file://$MODULE_DIR$/sqds_geotb" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sqds_gphistory" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sqds_officers" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/sqds_scoredunit" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/sqds_medals" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sqds_seed" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.ipynb_checkpoints" />
       <excludeFolder url="file://$MODULE_DIR$/.ropeproject" />

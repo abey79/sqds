@@ -1,0 +1,9 @@
+{% extends 'sqds/base_list_view.html' %}
+
+{% block title %}
+  Medal list
+{% endblock title %}
+
+{% block panel_title %}
+  Medal list (<a href="{% url 'admin:medals_medaledunit_changelist' %}">edit</a>)
+{% endblock panel_title %}

@@ -76,6 +76,8 @@ class PlayerTable(RowCounterTable):
     gp_char = LargeIntColumn()
     gp_ship = LargeIntColumn()
 
+    medal_count = LargeIntColumn('Med.', initial_sort_descending=True)
+
     unit_count = LargeIntColumn('Characters', initial_sort_descending=True)
     seven_star_unit_count = LargeIntColumn('7*', initial_sort_descending=True)
     g13_unit_count = LargeIntColumn('G13', initial_sort_descending=True)
@@ -140,7 +142,7 @@ class PlayerTable(RowCounterTable):
         order_by = '-gp'
         fields = ('row_counter', 'name', 'guild_name',
                   'level', 'gp', 'gp_char', 'gp_ship', 'sep_gp', 'gr_gp',
-                  'zeta_count', 'unit_count',
+                  'zeta_count', 'medal_count', 'unit_count',
                   'seven_star_unit_count', 'g13_unit_count', 'g12_unit_count',
                   'g11_unit_count', 'g10_unit_count',
                   'left_hand_g12_gear_count', 'right_hand_g12_gear_count',
@@ -177,6 +179,8 @@ class PlayerUnitTable(RowCounterTable):
     summary = tables.Column('Summary', initial_sort_descending=True,
                             order_by=['rarity', 'level', 'gear',
                                       'equipped_count', 'gp'])
+
+    medal_count = LargeIntColumn('Med.', initial_sort_descending=True)
     zeta_count = tables.Column('Zetas', initial_sort_descending=True)
 
     mod_speed = LargeIntColumn(
@@ -206,7 +210,8 @@ class PlayerUnitTable(RowCounterTable):
     class Meta:
         model = PlayerUnit
         order_by = '-gp'
-        sequence = ('row_counter', 'unit', 'player', 'gp', 'summary', 'zeta_count',
+        sequence = ('row_counter', 'unit', 'player', 'gp', 'summary',
+                    'zeta_count', 'medal_count',
                     'speed', 'mod_speed', 'mod_speed_no_set', 'health', 'mod_health',
                     'protection', 'mod_protection', 'physical_damage',
                     'mod_physical_damage', 'physical_crit_chance',
