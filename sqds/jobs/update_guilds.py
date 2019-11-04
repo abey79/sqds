@@ -24,4 +24,4 @@ class Job(BaseJob):
 
     def execute(self):
         update_guild(116235559)
-        update_guild(836415918)
+        update_guild(343174317)
