@@ -26,7 +26,7 @@ plotly
 pandas
 
 # Test stuff
-faker
+faker >= 2.0.0  # min_value vs. min
 factory_boy
 coverage
 pydotplus

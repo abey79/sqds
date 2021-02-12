@@ -248,6 +248,8 @@ class GuildSet(models.QuerySet):
                           player_set__unit_set__mod_set__primary_stat='SP'))))
         medal_count = Guild.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('player_set__unit_set__medal_set'))
+        relic_sum = Guild.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Coalesce(Sum('player_set__unit_set__relic'), 0))
 
         return self.annotate(
             player_count=Subquery(player_count.values('cnt'),
@@ -296,7 +298,10 @@ class GuildSet(models.QuerySet):
             mod_total_speed_15plus=Subquery(mod_total_speed_15plus.values('sum15'),
                                             output_field=models.IntegerField()),
             medal_count=Subquery(medal_count.values('cnt'),
-                                 output_field=models.IntegerField()))
+                                 output_field=models.IntegerField()),
+            relic_sum=Subquery(relic_sum.values('cnt'),
+                               output_field=models.IntegerField())
+        )
 
     def annotate_faction_gp(self):
         unit_ids = Unit.objects.filter(
@@ -436,6 +441,9 @@ class PlayerManager(models.Manager):
                 mod_stats = unit_data['stats']['mods']
 
                 # (D1) Update player model
+                relic = unit_data['relic']['currentTier'] - 2
+                if relic < 0:
+                    relic = None
                 player_unit = PlayerUnit(
                     player=player,
                     unit=unit,
@@ -444,6 +452,7 @@ class PlayerManager(models.Manager):
                     rarity=unit_data['rarity'],
                     level=unit_data['level'],
                     gear=unit_data['gear'],
+                    relic=relic,
                     equipped_count=len(unit_data['equipped']),
 
                     speed=unit_stats['Speed'],
@@ -574,6 +583,8 @@ class PlayerSet(models.QuerySet):
                           unit_set__mod_set__primary_stat='SP'))))
         medal_count = Player.objects.filter(pk=OuterRef('pk')).annotate(
             cnt=Count('unit_set__medal_set'))
+        relic_sum = Player.objects.filter(pk=OuterRef('pk')).annotate(
+            cnt=Coalesce(Sum('unit_set__relic'), 0))
 
         return self.annotate(
             unit_count=Subquery(unit_count.values('cnt'),
@@ -615,7 +626,10 @@ class PlayerSet(models.QuerySet):
             mod_total_speed_15plus=Subquery(mod_total_speed_15plus.values('sum15'),
                                             output_field=models.IntegerField()),
             medal_count=Subquery(medal_count.values('cnt'),
-                                 output_field=models.IntegerField()))
+                                 output_field=models.IntegerField()),
+            relic_sum=Subquery(relic_sum.values('cnt'),
+                               output_field=models.IntegerField())
+        )
 
     def annotate_faction_gp(self):
         unit_ids = Unit.objects.filter(
@@ -713,6 +727,7 @@ class PlayerUnit(models.Model):
     rarity = models.IntegerField()
     level = models.IntegerField()
     gear = models.IntegerField()
+    relic = models.IntegerField(null=True)
 
     # TODO: this should be removed
     equipped_count = models.IntegerField()
@@ -785,13 +800,13 @@ class PlayerUnit(models.Model):
 
     def summary(self):
         return format_html(
-            '{}&nbsp;L{}&nbsp;{}{}',
+            '{}&nbsp;L{}&nbsp;{}{}{}',
             self.star_count(),
             self.level,
             self.colored_gear(),
-            '+' + str(self.equipped_count) if self.equipped_count > 0 else '')
-
-    summary.admin_order_field = ['rarity', 'level', 'gear', 'equipped_count']
+            '+' + str(self.equipped_count) if self.equipped_count > 0 else '',
+            format_html('&nbsp;<b>R{}</b>', str(self.relic)) if self.relic is not None else '',
+        )
 
     def medals(self):
         """Returns an array of ([Stat|Zeta]MedalRule, Medal) tuple for the player unit.

@@ -76,6 +76,7 @@ class PlayerTable(RowCounterTable):
     gp_char = LargeIntColumn()
     gp_ship = LargeIntColumn()
 
+    relic_sum = LargeIntColumn('Relic', initial_sort_descending=True)
     medal_count = LargeIntColumn('Med.', initial_sort_descending=True)
 
     unit_count = LargeIntColumn('Characters', initial_sort_descending=True)
@@ -142,7 +143,7 @@ class PlayerTable(RowCounterTable):
         order_by = '-gp'
         fields = ('row_counter', 'name', 'guild_name',
                   'level', 'gp', 'gp_char', 'gp_ship', 'sep_gp', 'gr_gp',
-                  'zeta_count', 'medal_count', 'unit_count',
+                  'zeta_count', 'relic_sum', 'medal_count', 'unit_count',
                   'seven_star_unit_count', 'g13_unit_count', 'g12_unit_count',
                   'g11_unit_count', 'g10_unit_count',
                   'left_hand_g12_gear_count', 'right_hand_g12_gear_count',
@@ -178,7 +179,7 @@ class PlayerUnitTable(RowCounterTable):
 
     summary = tables.Column('Summary', initial_sort_descending=True,
                             order_by=['rarity', 'level', 'gear',
-                                      'equipped_count', 'gp'])
+                                      'equipped_count', 'relic', 'gp'])
 
     medal_count = LargeIntColumn('Med.', initial_sort_descending=True)
     zeta_count = tables.Column('Zetas', initial_sort_descending=True)
@@ -219,7 +220,7 @@ class PlayerUnitTable(RowCounterTable):
                     'special_crit_chance', 'mod_special_crit_chance', 'crit_damage',
                     'potency', 'mod_potency', 'tenacity', 'mod_tenacity', '...')
 
-        exclude = ('id', 'rarity', 'level', 'gear',
+        exclude = ('id', 'rarity', 'level', 'gear', 'relic',
                    'equipped_count', 'armor_penetration',
                    'resistance_penetration', 'health_steal', 'accuracy',
                    'mod_crit_damage', 'mod_armor', 'mod_resistance',

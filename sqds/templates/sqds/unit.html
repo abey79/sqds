@@ -43,6 +43,16 @@
             {% endif %}</td>
           </tr>
           <tr>
+            <th>Relic amplifier</th>
+            <td>
+              {% if not player_unit.relic %}
+                <span style="color: #CCC">n/a</span>
+              {% else %}
+              {{ player_unit.relic }}
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
             <th>Medals</th>
             <td>
               {% if medals %}
